@@ -21,12 +21,14 @@ export default async function handler(req, res) {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Email or password is incorrect. Please try again.' });
+
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Email or password is incorrect. Please try again.' });
+
     }
 
     return res.status(200).json({ message: 'Login successful', email }); // return email for localStorage if needed
