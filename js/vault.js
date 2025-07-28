@@ -292,3 +292,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial render
     applyFilters();
 });
+document.getElementById('saveVault').addEventListener('click', async () => {
+  const email = localStorage.getItem('userEmail') || "silentgamer174@gmail.com"; // fallback for now
+  const site = document.getElementById('site').value;
+  const secret = document.getElementById('secret').value;
+
+  const res = await fetch('/api/vault/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, site, secret })
+  });
+
+  const data = await res.json();
+  alert(data.message || 'Error saving vault');
+});
