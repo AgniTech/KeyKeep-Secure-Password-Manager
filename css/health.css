@@ -1,0 +1,128 @@
+/* css/health.css */
+.health-container header {
+    margin-bottom: 20px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 30px;
+}
+
+.health-score-widget {
+    grid-column: 1 / 5;
+    text-align: center;
+    padding: 30px;
+}
+
+.health-score-widget h2 {
+    margin-top: 0;
+    color: var(--primary-color);
+}
+
+.score-circle {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(closest-side, var(--bg-color) 79%, transparent 80% 100%),
+                conic-gradient(var(--accent-color) calc(var(--score) * 1%), var(--input-bg) 0);
+    transition: --score 1s ease-out;
+}
+
+.score-circle #scoreText {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.health-score-widget #scoreSummary {
+    font-size: 1.1em;
+    color: var(--secondary-text-color);
+}
+
+.summary-cards {
+    grid-column: 5 / 13;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.summary-cards .card {
+    padding: 25px;
+    text-align: center;
+}
+
+.summary-cards .card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.summary-cards .card .count {
+    font-size: 3em;
+    font-weight: 700;
+    margin: 10px 0;
+    color: var(--primary-color);
+}
+
+.risk-level {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    font-weight: 500;
+}
+.risk-level.high { background-color: #ff4d4d; color: white; }
+.risk-level.medium { background-color: #ff9d00; color: white; }
+.risk-level.low { background-color: #4CAF50; color: white; }
+
+.vulnerable-list {
+    grid-column: 1 / 13;
+    padding: 30px;
+}
+
+.vulnerable-list h2 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+}
+
+.vulnerable-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+.vulnerable-item:last-child {
+    border-bottom: none;
+}
+
+.vulnerable-icon { font-size: 1.5em; margin-right: 20px; }
+.vulnerable-details { flex-grow: 1; }
+.vulnerable-details h4 { margin: 0 0 5px 0; color: var(--text-color); }
+.vulnerable-details p { margin: 0; color: var(--secondary-text-color); font-size: 0.9em; }
+.vulnerable-action .button { font-size: 0.9em; padding: 8px 15px; }
+
+.all-good-message {
+    text-align: center;
+    font-size: 1.2em;
+    color: var(--secondary-text-color);
+    padding: 40px;
+}
+
+.health-container footer {
+    margin-top: 30px;
+}
+
+@media(max-width: 992px) {
+    .health-score-widget { grid-column: 1 / 13; }
+    .summary-cards { grid-column: 1 / 13; }
+}
+
+@media(max-width: 768px) {
+    .summary-cards { grid-template-columns: 1fr; gap: 20px; }
+}

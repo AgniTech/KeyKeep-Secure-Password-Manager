@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault - Settings</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+    <div class="container settings-container">
+        <header>
+            <h1>Settings</h1>
+        </header>
+        <main>
+            <section class="setting-group">
+                <h2>Theme</h2>
+                <div class="setting-item">
+                    <label for="themeToggle">Dark Mode:</label>
+                    <input type="checkbox" id="themeToggle" checked>
+                </div>
+            </section>
+
+            <section class="setting-group">
+                <h2>Clipboard</h2>
+                <div class="setting-item">
+                    <label for="clipboardTimeout">Auto-clear after:</label>
+                    <select id="clipboardTimeout">
+                        <option value="5">5 seconds</option>
+                        <option value="10">10 seconds</option>
+                        <option value="15">15 seconds</option>
+                    </select>
+                </div>
+            </section>
+
+            <section class="setting-group">
+                <h2>Lock</h2>
+                <div class="setting-item">
+                    <label for="lockTimeout">Idle lock after (minutes):</label>
+                    <input type="number" id="lockTimeout" value="5" min="1">
+                </div>
+            </section>
+
+            <section class="setting-group">
+                <h2>Data</h2>
+                <div class="setting-item">
+                    <button class="button secondary">Export Vault (Coming Soon)</button>
+                </div>
+                <div class="setting-item">
+                    <button class="button secondary">Import Vault (Coming Soon)</button>
+                </div>
+            </section>
+        </main>
+        <footer>
+            <p>&copy; 2025 CryptoVault</p>
+        </footer>
+    </div>
+    <script src="js/script.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html>

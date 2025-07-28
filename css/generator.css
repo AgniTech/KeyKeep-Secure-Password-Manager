@@ -1,0 +1,184 @@
+/* css/generator.css */
+.generator-container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.generator-container header h1 {
+    margin-bottom: 20px;
+    font-size: 2.5em;
+}
+
+.generator {
+    padding: 40px; /* More padding */
+    border-radius: 15px;
+    background: var(--glass-bg-base);
+    border: 1px solid var(--glass-border-base);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+}
+
+.generated-password {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px; /* More space */
+    background-color: rgba(0, 0, 0, 0.2); /* Darker background for generated password */
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.generated-password input[type="text"] {
+    flex-grow: 1;
+    margin-right: 15px;
+    padding: 15px; /* More padding */
+    border: none; /* No border here, handled by parent div */
+    border-radius: 8px;
+    background-color: transparent; /* Transparent to show parent background */
+    color: var(--accent-color);
+    font-size: 1.5em; /* Larger font */
+    font-weight: bold;
+    text-align: center;
+    box-sizing: border-box;
+    user-select: text; /* Allow selection */
+}
+
+.generated-password .button.icon-button {
+    width: 45px; /* Larger copy button */
+    height: 45px;
+    font-size: 1.5em;
+    border-radius: 8px; /* Square copy button */
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Flexible columns */
+    gap: 20px; /* Increased gap */
+    text-align: left;
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05); /* Subtle background for each control */
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.control-item label {
+    margin-left: 15px; /* More space */
+    color: var(--text-color);
+    font-size: 1.05em;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.control-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    appearance: none;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.control-item input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(108, 99, 255, 0.4);
+}
+
+.control-item input[type="checkbox"]:checked::after {
+    content: '✔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-color);
+    font-size: 1.2em;
+}
+
+.control-item input[type="range"] {
+    flex-grow: 1;
+    margin-right: 15px;
+    height: 8px; /* Thicker slider track */
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    -webkit-appearance: none; /* Remove default styling */
+    appearance: none;
+    cursor: grab;
+}
+
+.control-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px; /* Larger thumb */
+    height: 20px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: grab;
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+    transition: background var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.control-item input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: grab;
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+    transition: background var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.control-item input[type="range"]:active::-webkit-slider-thumb,
+.control-item input[type="range"]:active::-moz-range-thumb {
+    cursor: grabbing;
+}
+
+.control-item span {
+    min-width: 30px; /* Ensure space for length value */
+    text-align: right;
+    color: var(--accent-color);
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+#generateButton {
+    grid-column: 1 / -1; /* Span full width */
+    margin-top: 30px;
+    padding: 15px;
+    font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+    .generator {
+        padding: 30px 20px;
+    }
+
+    .generated-password input[type="text"] {
+        font-size: 1.2em;
+        padding: 12px;
+    }
+
+    .generated-password .button.icon-button {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3em;
+    }
+
+    .controls {
+        grid-template-columns: 1fr; /* Single column on small screens */
+    }
+
+    .control-item {
+        padding: 12px;
+    }
+}

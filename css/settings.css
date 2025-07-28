@@ -1,0 +1,124 @@
+/* css/settings.css */
+.settings-container {
+    max-width: 700px; /* Wider for settings */
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.settings-container header h1 {
+    margin-bottom: 40px;
+    font-size: 2.5em;
+}
+
+.setting-group {
+    margin-bottom: 30px;
+    padding: 30px; /* More padding */
+    border-radius: 15px;
+    background: var(--glass-bg-base);
+    border: 1px solid var(--glass-border-base);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    box-shadow: var(--glass-shadow);
+}
+
+.setting-group h2 {
+    color: var(--accent-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color); /* Subtle separator */
+    padding-bottom: 15px;
+    font-size: 1.6em;
+    font-weight: 600;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05); /* Very subtle separator */
+}
+
+.setting-item:last-child {
+    border-bottom: none; /* No border on last item */
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.setting-item label {
+    color: var(--text-color);
+    font-size: 1.05em;
+    font-weight: 400;
+}
+
+.setting-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    appearance: none; /* Hide default checkbox */
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.setting-item input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(108, 99, 255, 0.4);
+}
+
+.setting-item input[type="checkbox"]:checked::after {
+    content: '✔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-color);
+    font-size: 1.2em;
+}
+
+.setting-item input[type="number"],
+.setting-item select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.setting-item select option {
+    background-color: var(--bg-color); /* Ensure options are readable */
+    color: var(--text-color);
+}
+
+.setting-item .button.secondary {
+    padding: 10px 20px;
+    font-size: 0.95em;
+}
+
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 0 15px;
+    }
+
+    .setting-group {
+        padding: 20px;
+    }
+
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .setting-item input[type="number"],
+    .setting-item select,
+    .setting-item .button {
+        width: 100%;
+        text-align: left;
+    }
+}

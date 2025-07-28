@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault - Locked</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/lock.css">
+</head>
+<body>
+    <div class="container lock-container">
+        <main class="lock-screen">
+            <h1>🔒 Vault Locked</h1>
+            <p>Enter your master password to unlock.</p>
+            <form id="unlockForm">
+                <div class="input-group">
+                    <label for="unlockPassword">Master Password:</label>
+                    <input type="password" id="unlockPassword" name="unlockPassword" required>
+                </div>
+                <button type="submit" class="button primary">Unlock</button>
+                <div class="error-message" id="unlockError"></div>
+            </form>
+        </main>
+        <footer>
+            <p>&copy; 2025 CryptoVault</p>
+        </footer>
+    </div>
+    <script src="js/script.js"></script>
+    <script src="js/lock.js"></script>
+</body>
+</html>

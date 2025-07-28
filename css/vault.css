@@ -1,0 +1,281 @@
+/* css/vault.css */
+.vault-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "nav nav"
+        "sidebar main";
+    gap: 30px;
+    min-height: calc(100vh - 80px);
+    padding: 0;
+}
+
+.top-nav {
+    grid-area: nav;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+}
+
+.top-nav .left-actions .button.icon-button {
+    border-radius: 8px;
+    width: auto;
+    height: auto;
+    padding: 10px 20px;
+    font-size: 1em;
+}
+
+.top-nav .right-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.sidebar {
+    grid-area: sidebar;
+    padding: 30px 20px;
+}
+
+.sidebar h3 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.sidebar ul li a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--secondary-text-color);
+    border-radius: 8px;
+    transition: all var(--transition-speed) var(--transition-ease);
+    font-weight: 500;
+}
+
+.sidebar ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--accent-color);
+    transform: translateX(5px);
+}
+
+.sidebar ul li a.active {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: 0 0 15px rgba(108, 99, 255, 0.3);
+}
+
+.dashboard {
+    grid-area: main;
+    padding: 0;
+}
+
+/* --- UPDATED SEARCH BAR STYLES --- */
+.search-bar {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.search-bar .search-icon {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    font-size: 1.2em;
+    color: var(--secondary-text-color);
+    pointer-events: none; /* Allows clicking through the icon */
+    transition: color var(--transition-speed) var(--transition-ease);
+}
+
+.search-bar input[type="search"] {
+    width: 100%;
+    padding: 15px 20px 15px 55px; /* Left padding to make space for the icon */
+    font-size: 1.1em;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border-base);
+    background: var(--glass-bg-base);
+    color: var(--text-color);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.search-bar input[type="search"]::placeholder {
+    color: var(--secondary-text-color);
+    opacity: 0.7;
+}
+
+.search-bar input[type="search"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.5), var(--glass-shadow);
+}
+
+/* Change icon color when the input is focused */
+.search-bar:focus-within .search-icon {
+    color: var(--accent-color);
+}
+/* --- END OF SEARCH BAR STYLES --- */
+
+.credentials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.credential-card {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.credential-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.credential-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.credential-favicon {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    background-color: rgba(0,0,0,0.2);
+    flex-shrink: 0;
+}
+
+.credential-card h4 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: 1.4em;
+    font-weight: 600;
+}
+
+.credential-info p {
+    margin-bottom: 8px;
+    font-size: 0.95em;
+    color: var(--secondary-text-color);
+    word-break: break-all;
+}
+
+.credential-info strong {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.password-masked {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.password-masked span {
+    flex-grow: 1;
+    font-family: 'monospace';
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.credential-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.credential-actions .button {
+    flex-grow: 1;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    border-radius: 6px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.password-input .generate-password-modal {
+    position: absolute;
+    right: 50px;
+    background: none;
+    border: none;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+    font-size: 1.1em;
+    padding: 5px;
+    outline: none;
+    transition: color var(--transition-speed);
+}
+.password-input .generate-password-modal:hover {
+    color: var(--primary-color);
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--secondary-text-color);
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    border: 2px dashed var(--border-color);
+    background: none;
+    box-shadow: none;
+}
+.empty-state-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    opacity: 0.7;
+}
+.empty-state p {
+    font-size: 1.2em;
+    margin-bottom: 25px;
+}
+.empty-state .button {
+    font-size: 1.1em;
+}
+
+@media (max-width: 992px) {
+    .vault-container {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "nav"
+            "sidebar"
+            "main";
+    }
+}
+
+@media (max-width: 768px) {
+    .top-nav {
+        padding: 12px 15px;
+    }
+    .sidebar {
+        padding: 20px 15px;
+    }
+    .credentials-grid {
+        grid-template-columns: 1fr;
+    }
+}

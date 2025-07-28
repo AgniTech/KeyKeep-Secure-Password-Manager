@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault - Health Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/health.css">
+</head>
+<body>
+    <div class="container health-container">
+        <header>
+            <h1>Password Health</h1>
+            <p class="tagline">An overview of your vault's security.</p>
+        </header>
+        <main class="dashboard-grid">
+            <div class="health-score-widget glassmorphism">
+                <h2>Overall Score</h2>
+                <div class="score-circle" id="scoreCircle" style="--score: 0;">
+                    <span id="scoreText">0%</span>
+                </div>
+                <p id="scoreSummary">Analyzing your vault...</p>
+            </div>
+
+            <div class="summary-cards">
+                <div class="card glassmorphism" id="compromisedCard">
+                    <h3>Compromised</h3>
+                    <p class="count">0</p>
+                    <span class="risk-level high">High Risk</span>
+                </div>
+                <div class="card glassmorphism" id="reusedCard">
+                    <h3>Reused</h3>
+                    <p class="count">0</p>
+                    <span class="risk-level medium">Medium Risk</span>
+                </div>
+                <div class="card glassmorphism" id="weakCard">
+                    <h3>Weak</h3>
+                    <p class="count">0</p>
+                    <span class="risk-level low">Low Risk</span>
+                </div>
+            </div>
+
+            <div class="vulnerable-list glassmorphism" id="vulnerableList">
+                <h2>Action Items</h2>
+                <div class="list-container">
+                    <!-- Vulnerable items will be rendered here by JS -->
+                    <p class="all-good-message">Your vault is looking secure. Great job!</p>
+                </div>
+            </div>
+        </main>
+        <footer>
+            <a href="vault.html" class="button primary">Back to Vault</a>
+            <p>&copy; 2025 CryptoVault</p>
+        </footer>
+    </div>
+    
+    <script src="js/data.js"></script>
+    <script src="js/health.js"></script>
+</body>
+</html>

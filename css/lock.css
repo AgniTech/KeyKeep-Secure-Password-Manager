@@ -1,0 +1,60 @@
+/* css/lock.css */
+.lock-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 80px);
+}
+
+.lock-screen {
+    width: 100%;
+    max-width: 450px;
+    padding: 50px; /* More padding */
+    border-radius: 20px;
+    background: var(--glass-bg-base);
+    border: 1px solid var(--glass-border-base);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+}
+
+.lock-screen h1 {
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    font-size: 2.8em;
+    text-shadow: 0 0 15px rgba(108, 99, 255, 0.5);
+}
+
+.lock-screen p {
+    color: var(--secondary-text-color);
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+#unlockForm {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Space between input and button */
+}
+
+#unlockForm .input-group {
+    margin-bottom: 0; /* Handled by gap */
+}
+
+#unlockForm button[type="submit"] {
+    padding: 15px 25px;
+    font-size: 1.1em;
+    width: 100%;
+}
+
+@media (max-width: 480px) {
+    .lock-screen {
+        padding: 40px 25px;
+    }
+
+    .lock-screen h1 {
+        font-size: 2.2em;
+    }
+}
