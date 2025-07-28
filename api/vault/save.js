@@ -1,3 +1,4 @@
+// File: /api/vault/save.js
 import { connectDB } from '../../../backend/util/db.js';
 import Vault from '../../../backend/models/Vault.js';
 import { encryptData } from '../../../backend/util/encryption.js';
@@ -16,12 +17,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const encrypted = encryptData(secret);
+    const encrypted = encryptData(secret); // returns { ciphertext, nonce }
 
     const vaultEntry = new Vault({
       email,
       site,
-      ciphertext: encrypted.ciphertext,
+      encryptedSecret: encrypted.ciphertext, // ⬅ match schema
       nonce: encrypted.nonce
     });
 
