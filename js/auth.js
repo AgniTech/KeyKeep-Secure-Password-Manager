@@ -7,8 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
 
-    // Base URL for your backend API
-    const API_BASE_URL = 'http://localhost:5000/api/auth'; // Ensure this matches your backend server URL
+    // Base URL for your backend API (relative path works on Vercel and locally with vercel dev)
+    const API_BASE_URL = '/api/auth';
+
 
     // --- Sliding Panel Animation Logic ---
     if (signUpButton) {
