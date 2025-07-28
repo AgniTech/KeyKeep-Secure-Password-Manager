@@ -1,5 +1,5 @@
 // File: /api/auth/register.js
-
+import bcrypt from 'bcryptjs';
 import { connectDB } from '../../backend/util/db.js';
 import User from '../../backend/models/user.js';
 
@@ -34,9 +34,8 @@ export default async function handler(req, res) {
       return res.status(409).json({ error: 'User already exists' });
     }
 
-    const user = new User({ email });
-    user.setPassword(password);
-    await user.save();
+   const user = new User({ email, masterPassword: password }); // ✅ use the model's field name
+   await user.save();
 
     console.log('User successfully created:', email);
     return res.status(201).json({ message: 'User created successfully' });
