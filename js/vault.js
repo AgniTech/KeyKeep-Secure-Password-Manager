@@ -197,31 +197,54 @@ const renderCredentials = (filteredCredentials = credentials) => {
         document.removeEventListener('keydown', handleEscKey);
     };
 
-    const handleCredentialSubmit = (e) => {
-        e.preventDefault();
-        const id = document.getElementById('credentialId').value;
-        const newCredential = {
-            id: id ? parseInt(id) : Date.now(),
-            title: document.getElementById('websiteName').value,
-            url: document.getElementById('url').value,
-            username: document.getElementById('username').value,
-            password: document.getElementById('password').value,
-            category: document.getElementById('category').value,
-            tags: [], // Simplified for now
-            notes: '' // Simplified for now
-        };
+    const handleCredentialSubmit = async (e) => {
+    e.preventDefault();
 
-        if (id) {
-            const index = credentials.findIndex(c => c.id === parseInt(id));
-            credentials[index] = newCredential;
-            showToast('Credential updated!', 'success');
-        } else {
-            credentials.push(newCredential);
-            showToast('Credential saved!', 'success');
+    const id = document.getElementById('credentialId').value;
+    const title = document.getElementById('websiteName').value;
+    const url = document.getElementById('url').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const category = document.getElementById('category').value;
+
+    const email = localStorage.getItem('userEmail') || "silentgamer174@gmail.com"; // fallback for now
+
+    const newCredential = {
+        id: id ? parseInt(id) : Date.now(),
+        title,
+        url,
+        username,
+        password,
+        category,
+        tags: [],
+        notes: ''
+    };
+
+    try {
+        const response = await fetch('/api/vault/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email,
+                site: title,
+                secret: password
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to save to vault");
         }
+
+        showToast('Credential saved to vault!', 'success');
+        credentials.push(newCredential);
         applyFilters();
         closeAddEditModal();
-    };
+    } catch (err) {
+        console.error("Save error:", err);
+        showToast('Error saving credential.', 'error');
+    }
+};
+
     
     const handleEscKey = (e) => {
         if (e.key === 'Escape') {
