@@ -54,7 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
             card.dataset.id = cred.id;
             card.innerHTML = `
                 <div class="credential-header">
-                    <img src="${faviconUrl}" alt="${cred.title} favicon" class="credential-favicon" onerror="this.style.display='none'">
+                    <img src="${faviconUrl}" 
+                     alt="${cred.title} favicon" 
+                      class="credential-favicon" 
+                      onerror="this.onerror=null;this.src='/images/default-favicon.png';">
+
                     <h4>${cred.title}</h4>
                 </div>
                 <div class="credential-info">
@@ -292,23 +296,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial render
     applyFilters();
 });
-const saveButton = document.getElementById('saveVault');
-
-if (saveButton) {
-  saveButton.addEventListener('click', async () => {
-    const email = localStorage.getItem('userEmail') || "silentgamer174@gmail.com"; // fallback for now
-    const site = document.getElementById('site').value;
-    const secret = document.getElementById('secret').value;
-
-    const res = await fetch('/api/vault/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, site, secret })
-    });
-
-    const data = await res.json();
-    alert(data.message || 'Error saving vault');
-  });
-} else {
-  console.warn("saveVault button not found in DOM");
-}
