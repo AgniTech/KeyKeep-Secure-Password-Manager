@@ -34,52 +34,52 @@ document.addEventListener('DOMContentLoaded', () => {
         return password;
     };
 
-    // --- Rendering Logic ---
-    const renderCredentials = (filteredCredentials = credentials) => {
-        credentialsList.innerHTML = '';
-        if (filteredCredentials.length === 0) {
-            credentialsList.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">🛡️</div>
-                    <p>Your vault is empty. Let's secure your first account!</p>
-                    <button class="button primary" id="addFirstCredential">Add New Credential</button>
-                </div>`;
-            return;
-        }
+const renderCredentials = (filteredCredentials = credentials) => {
+    credentialsList.innerHTML = '';
+    if (filteredCredentials.length === 0) {
+        credentialsList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">🛡️</div>
+                <p>Your vault is empty. Let's secure your first account!</p>
+                <button class="button primary" id="addFirstCredential">Add New Credential</button>
+            </div>`;
+        return;
+    }
 
-        filteredCredentials.forEach(cred => {
-    const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}`;
-    const fallbackFavicon = '/images/default-favicon.png';
+    filteredCredentials.forEach(cred => {
+        const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}`;
+        const fallbackFavicon = '/images/default-favicon.png';
 
-    const card = document.createElement('div');
-    card.className = 'credential-card glassmorphism';
-    card.dataset.id = cred.id;
-    card.innerHTML = `
-        <div class="credential-header">
-            <img src="${faviconUrl}" 
-                 alt="${cred.title} favicon" 
-                 class="credential-favicon"
-                 onerror="this.onerror=null;this.src='${fallbackFavicon}'">
+        const card = document.createElement('div');
+        card.className = 'credential-card glassmorphism';
+        card.dataset.id = cred.id;
+        card.innerHTML = `
+            <div class="credential-header">
+                <img src="${faviconUrl}" 
+                     alt="${cred.title} favicon" 
+                     class="credential-favicon"
+                     onerror="this.onerror=null;this.src='${fallbackFavicon}'">
 
-            <h4>${cred.title}</h4>
-        </div>
-        <div class="credential-info">
-            <p><strong>Username:</strong> ${cred.username}</p>
-            <p class="password-masked">
-                <strong>Password:</strong>
-                <span data-password="${cred.password}">********</span>
-                <button class="button icon-button show-hide-password" aria-label="Show password">👁️</button>
-            </p>
-        </div>
-        <div class="credential-actions">
-            <button class="button secondary copy-button" data-type="password">📋 Copy Pass</button>
-            <button class="button secondary copy-button" data-type="username">📋 Copy User</button>
-            <button class="button secondary edit-button">✏️ Edit</button>
-            <button class="button secondary delete-button">🗑️ Delete</button>
-        </div>`;
-        
-    credentialsList.appendChild(card);
-});
+                <h4>${cred.title}</h4>
+            </div>
+            <div class="credential-info">
+                <p><strong>Username:</strong> ${cred.username}</p>
+                <p class="password-masked">
+                    <strong>Password:</strong>
+                    <span data-password="${cred.password}">********</span>
+                    <button class="button icon-button show-hide-password" aria-label="Show password">👁️</button>
+                </p>
+            </div>
+            <div class="credential-actions">
+                <button class="button secondary copy-button" data-type="password">📋 Copy Pass</button>
+                <button class="button secondary copy-button" data-type="username">📋 Copy User</button>
+                <button class="button secondary edit-button">✏️ Edit</button>
+                <button class="button secondary delete-button">🗑️ Delete</button>
+            </div>`;
+        credentialsList.appendChild(card);
+    });
+}; 
+
 
     
     // --- Event Listeners (using delegation for dynamic content) ---
