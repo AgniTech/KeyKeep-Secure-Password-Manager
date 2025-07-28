@@ -1,6 +1,6 @@
 // File: /api/auth/register.js
-import { connectDB } from '../backend/util/db.js';
-import User from '../backend/models/user.js';
+import { connectDB } from '../../backend/util/db.js';
+import User from '../../backend/models/user.js';
 
 // Connect once per cold start
 connectDB().catch(err => {
