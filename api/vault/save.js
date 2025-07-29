@@ -2,6 +2,7 @@
 import { connectDB } from '../../../backend/util/db.js';
 import Vault from '../../../backend/models/Vault.js';
 import { encryptData } from '../../../backend/util/encryption.js';
+import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,18 +12,23 @@ export default async function handler(req, res) {
   try {
     await connectDB();
 
-    const { email, site, secret } = req.body;
+    const token = req.headers.authorization?.split(' ')[1]; // Expect: Bearer <token>
+    if (!token) return res.status(401).json({ error: 'Unauthorized: No token' });
 
-    if (!email || !site || !secret) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const { site, secret } = req.body;
+    if (!site || !secret) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     const encrypted = encryptData(secret); // returns { ciphertext, nonce }
 
     const vaultEntry = new Vault({
-      email,
+      userId,
       site,
-      encryptedSecret: encrypted.ciphertext, // ⬅ match schema
+      encryptedSecret: encrypted.ciphertext,
       nonce: encrypted.nonce
     });
 

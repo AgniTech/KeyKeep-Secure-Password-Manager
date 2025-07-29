@@ -8,7 +8,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalOverlay = document.getElementById('modalOverlay');
     const addNewCredentialButton = document.getElementById('addNewCredential');
 
-    // Sample data (replace with actual data fetching)
+   let credentials = []; // Will be fetched from backend
+
+async function fetchVault() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast("Unauthorized: Please log in", 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/vault/fetch', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!res.ok) {
+            throw new Error('Failed to fetch credentials');
+        }
+
+        const data = await res.json();
+        // Map data into frontend-friendly format
+        credentials = data.map((entry, index) => ({
+            id: index,
+            title: entry.site,
+            url: '',
+            username: '', // You can add username/email field to the DB if needed
+            password: entry.encryptedSecret,
+            category: 'other', // Add category support later
+            tags: [],
+            notes: ''
+        }));
+
+        applyFilters();
+    } catch (err) {
+        console.error('Fetch error:', err);
+        showToast('Failed to load vault.', 'error');
+    }
+}
+
 
     let currentFilter = 'all';
     let focusableElements = [];
@@ -207,42 +247,45 @@ const renderCredentials = (filteredCredentials = credentials) => {
     const password = document.getElementById('password').value;
     const category = document.getElementById('category').value;
 
-    const email = localStorage.getItem('userEmail') || "silentgamer174@gmail.com"; // fallback for now
+const token = localStorage.getItem('token');
 
-    const newCredential = {
-        id: id ? parseInt(id) : Date.now(),
-        title,
-        url,
-        username,
-        password,
-        category,
-        tags: [],
-        notes: ''
-    };
+const newCredential = {
+    id: id ? parseInt(id) : Date.now(),
+    title,
+    url,
+    username,
+    password,
+    category,
+    tags: [],
+    notes: ''
+};
 
-    try {
-        const response = await fetch('/api/vault/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email,
-                site: title,
-                secret: password
-            })
-        });
+try {
+    const response = await fetch('/api/vault/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            site: title,
+            secret: password
+        })
+    });
 
-        if (!response.ok) {
-            throw new Error("Failed to save to vault");
-        }
-
-        showToast('Credential saved to vault!', 'success');
-        credentials.push(newCredential);
-        applyFilters();
-        closeAddEditModal();
-    } catch (err) {
-        console.error("Save error:", err);
-        showToast('Error saving credential.', 'error');
+    if (!response.ok) {
+        throw new Error("Failed to save to vault");
     }
+
+    showToast('Credential saved to vault!', 'success');
+    credentials.push(newCredential);
+    applyFilters();
+    closeAddEditModal();
+} catch (err) {
+    console.error("Save error:", err);
+    showToast('Error saving credential.', 'error');
+}
+
 };
 
     
@@ -320,5 +363,7 @@ const renderCredentials = (filteredCredentials = credentials) => {
     }
     
     // Initial render
+    fetchVault(); // Fetch user-specific credentials from backend on load
+
     applyFilters();
 });
