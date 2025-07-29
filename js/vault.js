@@ -264,7 +264,11 @@ const renderCredentials = (filteredCredentials = credentials) => {
      const passwordForKey = localStorage.getItem('userPassword');
         const salt = localStorage.getItem('encryptionSalt');
         const key = deriveKey(passwordForKey, salt);
-        const keyBase64 = sodium.to_base64(key);
+        function toBase64(bytes) {
+  return btoa(String.fromCharCode(...bytes));
+}
+const keyBase64 = toBase64(key);
+
 
 
 const token = localStorage.getItem('token');
