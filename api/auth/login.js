@@ -1,6 +1,6 @@
 // File: /api/auth/login.js
-import { connectDB } from 'api/backend/util/db.js';
-import User from 'api/backend/models/user.js';
+import { connectDB } from '../../backend/util/db.js';
+import User from '../../backend/models/user.js';
 
 connectDB().catch(err => {
   console.error('MongoDB connection error:', err);

@@ -40,7 +40,7 @@ app.get('/', (req, res) => {
 });
 
 // Auth routes
-app.use('/api/auth', require('./routes/auth.js')); // Add this line
+app.use('/api/auth', require('./routes/auth')); // Add this line
 
 // --- Start the Server ---
 app.listen(PORT, () => {
