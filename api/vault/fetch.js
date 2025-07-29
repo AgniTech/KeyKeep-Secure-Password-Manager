@@ -20,7 +20,8 @@ export default async function handler(req, res) {
 
     const credentials = await Vault.find({ userId });
 
-    res.status(200).json({ credentials });
+    res.status(200).json(credentials);
+
   } catch (e) {
     console.error('Fetch vault error:', e);
     res.status(500).json({ error: 'Server error' });
