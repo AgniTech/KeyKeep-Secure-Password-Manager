@@ -1,6 +1,6 @@
 // File: /api/auth/login.js
-import { connectDB } from '../../backend/util/db.js';
-import User from '../../backend/models/user.js';
+import { connectDB } from '../util/db.js';
+import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config(); // Load .env vars like JWT_SECRET

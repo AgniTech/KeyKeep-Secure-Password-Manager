@@ -1,7 +1,7 @@
 // File: /api/vault/save.js
-import { connectDB } from '../../../backend/util/db.js';
-import Vault from '../../../backend/models/Vault.js';
-import { encryptData } from '../../../backend/util/encryption.js';
+import { connectDB } from '../util/db.js';
+import Vault from '../models/Vault.js';
+import { encryptData } from '../util/encryption.js';
 import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {

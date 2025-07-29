@@ -1,7 +1,7 @@
 // /api/auth/register.js
 import bcrypt from 'bcryptjs';
-import { connectDB } from '../../backend/util/db.js';
-import User from '../../backend/models/user.js';
+import { connectDB } from '../util/db.js';
+import User from '../models/user.js';
 
 connectDB().catch(err => {
   console.error('MongoDB connection error:', err);
