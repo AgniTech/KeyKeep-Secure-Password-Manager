@@ -29,8 +29,7 @@ export default async function handler(req, res) {
       return res.status(409).json({ error: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(masterPassword, 10);
-    const user = new User({ email, masterPassword: hashedPassword }); // ✔ match schema
+    const user = new User({ email, masterPassword }); 
 
     await user.save();
     return res.status(201).json({ message: 'User created successfully' });
