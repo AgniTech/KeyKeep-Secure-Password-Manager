@@ -16,29 +16,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, password } = req.body;
+    const { email, masterPassword } = req.body; // FIXED HERE
 
-    if (!email || !password) {
+    if (!email || !masterPassword) {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ error: 'Email or password is incorrect. Please try again.' });
-
     }
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await user.comparePassword(masterPassword); // FIXED HERE
     if (!isMatch) {
       return res.status(401).json({ error: 'Email or password is incorrect. Please try again.' });
-
     }
+
     const token = jwt.sign(
-      { id: user._id },                // payload
-      process.env.JWT_SECRET,          // secret
-      { expiresIn: '2h' }              // optional: set expiry
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
     );
-    
+
     return res.status(200).json({ token });
   } catch (e) {
     console.error('Login error:', e);
