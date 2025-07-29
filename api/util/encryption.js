@@ -1,20 +1,20 @@
-import pkg from 'salsa20';
-const { Salsa20 } = pkg;
+import sodium from 'libsodium-wrappers';
 
-export function encryptData(secret) {
-  const key = crypto.getRandomValues(new Uint8Array(32)); // 256-bit key
-  const nonce = crypto.getRandomValues(new Uint8Array(8)); // 64-bit nonce
+export async function encryptData(secret) {
+  await sodium.ready;
 
-  const encoder = new TextEncoder();
-  const plaintext = encoder.encode(secret);
+  const key = sodium.randombytes_buf(sodium.crypto_secretbox_KEYBYTES);
+  const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
 
- const cipher = new Salsa20(key, nonce);
- const encryptedBytes = cipher.xor(plaintext);
-
+  const ciphertext = sodium.crypto_secretbox_easy(
+    sodium.from_string(secret),
+    nonce,
+    key
+  );
 
   return {
-    ciphertext: Buffer.from(encryptedBytes).toString('base64'),
+    ciphertext: Buffer.from(ciphertext).toString('base64'),
     nonce: Buffer.from(nonce).toString('base64'),
-    key: Buffer.from(key).toString('base64') // Optional
+    key: Buffer.from(key).toString('base64') // Store this securely or derive from master password
   };
 }
