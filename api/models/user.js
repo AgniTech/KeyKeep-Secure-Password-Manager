@@ -1,6 +1,8 @@
 // backend/models/User.js
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+
+import bcrypt from 'bcryptjs';
+
 
 const UserSchema = new mongoose.Schema({
     email: {
@@ -37,4 +39,5 @@ UserSchema.methods.comparePassword = async function(candidatePassword) {
 };
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);
+
 
