@@ -51,13 +51,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
 
-                if (response.ok) { // Check if the response status is 2xx
-                    console.log('Login successful:', data);
-                    // Store the JWT token
-                    localStorage.setItem('token', data.token);
-                    // Redirect to the vault page
-                    window.location.href = 'vault.html';
-                } else {
+                if (response.ok) {
+    console.log('Login successful:', data);
+
+    // 🟢 Store JWT token
+    localStorage.setItem('token', data.token);
+
+    // 🟢 Store password (used later for deriving decryption key)
+    localStorage.setItem('userPassword', masterPassword);
+
+    // 🟢 Store salt for decryption
+    localStorage.setItem('encryptionSalt', data.encryptionSalt);
+
+    // ➡️ Redirect to vault
+    window.location.href = 'vault.html';
+}
+ else {
                     // Handle errors from the backend (e.g., "Invalid Credentials")
                     console.error('Login failed:', data.msg);
                     errorContainer.textContent = data.msg || 'Login failed. Please try again.';

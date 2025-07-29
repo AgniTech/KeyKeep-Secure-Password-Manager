@@ -22,6 +22,14 @@ const VaultSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  url: {
+    type: String,
+    default: ''
+  },
+  username: {
+    type: String,
+    default: ''
+  },
   encryptedSecret: {
     type: String,
     required: true
@@ -29,7 +37,21 @@ const VaultSchema = new mongoose.Schema({
   nonce: {
     type: String,
     required: true
+  },
+  category: {
+    type: String,
+    default: 'other'
+  },
+  tags: {
+    type: [String],
+    default: []
+  },
+  notes: {
+    type: String,
+    default: ''
   }
-});
+}, { timestamps: true });
+
+
 
 export default mongoose.models.Vault || mongoose.model('Vault', VaultSchema);

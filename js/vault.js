@@ -1,5 +1,5 @@
 // js/vault.js
-
+import { deriveKey, decryptPassword } from '../api/util/salsa.js'; // Make sure this path resolves
 document.addEventListener('DOMContentLoaded', () => {
     const credentialsList = document.getElementById('credentialsList');
     const searchInput = document.getElementById('searchCredentials');
@@ -12,8 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchVault() {
     const token = localStorage.getItem('token');
-    if (!token) {
-        showToast("Unauthorized: Please log in", 'error');
+    const password = localStorage.getItem('userPassword');
+    const salt = localStorage.getItem('encryptionSalt');
+
+    if (!token || !password || !salt) {
+        showToast("Unauthorized or missing credentials", 'error');
         return;
     }
 
@@ -30,17 +33,28 @@ async function fetchVault() {
         }
 
         const data = await res.json();
-        // Map data into frontend-friendly format
-        credentials = data.map((entry, index) => ({
-            id: index,
-            title: entry.site,
-            url: '',
-            username: '', // You can add username/email field to the DB if needed
-            password: entry.encryptedSecret,
-            category: 'other', // Add category support later
-            tags: [],
-            notes: ''
-        }));
+        const key = deriveKey(password, salt); // Derive decryption key
+
+        credentials = data.vault.map((entry, index) => {
+            let decryptedPassword = '';
+            try {
+                decryptedPassword = decryptPassword(entry.encryptedSecret, entry.nonce, key);
+            } catch (e) {
+                console.error('Decryption failed for entry:', entry, e);
+                decryptedPassword = '[DECRYPTION FAILED]';
+            }
+
+            return {
+                id: index,
+                title: entry.site || 'Untitled',
+                url: entry.url || '',
+                username: entry.username || '', 
+                password: decryptedPassword,
+                category: entry.category || 'other',
+                tags: entry.tags || [],
+                notes: entry.notes || ''
+            };
+        });
 
         applyFilters();
     } catch (err) {
@@ -48,6 +62,7 @@ async function fetchVault() {
         showToast('Failed to load vault.', 'error');
     }
 }
+
 
 
     let currentFilter = 'all';
@@ -246,6 +261,11 @@ const renderCredentials = (filteredCredentials = credentials) => {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const category = document.getElementById('category').value;
+     const passwordForKey = localStorage.getItem('userPassword');
+        const salt = localStorage.getItem('encryptionSalt');
+        const key = deriveKey(passwordForKey, salt);
+        const keyBase64 = sodium.to_base64(key);
+
 
 const token = localStorage.getItem('token');
 
@@ -262,16 +282,18 @@ const newCredential = {
 
 try {
     const response = await fetch('/api/vault/save', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            site: title,
-            secret: password
-        })
-    });
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+        site: title,
+        secret: password,
+        keyBase64: keyBase64
+    })
+});
+
 
     if (!response.ok) {
         throw new Error("Failed to save to vault");
@@ -364,6 +386,6 @@ try {
     
     // Initial render
     fetchVault(); // Fetch user-specific credentials from backend on load
-
+    
     applyFilters();
 });

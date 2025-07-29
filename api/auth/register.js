@@ -2,6 +2,7 @@
 import bcrypt from 'bcryptjs';
 import { connectDB } from '../util/db.js';
 import User from '../models/user.js';
+import sodium from 'libsodium-wrappers';
 
 connectDB().catch(err => {
   console.error('MongoDB connection error:', err);
@@ -13,6 +14,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  await sodium.ready;
   console.log("Incoming request body:", req.body);
 
   try {
@@ -29,7 +31,18 @@ export default async function handler(req, res) {
       return res.status(409).json({ error: 'User already exists' });
     }
 
-    const user = new User({ email, masterPassword }); 
+    // 🔥 Create encryption salt
+    const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
+    const saltBase64 = sodium.to_base64(salt);
+
+    // ✅ Hash password (for login)
+    const hashedPassword = await bcrypt.hash(masterPassword, 10);
+
+    const user = new User({
+      email,
+      masterPassword: hashedPassword,
+      encryptionSalt: saltBase64
+    });
 
     await user.save();
     return res.status(201).json({ message: 'User created successfully' });
