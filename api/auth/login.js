@@ -45,7 +45,7 @@ export default async function handler(req, res) {
       { expiresIn: '2h' }
     );
 
-    return res.status(200).json({ token , encryptionSalt: user.encryptionSalt });
+    return res.status(200).json({ token });
 
   } catch (e) {
     console.error('Login error:', e);

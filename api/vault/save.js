@@ -3,7 +3,6 @@ import { connectDB } from '../util/db.js';
 import Vault from '../models/Vault.js';
 import { encryptData } from '../util/encryption.js';
 import jwt from 'jsonwebtoken';
-import sodium from 'libsodium-wrappers';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -12,7 +11,6 @@ export default async function handler(req, res) {
 
   try {
     await connectDB();
-    await sodium.ready;
 
     const token = req.headers.authorization?.split(' ')[1]; // Expect: Bearer <token>
     if (!token) return res.status(401).json({ error: 'Unauthorized: No token' });
@@ -20,26 +18,20 @@ export default async function handler(req, res) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    const { site, secret, keyBase64, url, username, category, tags, notes } = req.body;
-if (!site || !secret || !keyBase64) {
-  return res.status(400).json({ error: 'Missing required fields' });
-}
+    const { site, secret } = req.body;
+    if (!site || !secret) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-const key = sodium.from_base64(keyBase64);
-const encrypted = encryptData(key, secret); // Encrypt with user-derived key
+    const encrypted = await encryptData(secret); // ✅ FIXED: await the promise
 
-const vaultEntry = new Vault({
-  userId,
-  site,
-  encryptedSecret: encrypted.ciphertext,
-  nonce: encrypted.nonce,
-  url: url || '',
-  username: username || '',
-  category: category || 'other',
-  tags: Array.isArray(tags) ? tags : [],
-  notes: notes || ''
-});
 
+    const vaultEntry = new Vault({
+      userId,
+      site,
+      encryptedSecret: encrypted.ciphertext,
+      nonce: encrypted.nonce
+    });
 
     await vaultEntry.save();
 

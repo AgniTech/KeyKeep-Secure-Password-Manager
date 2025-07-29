@@ -1,10 +1,7 @@
 // File: /api/vault/get.js
-import { connectDB } from '../util/db.js';
-import Vault from '../models/Vault.js';
+import { connectDB } from '../../../backend/util/db.js';
+import Vault from '../../../backend/models/Vault.js';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -20,9 +17,7 @@ export default async function handler(req, res) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    const vaultEntries = await Vault.find({ userId })
-      .select('-__v -_id -userId')
-      .sort({ createdAt: -1 });
+    const vaultEntries = await Vault.find({ userId }).sort({ createdAt: -1 });
 
     res.status(200).json({ vault: vaultEntries });
   } catch (e) {
