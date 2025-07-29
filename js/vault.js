@@ -1,5 +1,5 @@
 // js/vault.js
-import { deriveKey, decryptPassword } from '../lib/salsa.js'; // Make sure this path resolves
+import { deriveKey, decryptPassword } from '../api/util/salsa.js'; // Make sure this path resolves
 document.addEventListener('DOMContentLoaded', () => {
     const credentialsList = document.getElementById('credentialsList');
     const searchInput = document.getElementById('searchCredentials');
