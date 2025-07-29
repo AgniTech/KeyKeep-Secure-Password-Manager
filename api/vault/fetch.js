@@ -1,7 +1,7 @@
 // File: /api/vault/fetch.js
 
-import { connectDB } from '../../backend/util/db.js';
-import Vault from '../../backend/models/Vault.js';
+import { connectDB } from '../util/db.js';
+import Vault from '../models/Vault.js';
 import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
