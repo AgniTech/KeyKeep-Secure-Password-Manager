@@ -8,8 +8,9 @@ export function encryptData(secret) {
   const encoder = new TextEncoder();
   const plaintext = encoder.encode(secret);
 
-  const cipher = new Salsa20(key, nonce);
-  const encryptedBytes = cipher.xor(plaintext); // ✅ CORRECT METHOD
+ const cipher = new Salsa20(key, nonce);
+ const encryptedBytes = cipher.xor(plaintext);
+
 
   return {
     ciphertext: Buffer.from(encryptedBytes).toString('base64'),
