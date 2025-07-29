@@ -3,7 +3,7 @@ import { connectDB } from '../util/db.js';
 import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-dotenv.config(); // Load .env vars like JWT_SECRET
+dotenv.config();
 
 connectDB().catch(err => {
   console.error('MongoDB connection error:', err);
@@ -16,18 +16,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, masterPassword } = req.body; // FIXED HERE
+    const { email, masterPassword } = req.body;
 
     if (!email || !masterPassword) {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).exec(); // ✅ FIXED: Moved up + .exec()
+
     if (!user) {
       return res.status(401).json({ error: 'Email or password is incorrect. Please try again.' });
     }
 
-    const isMatch = await user.comparePassword(masterPassword); // FIXED HERE
+    console.log("Login attempt for:", email);                           
+    console.log("User found:", user); // ✅ Works now
+    console.log("Password in request:", masterPassword);
+
+    const isMatch = await user.comparePassword(masterPassword);
+    console.log("Password match:", isMatch);
+
     if (!isMatch) {
       return res.status(401).json({ error: 'Email or password is incorrect. Please try again.' });
     }
@@ -39,6 +46,7 @@ export default async function handler(req, res) {
     );
 
     return res.status(200).json({ token });
+
   } catch (e) {
     console.error('Login error:', e);
     return res.status(500).json({ error: 'Server Error' });
