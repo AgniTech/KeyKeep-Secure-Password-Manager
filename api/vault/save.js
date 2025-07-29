@@ -1,7 +1,7 @@
 // File: /api/vault/save.js
-import { connectDB } from 'backend/util/db.js';
-import Vault from 'backend/models/Vault.js';
-import { encryptData } from 'backend/util/encryption.js';
+import { connectDB } from 'api/backend/util/db.js';
+import Vault from 'api/backend/models/Vault.js';
+import { encryptData } from 'api/backend/util/encryption.js';
 
 
 export default async function handler(req, res) {
