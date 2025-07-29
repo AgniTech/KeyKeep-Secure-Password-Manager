@@ -1,3 +1,14 @@
+<!-- At the top of vault.html, settings.html, etc. -->
+<script>
+  // Example: using localStorage token set at login
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    // Not logged in → redirect
+    window.location.href = 'login.html';
+  }
+  // Optionally: verify token with backend before rendering
+</script>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
