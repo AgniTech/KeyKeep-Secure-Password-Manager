@@ -99,6 +99,20 @@
     padding: 10px 20px;
     font-size: 0.95em;
 }
+.button.danger {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.button.danger:hover {
+  background-color: #c9302c;
+}
+
 
 @media (max-width: 768px) {
     .settings-container {

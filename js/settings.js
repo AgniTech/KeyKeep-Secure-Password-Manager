@@ -67,4 +67,33 @@ document.addEventListener('DOMContentLoaded', () => {
             // Implement import logic here
         });
     }
+        const logoutButton = document.getElementById('logoutBtn');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            showToast('Logged out successfully. Redirecting...');
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 1000);
+        });
+    }
+
 });
+// Simple toast popup for feedback
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.padding = '10px 20px';
+    toast.style.backgroundColor = '#444';
+    toast.style.color = 'white';
+    toast.style.borderRadius = '6px';
+    toast.style.zIndex = 1000;
+    toast.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+}
+
