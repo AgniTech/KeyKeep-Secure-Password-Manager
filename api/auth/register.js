@@ -16,11 +16,11 @@ export default async function handler(req, res) {
   console.log("Incoming request body:", req.body);
 
   try {
-    const { email, password } = req.body;
+    const { email, masterPassword } = req.body;
     console.log("Extracted email:", email);
-    console.log("Extracted password:", password);
+    console.log("Extracted password:", masterPassword);
 
-    if (!email || !password) {
+    if (!email || !masterPassword) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
       return res.status(409).json({ error: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(masterPassword, 10);
     const user = new User({ email, masterPassword: hashedPassword }); // ✔ match schema
 
     await user.save();
