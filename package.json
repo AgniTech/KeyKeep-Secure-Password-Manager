@@ -9,6 +9,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "libsodium-wrappers": "^0.7.15",
-    "mongoose": "^8.16.5"
+    "mongoose": "^8.16.5",
+    "salsa20": "^1.0.0"
   }
 }
