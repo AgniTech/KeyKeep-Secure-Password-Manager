@@ -51,22 +51,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Export/Import vault buttons (basic click listeners for future implementation)
-    const exportButton = document.querySelector('.button.secondary:contains("Export Vault")');
-    if (exportButton) {
-        exportButton.addEventListener('click', () => {
+    // Export/Import vault buttons (using text matching)
+const buttons = document.querySelectorAll('.button.secondary');
+buttons.forEach(button => {
+    if (button.textContent.includes('Export Vault')) {
+        button.addEventListener('click', () => {
             showToast('Export functionality coming soon!');
-            // Implement export logic here
         });
-    }
-
-    const importButton = document.querySelector('.button.secondary:contains("Import Vault")');
-    if (importButton) {
-        importButton.addEventListener('click', () => {
+    } else if (button.textContent.includes('Import Vault')) {
+        button.addEventListener('click', () => {
             showToast('Import functionality coming soon!');
-            // Implement import logic here
         });
     }
+});
+
         const logoutButton = document.getElementById('logoutBtn');
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
