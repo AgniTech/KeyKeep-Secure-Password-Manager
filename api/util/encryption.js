@@ -1,4 +1,6 @@
-import { Salsa20 } from 'salsa20';
+import pkg from 'salsa20';
+const { Salsa20 } = pkg;
+
 
 export function encryptData(secret) {
   const key = crypto.getRandomValues(new Uint8Array(32)); // 256-bit key
