@@ -1,6 +1,9 @@
 // File: /api/auth/login.js
 import { connectDB } from '../../backend/util/db.js';
 import User from '../../backend/models/user.js';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config(); // Load .env vars like JWT_SECRET
 
 connectDB().catch(err => {
   console.error('MongoDB connection error:', err);
@@ -30,8 +33,13 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Email or password is incorrect. Please try again.' });
 
     }
-
-    return res.status(200).json({ message: 'Login successful', email }); // return email for localStorage if needed
+    const token = jwt.sign(
+      { id: user._id },                // payload
+      process.env.JWT_SECRET,          // secret
+      { expiresIn: '2h' }              // optional: set expiry
+    );
+    
+    return res.status(200).json({ token });
   } catch (e) {
     console.error('Login error:', e);
     return res.status(500).json({ error: 'Server Error' });

@@ -1,11 +1,8 @@
-// js/protect.js
-
 (function () {
   const token = localStorage.getItem('token');
+  console.log("PROTECT.JS: Token is", token); // ✅ This will help debug
 
-  // If no token found, redirect to login page
-  if (!token || token === 'undefined' || token === 'null') {
-    console.warn("No valid token found. Redirecting to login...");
+  if (!token || token === 'undefined' || token === 'null' || token.length < 10) {
     window.location.href = 'index.html';
   }
 })();
