@@ -1,16 +1,18 @@
-import { randomBytes } from 'crypto';
-import Salsa20 from 'salsa20';
+import { Salsa20 } from 'salsa20';
 
-export function encryptData(text) {
-  const key = randomBytes(32);
-  const nonce = randomBytes(8);
+export function encryptData(secret) {
+  const key = crypto.getRandomValues(new Uint8Array(32)); // 256-bit key
+  const nonce = crypto.getRandomValues(new Uint8Array(8)); // 64-bit nonce
+
+  const encoder = new TextEncoder();
+  const plaintext = encoder.encode(secret);
+
   const cipher = new Salsa20(key, nonce);
-
-  const encrypted = cipher.encrypt(Buffer.from(text, 'utf-8'));
+  const encryptedBytes = cipher.encrypt(plaintext);
 
   return {
-    key: key.toString('base64'),
-    nonce: nonce.toString('base64'),
-    ciphertext: Buffer.from(encrypted).toString('base64')
+    ciphertext: Buffer.from(encryptedBytes).toString('base64'),
+    nonce: Buffer.from(nonce).toString('base64'),
+    key: Buffer.from(key).toString('base64') // Optional, if needed for decrypting later
   };
 }
