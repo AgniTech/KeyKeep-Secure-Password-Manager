@@ -23,7 +23,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const encrypted = encryptData(secret); // returns { ciphertext, nonce }
+    const encrypted = await encryptData(secret); // ✅ FIXED: await the promise
+
 
     const vaultEntry = new Vault({
       userId,
