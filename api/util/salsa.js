@@ -25,15 +25,10 @@ export function encryptPassword(plainText, key) {
   };
 }
 
-export function decryptPassword(encryptedBase64, nonceBase64, keyBase64) {
-  // Decode inputs from Base64
-  const key      = sodium.from_base64(keyBase64);
-  const nonce    = sodium.from_base64(nonceBase64);
-  const encrypted= sodium.from_base64(encryptedBase64);
-
-  // Attempt decryption
+export function decryptPassword(encryptedBase64, nonceBase64, key) {
+  const nonce = sodium.from_base64(nonceBase64);
+  const encrypted = sodium.from_base64(encryptedBase64);
   const decrypted = sodium.crypto_secretbox_open_easy(encrypted, nonce, key);
-
 
   if (!decrypted) throw new Error('Failed to decrypt. Wrong key or tampered data.');
   return sodium.to_string(decrypted);
