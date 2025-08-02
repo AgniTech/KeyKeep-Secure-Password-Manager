@@ -9,6 +9,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const addNewCredentialButton = document.getElementById('addNewCredential');
 
    let credentials = []; // Will be fetched from backend
+   // --- Decryption Utilities ---
+function base64ToUint8Array(base64) {
+    const binaryStr = atob(base64);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
+    }
+    return bytes;
+}
+
+function decryptPassword(cipherTextB64, nonceB64, key) {
+    const cipher = base64ToUint8Array(cipherTextB64);
+    const nonce = base64ToUint8Array(nonceB64);
+    const decrypted = window.sodium.crypto_secretbox_open_easy(cipher, nonce, key);
+    return new TextDecoder().decode(decrypted);
+}
+
+function deriveKey(password, saltBase64) {
+    const salt = base64ToUint8Array(saltBase64);
+    return window.sodium.crypto_pwhash(
+        32,
+        password,
+        salt,
+        window.sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+        window.sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
+        window.sodium.crypto_pwhash_ALG_DEFAULT
+    );
+}
+
 
 async function fetchVault() {
     const token = localStorage.getItem('token');
@@ -31,16 +60,18 @@ async function fetchVault() {
 
         const data = await res.json();
         // Map data into frontend-friendly format
-        credentials = data.map((entry, index) => ({
-            id: index,
-            title: entry.site,
-            url: '',
-            username: '', // You can add username/email field to the DB if needed
-            password: entry.encryptedSecret,
-            category: 'other', // Add category support later
-            tags: [],
-            notes: ''
-        }));
+       credentials = data.map((entry, index) => ({
+    id: index,
+    title: entry.site,
+    url: '',
+    username: '',
+    password: entry.encryptedSecret,
+    nonce: entry.nonce,
+    category: 'other',
+    tags: [],
+    notes: ''
+}));
+
 
         applyFilters();
     } catch (err) {
@@ -139,16 +170,34 @@ const renderCredentials = (filteredCredentials = credentials) => {
         }
 
         // Copy Buttons
-        if (target.classList.contains('copy-button')) {
-            const type = target.dataset.type;
-            const cred = credentials.find(c => c.id === id);
-            const textToCopy = type === 'password' ? cred.password : cred.username;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                showToast(`Copied ${type} to clipboard!`, 'success');
-            }).catch(err => {
-                showToast(`Failed to copy ${type}.`, 'error');
-            });
+      // Show/Hide Password - With Decryption
+if (target.classList.contains('show-hide-password')) {
+    const passwordSpan = card.querySelector('[data-password]');
+    const cred = credentials.find(c => c.id === id);
+    const isMasked = passwordSpan.textContent.includes('*');
+
+    if (isMasked) {
+        const userPassword = localStorage.getItem('userPassword');
+        const salt = localStorage.getItem('encryptionSalt');
+
+        if (!userPassword || !salt) {
+            showToast('Missing encryption key.', 'error');
+            return;
         }
+
+        const key = deriveKey(userPassword, salt);
+        const decrypted = decryptPassword(cred.password, cred.nonce, key);
+
+        passwordSpan.textContent = decrypted;
+        target.textContent = 'Hide';
+        target.setAttribute('aria-label', 'Hide password');
+    } else {
+        passwordSpan.textContent = '********';
+        target.textContent = '👁️';
+        target.setAttribute('aria-label', 'Show password');
+    }
+}
+
         
         // Edit Button
         if (target.classList.contains('edit-button')) {
