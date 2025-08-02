@@ -1,5 +1,5 @@
 // File: /api/vault/fetch.js
-
+import { decryptPassword } from '../util/salsa.js';
 import { connectDB } from '../util/db.js';
 import Vault from '../models/Vault.js';
 import jwt from 'jsonwebtoken';
@@ -18,9 +18,16 @@ export default async function handler(req, res) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    const credentials = await Vault.find({ userId });
-
-    res.status(200).json(credentials);
+      const entries = await Vault.find({ userId });
+   const credentials = entries.map(e => ({
+     site: e.site,
+     secret: decryptPassword(
+       e.encryptedSecret,
+       e.nonce,
+       e.key              // Base64 key stored in DB
+     )
+   }));
+   res.status(200).json(credentials);
 
   } catch (e) {
     console.error('Fetch vault error:', e);
