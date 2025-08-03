@@ -234,7 +234,13 @@ if (target.classList.contains('show-hide-password')) {
                 </div>
                 <div class="input-group">
                     <label for="url">URL:</label>
-                    <input type="url" id="url" value="${isEdit ? credential.url : ''}" placeholder="https://example.com">
+                    <div class="input-group url-group">
+    <label for="url">URL:</label>
+    <div class="input-with-icon">
+        <span class="url-icon"><i class="fa-solid fa-link"></i></span>
+        <input type="url" id="url" value="${isEdit ? credential.url : ''}" placeholder="https://example.com">
+    </div>
+</div>
                 </div>
                 <div class="input-group">
                     <label for="username">Username/Email:</label>

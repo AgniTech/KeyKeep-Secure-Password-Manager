@@ -19,6 +19,28 @@
     padding: 15px 25px;
 }
 
+.input-with-icon {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 6px 10px;
+    background-color: #fff;
+}
+
+.url-icon {
+    color: #888;
+    margin-right: 8px;
+}
+
+.input-with-icon input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 1rem;
+}
+
+
 .top-nav .left-actions .button.icon-button {
     border-radius: 8px;
     width: auto;
