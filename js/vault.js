@@ -8,77 +8,77 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalOverlay = document.getElementById('modalOverlay');
     const addNewCredentialButton = document.getElementById('addNewCredential');
 
-   let credentials = []; // Will be fetched from backend
-   // --- Decryption Utilities ---
-function base64ToUint8Array(base64) {
-    const binaryStr = atob(base64);
-    const bytes = new Uint8Array(binaryStr.length);
-    for (let i = 0; i < binaryStr.length; i++) {
-        bytes[i] = binaryStr.charCodeAt(i);
-    }
-    return bytes;
-}
-
-function decryptPassword(cipherTextB64, nonceB64, key) {
-    const cipher = base64ToUint8Array(cipherTextB64);
-    const nonce = base64ToUint8Array(nonceB64);
-    const decrypted = window.sodium.crypto_secretbox_open_easy(cipher, nonce, key);
-    return new TextDecoder().decode(decrypted);
-}
-
-function deriveKey(password, saltBase64) {
-    const salt = base64ToUint8Array(saltBase64);
-    return window.sodium.crypto_pwhash(
-        32,
-        password,
-        salt,
-        window.sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
-        window.sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
-        window.sodium.crypto_pwhash_ALG_DEFAULT
-    );
-}
-
-
-async function fetchVault() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showToast("Unauthorized: Please log in", 'error');
-        return;
+    let credentials = []; // Will be fetched from backend
+    // --- Decryption Utilities ---
+    function base64ToUint8Array(base64) {
+        const binaryStr = atob(base64);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+        }
+        return bytes;
     }
 
-    try {
-        const res = await fetch('/api/vault/fetch', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+    function decryptPassword(cipherTextB64, nonceB64, key) {
+        const cipher = base64ToUint8Array(cipherTextB64);
+        const nonce = base64ToUint8Array(nonceB64);
+        const decrypted = window.sodium.crypto_secretbox_open_easy(cipher, nonce, key);
+        return new TextDecoder().decode(decrypted);
+    }
 
-        if (!res.ok) {
-            throw new Error('Failed to fetch credentials');
+    function deriveKey(password, saltBase64) {
+        const salt = base64ToUint8Array(saltBase64);
+        return window.sodium.crypto_pwhash(
+            32,
+            password,
+            salt,
+            window.sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+            window.sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
+            window.sodium.crypto_pwhash_ALG_DEFAULT
+        );
+    }
+
+
+    async function fetchVault() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast("Unauthorized: Please log in", 'error');
+            return;
         }
 
-        const data = await res.json();
-        // Map data into frontend-friendly format
-       credentials = data.map((entry, index) => ({
-    id: index,
-    title: entry.site,
-    url: '',
-    username: '',
-    password: entry.encryptedSecret,
-    nonce: entry.nonce,
-    category: 'other',
-    tags: [],
-    notes: ''
-}));
+        try {
+            const res = await fetch('/api/vault/fetch', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to fetch credentials');
+            }
+
+            const data = await res.json();
+            // Map data into frontend-friendly format
+            credentials = data.map((entry, index) => ({
+                id: index,
+                title: entry.site,
+                url: '',
+                username: '',
+                password: entry.encryptedSecret,
+                nonce: entry.nonce,
+                category: 'other',
+                tags: [],
+                notes: ''
+            }));
 
 
-        applyFilters();
-    } catch (err) {
-        console.error('Fetch error:', err);
-        showToast('Failed to load vault.', 'error');
+            applyFilters();
+        } catch (err) {
+            console.error('Fetch error:', err);
+            showToast('Failed to load vault.', 'error');
+        }
     }
-}
 
 
     let currentFilter = 'all';
@@ -94,7 +94,7 @@ async function fetchVault() {
         if (nums) chars += '0123456789';
         if (syms) chars += '!@#$%^&*()_+=-`~[]{}|;\':",./<>?';
         if (chars.length === 0) return 'Select options';
-        
+
         let password = '';
         // Use crypto.getRandomValues for more secure random numbers
         const randomValues = new Uint32Array(length);
@@ -105,26 +105,26 @@ async function fetchVault() {
         return password;
     };
 
-const renderCredentials = (filteredCredentials = credentials) => {
-    credentialsList.innerHTML = '';
-    if (filteredCredentials.length === 0) {
-        credentialsList.innerHTML = `
+    const renderCredentials = (filteredCredentials = credentials) => {
+        credentialsList.innerHTML = '';
+        if (filteredCredentials.length === 0) {
+            credentialsList.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">🛡️</div>
                 <p>Your vault is empty. Let's secure your first account!</p>
                 <button class="button primary" id="addFirstCredential">Add New Credential</button>
             </div>`;
-        return;
-    }
+            return;
+        }
 
-    filteredCredentials.forEach(cred => {
-        const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}`;
-        const fallbackFavicon = '/images/default-favicon.png';
+        filteredCredentials.forEach(cred => {
+            const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}`;
+            const fallbackFavicon = '/images/default-favicon.png';
 
-        const card = document.createElement('div');
-        card.className = 'credential-card glassmorphism';
-        card.dataset.id = cred.id;
-        card.innerHTML = `
+            const card = document.createElement('div');
+            card.className = 'credential-card glassmorphism';
+            card.dataset.id = cred.id;
+            card.innerHTML = `
             <div class="credential-header">
                 <img src="${faviconUrl}" 
                      alt="${cred.title} favicon" 
@@ -151,81 +151,81 @@ const renderCredentials = (filteredCredentials = credentials) => {
                 <button class="button secondary edit-button">✏️ Edit</button>
                 <button class="button secondary delete-button">🗑️ Delete</button>
             </div>`;
-        credentialsList.appendChild(card);
-    });
-}; 
+            credentialsList.appendChild(card);
+        });
+    };
 
 
-    
+
     // --- Event Listeners (using delegation for dynamic content) ---
     credentialsList.addEventListener('click', (e) => {
         const target = e.target;
         const card = target.closest('.credential-card');
         const id = card ? parseInt(card.dataset.id) : null;
-        
+
         // Show/Hide Password
-       if (target.classList.contains('show-hide-password') || target.closest('.show-hide-password')) {
-    const button = target.closest('.show-hide-password');
-    const passwordSpan = card.querySelector('[data-password]');
-    const iconImg = button.querySelector('img');
-    const cred = credentials.find(c => c.id === id);
-    const isMasked = passwordSpan.textContent.includes('*');
+        if (target.classList.contains('show-hide-password') || target.closest('.show-hide-password')) {
+            const button = target.closest('.show-hide-password');
+            const passwordSpan = card.querySelector('[data-password]');
+            const iconImg = button.querySelector('img');
+            const cred = credentials.find(c => c.id === id);
+            const isMasked = passwordSpan.textContent.includes('*');
 
-    if (isMasked) {
-        const userPassword = localStorage.getItem('userPassword');
-        const salt = localStorage.getItem('encryptionSalt');
+            if (isMasked) {
+                const userPassword = localStorage.getItem('userPassword');
+                const salt = localStorage.getItem('encryptionSalt');
 
-        if (!userPassword || !salt) {
-            showToast('Missing encryption key.', 'error');
-            return;
+                if (!userPassword || !salt) {
+                    showToast('Missing encryption key.', 'error');
+                    return;
+                }
+
+                const key = deriveKey(userPassword, salt);
+                const decrypted = decryptPassword(cred.password, cred.nonce, key);
+
+                passwordSpan.textContent = decrypted;
+                iconImg.src = 'images/see.png';
+                iconImg.alt = 'Hide';
+                button.setAttribute('aria-label', 'Hide password');
+            } else {
+                passwordSpan.textContent = '********';
+                iconImg.src = 'images/unsee.png';
+                iconImg.alt = 'Show';
+                button.setAttribute('aria-label', 'Show password');
+            }
         }
-
-        const key = deriveKey(userPassword, salt);
-        const decrypted = decryptPassword(cred.password, cred.nonce, key);
-
-        passwordSpan.textContent = decrypted;
-        iconImg.src = 'images/see.png';
-        iconImg.alt = 'Hide';
-        button.setAttribute('aria-label', 'Hide password');
-    } else {
-        passwordSpan.textContent = '********';
-        iconImg.src = 'images/unsee.png';
-        iconImg.alt = 'Show';
-        button.setAttribute('aria-label', 'Show password');
-    }
-}
 
 
         // Copy Buttons
-      // Show/Hide Password - With Decryption
-if (target.classList.contains('show-hide-password')) {
-    const passwordSpan = card.querySelector('[data-password]');
-    const cred = credentials.find(c => c.id === id);
-    const isMasked = passwordSpan.textContent.includes('*');
+        // Show/Hide Password - With Decryption
+        if (target.classList.contains('show-hide-password')) {
+            const passwordSpan = card.querySelector('[data-password]');
+            const cred = credentials.find(c => c.id === id);
+            const isMasked = passwordSpan.textContent.includes('*');
 
-    if (isMasked) {
-        const userPassword = localStorage.getItem('userPassword');
-        const salt = localStorage.getItem('encryptionSalt');
+            if (isMasked) {
+                const userPassword = localStorage.getItem('userPassword');
+                const salt = localStorage.getItem('encryptionSalt');
 
-        if (!userPassword || !salt) {
-            showToast('Missing encryption key.', 'error');
-            return;
+                if (!userPassword || !salt) {
+                    showToast('Missing encryption key.', 'error');
+                    return;
+                }
+
+                const key = deriveKey(userPassword, salt);
+                const decrypted = decryptPassword(cred.password, cred.nonce, key);
+
+                passwordSpan.textContent = decrypted;
+                target.textContent = 'Hide';
+                target.setAttribute('aria-label', 'Hide password');
+            } else {
+                passwordSpan.textContent = '********';
+                target.textContent = '👁️';
+                target.setAttribute('aria-label', 'Show password');
+            }
         }
 
-        const key = deriveKey(userPassword, salt);
-        const decrypted = decryptPassword(cred.password, cred.nonce, key);
 
-        passwordSpan.textContent = decrypted;
-        target.textContent = 'Hide';
-        target.setAttribute('aria-label', 'Hide password');
-    } else {
-        passwordSpan.textContent = '********';
-        target.textContent = '👁️';
-        target.setAttribute('aria-label', 'Show password');
-    }
-}
-
-        
         // Edit Button
         if (target.classList.contains('edit-button')) {
             const credToEdit = credentials.find(c => c.id === id);
@@ -240,7 +240,7 @@ if (target.classList.contains('show-hide-password')) {
                 showToast('Credential deleted.', 'info');
             }
         }
-        
+
         // Add First Credential Button (in empty state)
         if (target.id === 'addFirstCredential') {
             openAddEditModal('add');
@@ -257,15 +257,14 @@ if (target.classList.contains('show-hide-password')) {
                 <div class="input-group">
                     <label for="websiteName">Website Name:</label>
                     <input type="text" id="websiteName" value="${isEdit ? credential.title : ''}" required>
-                </div>
                 <div class="input-group">
-                    <label for="url">URL:</label>
-                    <div class="input-group url-group">
-    <label for="url">URL:</label>
-    <div class="input-with-icon">
-        <span class="url-icon"><i class="fa-solid fa-link"></i></span>
-        <input type="url" id="url" value="${isEdit ? credential.url : ''}" placeholder="https://example.com">
-    </div>
+  <label for="url">URL:</label>
+  <div class="url-input-wrapper">
+    <span class="url-icon">🔗</span>
+    <input type="url" id="url" value="${isEdit ? credential.url : ''}" placeholder="https://example.com">
+  </div>
+</div>
+
 </div>
                 </div>
                 <div class="input-group">
@@ -320,71 +319,71 @@ if (target.classList.contains('show-hide-password')) {
     };
 
     const handleCredentialSubmit = async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    const id = document.getElementById('credentialId').value;
-    const title = document.getElementById('websiteName').value;
-    const url = document.getElementById('url').value;
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const category = document.getElementById('category').value;
+        const id = document.getElementById('credentialId').value;
+        const title = document.getElementById('websiteName').value;
+        const url = document.getElementById('url').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const category = document.getElementById('category').value;
 
-const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token');
 
-const newCredential = {
-    id: id ? parseInt(id) : Date.now(),
-    title,
-    url,
-    username,
-    password,
-    category,
-    tags: [],
-    notes: ''
-};
+        const newCredential = {
+            id: id ? parseInt(id) : Date.now(),
+            title,
+            url,
+            username,
+            password,
+            category,
+            tags: [],
+            notes: ''
+        };
 
-try {
-    const response = await fetch('/api/vault/save', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            site: title,
-            secret: password
-        })
-    });
+        try {
+            const response = await fetch('/api/vault/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    site: title,
+                    secret: password
+                })
+            });
 
-    if (!response.ok) {
-        throw new Error("Failed to save to vault");
-    }
+            if (!response.ok) {
+                throw new Error("Failed to save to vault");
+            }
 
-    showToast('Credential saved to vault!', 'success');
-    credentials.push(newCredential);
-    applyFilters();
-    closeAddEditModal();
-} catch (err) {
-    console.error("Save error:", err);
-    showToast('Error saving credential.', 'error');
-}
+            showToast('Credential saved to vault!', 'success');
+            credentials.push(newCredential);
+            applyFilters();
+            closeAddEditModal();
+        } catch (err) {
+            console.error("Save error:", err);
+            showToast('Error saving credential.', 'error');
+        }
 
-};
+    };
 
-    
+
     const handleEscKey = (e) => {
         if (e.key === 'Escape') {
             closeAddEditModal();
         }
     };
-    
+
     // --- Focus Trap for Modals (Accessibility) ---
     const trapFocus = (modal) => {
         focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
         firstFocusableElement = focusableElements[0];
         lastFocusableElement = focusableElements[focusableElements.length - 1];
-        
+
         firstFocusableElement.focus();
-        
+
         modal.addEventListener('keydown', (e) => {
             if (e.key !== 'Tab') return;
 
@@ -439,11 +438,11 @@ try {
             }
         });
     }
-    
-    if(searchInput) {
+
+    if (searchInput) {
         searchInput.addEventListener('input', applyFilters);
     }
-    
+
     // Initial render
     fetchVault(); // Fetch user-specific credentials from backend on load
 

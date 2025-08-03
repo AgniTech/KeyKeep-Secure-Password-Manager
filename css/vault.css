@@ -286,6 +286,30 @@
 .empty-state .button {
     font-size: 1.1em;
 }
+.url-input-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-top: 6px;
+}
+
+.url-icon {
+    color: #aaa;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.url-input-wrapper input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #f0f0f0;
+    flex: 1;
+    font-size: 1rem;
+}
 
 @media (max-width: 992px) {
     .vault-container {
