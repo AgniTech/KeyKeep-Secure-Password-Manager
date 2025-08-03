@@ -1,13 +1,13 @@
 
-# 🔐 CryptoVault2 – Secure Password Vault
+# 🔐 KeyKeep – Secure Password Vault
 
-**CryptoVault2** is a secure, client-focused password manager built using Node.js, MongoDB, and frontend technologies. It allows users to safely store, manage, and generate strong passwords with local encryption, offering a sleek and responsive interface with modern security practices.
+**KeyKeep** is a secure, client-focused password manager built using Node.js, MongoDB, and frontend technologies. It allows users to safely store, manage, and generate strong passwords with local encryption, offering a sleek and responsive interface with modern security practices.
 
 ---
 
 ## 📌 Overview
 
-CryptoVault2 is a full-stack password vault application designed to:
+KeyKeep is a full-stack password vault application designed to:
 - Store users' credentials securely
 - Ensure client-side encryption and privacy
 - Provide essential tools like password generation and health checks
@@ -45,7 +45,7 @@ This project aims to balance security and usability, enabling users to manage se
 ## 🧩 Folder Structure
 
 ```bash
-CryptoVault2-main/
+KeyKeep-main/
 ├── api/
 │   ├── auth/
 │   ├── models/
@@ -65,7 +65,7 @@ CryptoVault2-main/
 
 ## 🔐 Encryption Details
 
-CryptoVault2 uses **libsodium** (via `libsodium-wrappers`) for strong encryption.
+KeyKeep uses **libsodium** (via `libsodium-wrappers`) for strong encryption.
 
 ### 🔸 What is encrypted?
 - Vault entries (site, username, password) are encrypted **on the client side** using symmetric encryption.
@@ -118,8 +118,8 @@ CryptoVault2 uses **libsodium** (via `libsodium-wrappers`) for strong encryption
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/yourusername/CryptoVault2.git
-cd CryptoVault2
+git clone https://github.com/yourusername/KeyKeep.git
+cd KeyKeep
 
 # 2. Install dependencies
 cd backend
@@ -144,7 +144,7 @@ Open index.html with Live Server or directly in browser
 ## 🧪 Sample `.env` File
 
 ```env
-MONGO_URI=mongodb://localhost:27017/crypto-vault
+MONGO_URI=mongodb://localhost:27017/keykeep
 JWT_SECRET=yourVerySecretKey
 PORT=5000
 ```
