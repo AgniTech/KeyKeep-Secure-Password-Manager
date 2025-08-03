@@ -350,24 +350,41 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch('/api/vault/save', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    site: title,
-                    secret: password
-                })
-            });
+const userPassword = localStorage.getItem('userPassword');
+const salt = localStorage.getItem('encryptionSalt');
+
+if (!userPassword || !salt) {
+    showToast('Missing encryption key.', 'error');
+    return;
+}
+
+const key = await deriveKey(userPassword, salt);
+const encrypted = await encryptData(password, key);
+
+const response = await fetch('/api/vault/save', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    site: title,
+    encryptedSecret: encrypted.ciphertext,
+    nonce: encrypted.nonce
+  })
+});
 
             if (!response.ok) {
                 throw new Error("Failed to save to vault");
             }
 
             showToast('Credential saved to vault!', 'success');
-            credentials.push(newCredential);
+            credentials.push({
+  ...newCredential,
+  password: encrypted.ciphertext,
+  nonce: encrypted.nonce
+});
+
             applyFilters();
             closeAddEditModal();
         } catch (err) {
