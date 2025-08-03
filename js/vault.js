@@ -158,50 +158,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Event Listeners (using delegation for dynamic content) ---
-    credentialsList.addEventListener('click', async (e) => {
-
+    credentialsList.addEventListener('click', (e) => {
         const target = e.target;
         const card = target.closest('.credential-card');
         const id = card ? parseInt(card.dataset.id) : null;
 
         // Show/Hide Password
-       if (target.classList.contains('show-hide-password') || target.closest('.show-hide-password')) {
-    const button = target.closest('.show-hide-password');
-    const passwordSpan = card.querySelector('[data-password]');
-    const iconImg = button.querySelector('img');
-    const cred = credentials.find(c => c.id === id);
-    const isMasked = passwordSpan.textContent.includes('*');
+        if (target.classList.contains('show-hide-password') || target.closest('.show-hide-password')) {
+            const button = target.closest('.show-hide-password');
+            const passwordSpan = card.querySelector('[data-password]');
+            const iconImg = button.querySelector('img');
+            const cred = credentials.find(c => c.id === id);
+            const isMasked = passwordSpan.textContent.includes('*');
 
-    if (isMasked) {
-        const userPassword = localStorage.getItem('userPassword');
-        const salt = localStorage.getItem('encryptionSalt');
+            if (isMasked) {
+                const userPassword = localStorage.getItem('userPassword');
+                const salt = localStorage.getItem('encryptionSalt');
 
-        if (!userPassword || !salt) {
-            showToast('Missing encryption key.', 'error');
-            return;
+                if (!userPassword || !salt) {
+                    showToast('Missing encryption key.', 'error');
+                    return;
+                }
+
+                const key = deriveKey(userPassword, salt);
+                const decrypted = decryptPassword(cred.password, cred.nonce, key);
+
+                passwordSpan.textContent = decrypted;
+                iconImg.src = 'images/see.png';
+                iconImg.alt = 'Hide';
+                button.setAttribute('aria-label', 'Hide password');
+            } else {
+                passwordSpan.textContent = '********';
+                iconImg.src = 'images/unsee.png';
+                iconImg.alt = 'Show';
+                button.setAttribute('aria-label', 'Show password');
+            }
         }
-
-        try {
-            const key = await deriveKey(userPassword, salt);
-            const decrypted = await decryptPassword(cred.password, cred.nonce, key);
-
-            passwordSpan.textContent = decrypted;
-            iconImg.src = 'images/see.png';
-            iconImg.alt = 'Hide';
-            button.setAttribute('aria-label', 'Hide password');
-        } catch (err) {
-            console.error("Decryption failed:", err);
-            showToast('Failed to decrypt password', 'error');
-        }
-
-    } else {
-        passwordSpan.textContent = '********';
-        iconImg.src = 'images/unsee.png';
-        iconImg.alt = 'Show';
-        button.setAttribute('aria-label', 'Show password');
-    }
-}
-
 
 
         // Copy Buttons
