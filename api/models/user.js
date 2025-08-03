@@ -5,28 +5,23 @@ import bcrypt from 'bcryptjs';
 
 
 const UserSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  masterPassword: {
-    type: String,
-    required: true,
-    minlength: 8
-  },
-  salt: {
-    type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true
+    },
+    masterPassword: {
+        type: String,
+        required: true,
+        minlength: 8 // Enforce minimum length
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 });
-
 
 // Hash master password before saving (pre-save hook)
 UserSchema.pre('save', async function(next) {
