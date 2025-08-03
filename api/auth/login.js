@@ -45,7 +45,11 @@ export default async function handler(req, res) {
       { expiresIn: '2h' }
     );
 
-    return res.status(200).json({ token });
+   return res.status(200).json({
+  token,
+  salt: user.salt  // ✅ Send the stored salt to frontend
+});
+
 
   } catch (e) {
     console.error('Login error:', e);
