@@ -138,7 +138,8 @@ const renderCredentials = (filteredCredentials = credentials) => {
                 <p class="password-masked">
                     <strong>Password:</strong>
                     <span data-password="${cred.password}">********</span>
-                    <button class="button icon-button show-hide-password" aria-label="Show password">👁️</button>
+                    <button class="button icon-button show-hide-password" aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
+
                 </p>
             </div>
             <div class="credential-actions">
@@ -165,7 +166,7 @@ const renderCredentials = (filteredCredentials = credentials) => {
             const actualPassword = passwordSpan.dataset.password;
             const isMasked = passwordSpan.textContent.includes('*');
             passwordSpan.textContent = isMasked ? actualPassword : '********';
-            target.textContent = isMasked ? 'Hide' : '👁️';
+            target.innerHTML = isMasked ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
             target.setAttribute('aria-label', isMasked ? 'Hide password' : 'Show password');
         }
 
