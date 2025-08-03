@@ -202,6 +202,13 @@
     font-weight: 500;
 }
 
+.password-toggle-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+
 .password-masked {
     display: flex;
     align-items: center;

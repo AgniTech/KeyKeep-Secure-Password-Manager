@@ -138,7 +138,10 @@ const renderCredentials = (filteredCredentials = credentials) => {
                 <p class="password-masked">
                     <strong>Password:</strong>
                     <span data-password="${cred.password}">********</span>
-                    <button class="button icon-button show-hide-password" aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
+                    <button class="button icon-button show-hide-password" aria-label="Show password">
+    <img src="images/unsee.png" alt="Show" class="password-toggle-icon" width="20" height="20">
+</button>
+
 
                 </p>
             </div>
@@ -161,14 +164,37 @@ const renderCredentials = (filteredCredentials = credentials) => {
         const id = card ? parseInt(card.dataset.id) : null;
         
         // Show/Hide Password
-        if (target.classList.contains('show-hide-password')) {
-            const passwordSpan = card.querySelector('[data-password]');
-            const actualPassword = passwordSpan.dataset.password;
-            const isMasked = passwordSpan.textContent.includes('*');
-            passwordSpan.textContent = isMasked ? actualPassword : '********';
-            target.innerHTML = isMasked ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
-            target.setAttribute('aria-label', isMasked ? 'Hide password' : 'Show password');
+       if (target.classList.contains('show-hide-password') || target.closest('.show-hide-password')) {
+    const button = target.closest('.show-hide-password');
+    const passwordSpan = card.querySelector('[data-password]');
+    const iconImg = button.querySelector('img');
+    const cred = credentials.find(c => c.id === id);
+    const isMasked = passwordSpan.textContent.includes('*');
+
+    if (isMasked) {
+        const userPassword = localStorage.getItem('userPassword');
+        const salt = localStorage.getItem('encryptionSalt');
+
+        if (!userPassword || !salt) {
+            showToast('Missing encryption key.', 'error');
+            return;
         }
+
+        const key = deriveKey(userPassword, salt);
+        const decrypted = decryptPassword(cred.password, cred.nonce, key);
+
+        passwordSpan.textContent = decrypted;
+        iconImg.src = 'images/see.png';
+        iconImg.alt = 'Hide';
+        button.setAttribute('aria-label', 'Hide password');
+    } else {
+        passwordSpan.textContent = '********';
+        iconImg.src = 'images/unsee.png';
+        iconImg.alt = 'Show';
+        button.setAttribute('aria-label', 'Show password');
+    }
+}
+
 
         // Copy Buttons
       // Show/Hide Password - With Decryption
