@@ -325,10 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'auto';
         document.removeEventListener('keydown', handleEscKey);
     };
-    console.log('🔐 LOCALSTORAGE CHECK', {
-  userPassword: localStorage.getItem('userPassword'),
-  encryptionSalt: localStorage.getItem('encryptionSalt')
-});
 
     const handleCredentialSubmit = async (e) => {
         e.preventDefault();
@@ -361,10 +357,6 @@ if (!userPassword || !salt) {
     showToast('Missing encryption key.', 'error');
     return;
 }
-console.log('🔐 LOCALSTORAGE CHECK', {
-  userPassword: localStorage.getItem('userPassword'),
-  encryptionSalt: localStorage.getItem('encryptionSalt')
-});
 
 const key = await deriveKey(userPassword, salt);
 const encrypted = await encryptData(password, key);
