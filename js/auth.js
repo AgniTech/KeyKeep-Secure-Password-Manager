@@ -51,20 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
 
-               if (response.ok) {
-    console.log('Login successful:', data);
-
-    if (data.token && data.salt) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userPassword', masterPassword); // 🟢 store what user typed
-        localStorage.setItem('encryptionSalt', data.salt);    // 🟢 store salt from backend
-
-        window.location.href = 'vault.html';
-    } else {
-        errorContainer.textContent = 'Login failed: missing token or salt.';
-    }
-}
- else {
+                if (response.ok) { // Check if the response status is 2xx
+                    console.log('Login successful:', data);
+                    // Store the JWT token
+                    localStorage.setItem('token', data.token);
+                    // Redirect to the vault page
+                    window.location.href = 'vault.html';
+                } else {
                     // Handle errors from the backend (e.g., "Invalid Credentials")
                     console.error('Login failed:', data.msg);
                     errorContainer.textContent = data.msg || 'Login failed. Please try again.';
