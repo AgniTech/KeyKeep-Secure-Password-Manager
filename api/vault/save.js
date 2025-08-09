@@ -1,7 +1,7 @@
 // File: /api/vault/save.js
 import { connectDB } from '../util/db.js';
 import Vault from '../models/Vault.js';
-import { encryptData } from '../util/encryption.js';
+import { storeData } from '../util/encryption.js';
 import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
@@ -23,14 +23,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const encrypted = await encryptData(secret); // ✅ FIXED: await the promise
-
+    const stored = storeData(secret);
 
     const vaultEntry = new Vault({
       userId,
       site,
-      encryptedSecret: encrypted.ciphertext,
-      nonce: encrypted.nonce
+      secret: stored.data
     });
 
     await vaultEntry.save();

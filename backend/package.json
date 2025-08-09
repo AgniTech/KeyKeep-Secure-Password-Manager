@@ -9,7 +9,5 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "dependencies": {
-    "libsodium-wrappers": "^0.7.15"
-  }
+  "dependencies": {}
 }
