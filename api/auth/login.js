@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     const user = await User.findOne({ email }).exec(); // ✅ FIXED: Moved up + .exec()
 
     if (!user) {
-      return res.status(401).json({ error: 'Email or password is incorrect. Please try again.' });
+      return res.status(401).json({ msg: 'Email or password is incorrect. Please try again.' });
     }
 
     console.log("Login attempt for:", email);                           
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
     console.log("Password match:", isMatch);
 
     if (!isMatch) {
-      return res.status(401).json({ error: 'Email or password is incorrect. Please try again.' });
+      return res.status(401).json({ msg: 'Email or password is incorrect. Please try again.' });
     }
 
     const token = jwt.sign(

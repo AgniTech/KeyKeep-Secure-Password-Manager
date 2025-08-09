@@ -32,16 +32,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await res.json();
+            console.log('Fetched vault data:', data.length, 'entries');
+            
             // Map data into frontend-friendly format
             credentials = data.map((entry, index) => ({
-                id: index,
-                title: entry.site,
-                url: '',
-                username: '',
-                password: entry.secret,
-                category: 'other',
+                id: entry.id || index,
+                title: entry.title || entry.site || 'Untitled',
+                url: entry.url || '',
+                username: entry.username || '',
+                password: entry.password || entry.secret || '',
+                category: entry.category || 'other',
                 tags: [],
-                notes: ''
+                notes: entry.notes || '',
+                createdAt: entry.createdAt,
+                updatedAt: entry.updatedAt
             }));
 
 
@@ -277,16 +281,28 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
+            // Prepare complete credential data
+            const credentialData = {
+                title: title,
+                url: url,
+                username: username,
+                password: password,
+                category: category,
+                notes: '',
+                // Legacy fields for backward compatibility
+                site: title,
+                secret: password
+            };
+
+            console.log('Sending credential data:', { ...credentialData, password: '[HIDDEN]', secret: '[HIDDEN]' });
+
             const response = await fetch('/api/vault/save', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    site: title,
-                    secret: password
-                })
+                body: JSON.stringify(credentialData)
             });
 
             if (!response.ok) {

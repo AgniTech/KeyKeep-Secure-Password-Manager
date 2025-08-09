@@ -1,4 +1,4 @@
-// File: backend/util/db.js
+// File: api/util/db.js
 
 import mongoose from 'mongoose';
 
@@ -13,9 +13,9 @@ export async function connectDB() {
   }
 
   if (!cached.promise) {
-    const MONGO_URI = process.env.MONGODB_URI;
+    const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
     if (!MONGO_URI) {
-      throw new Error('MONGODB_URI is not defined in environment variables');
+      throw new Error('MONGODB_URI or MONGO_URI is not defined in environment variables');
     }
 
     // No need for useNewUrlParser or useUnifiedTopology in mongoose v6+
