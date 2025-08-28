@@ -181,7 +181,7 @@ This project is licensed under the MIT License.
 
 ## 📬 Contact
 
-**Maintainer:** [Your Name]  
+**Maintainer:** [Dinesh Vishwakarma]  
 GitHub: [github.com/DInesh-Vishwakarma174](https://github.com/Dinesh-VIshwakarma174)  
 Email: yogeshvishwakarma074@gmail.com
 
