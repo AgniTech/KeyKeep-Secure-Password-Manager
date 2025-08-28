@@ -182,7 +182,7 @@ This project is licensed under the MIT License.
 ## 📬 Contact
 
 **Maintainer:** [Your Name]  
-GitHub: [github.com/yourusername](https://github.com/yourusername)  
-Email: your@email.com
+GitHub: [github.com/DInesh-Vishwakarma174](https://github.com/Dinesh-VIshwakarma174)  
+Email: yogeshvishwakarma074@gmail.com
 
 ---
