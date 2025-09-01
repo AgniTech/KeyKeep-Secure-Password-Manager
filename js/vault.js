@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Event Listeners (using delegation for dynamic content) ---
-    credentialsList.addEventListener('click', (e) => {
+    credentialsList.addEventListener('click', async (e) => {
         const target = e.target;
         const card = target.closest('.credential-card');
         const id = card ? card.dataset.id : null;
@@ -173,10 +173,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Delete Button
         if (target.classList.contains('delete-button')) {
-            if (confirm('Are you sure you want to delete this credential?')) {
-                credentials = credentials.filter(cred => cred.id !== id);
-                applyFilters();
-                showToast('Credential deleted.', 'info');
+            if (confirm('Are you sure you want to permanently delete this credential?')) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/vault/delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ id: id })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to delete credential');
+                    }
+
+                    showToast('Credential deleted successfully!', 'success');
+                    await fetchVault(); // Re-fetch data from server to update UI
+                } catch (err) {
+                    console.error('Delete error:', err);
+                    showToast(`Error: ${err.message}`, 'error');
+                }
             }
         }
 
