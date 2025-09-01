@@ -59,4 +59,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Make window.setupPasswordToggles globally available for modals
     window.setupPasswordToggles = setupPasswordToggles;
+
+    // --- Idle Lock Functionality ---
+    const setupIdleTimer = () => {
+        // Only run on pages that are not the lock or login pages
+        const currentPage = window.location.pathname;
+        if (currentPage.endsWith('/lock.html') || currentPage.endsWith('/index.html') || currentPage.endsWith('/register.html')) {
+            return;
+        }
+
+        let idleTimeout;
+        const lockTimeoutMinutes = parseInt(localStorage.getItem('lockTimeout') || '5', 10);
+        const lockTimeoutMs = lockTimeoutMinutes * 60 * 1000;
+
+        if (lockTimeoutMs <= 0) return;
+
+        const lockVault = () => { window.location.href = 'lock.html'; };
+
+        const resetIdleTimer = () => {
+            clearTimeout(idleTimeout);
+            idleTimeout = setTimeout(lockVault, lockTimeoutMs);
+        };
+
+        const activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+        activityEvents.forEach(event => window.addEventListener(event, resetIdleTimer, true));
+
+        resetIdleTimer(); // Start the timer
+    };
+
+    setupIdleTimer();
 });

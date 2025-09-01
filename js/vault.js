@@ -163,7 +163,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // Copy Buttons
+        if (target.classList.contains('copy-button')) {
+            const type = target.dataset.type;
+            const cred = credentials.find(c => c.id === id);
+            if (!cred) return;
 
+            const textToCopy = type === 'password' ? cred.password : cred.username;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} copied!`, 'success');
+
+                const clipboardTimeout = parseInt(localStorage.getItem('clipboardTimeout') || '0', 10);
+                if (clipboardTimeout > 0) {
+                    setTimeout(() => {
+                        navigator.clipboard.writeText(' ').catch(err => console.error('Could not clear clipboard:', err));
+                    }, clipboardTimeout * 1000);
+                }
+            }).catch(err => {
+                showToast('Failed to copy.', 'error');
+            });
+        }
 
         // Edit Button
         if (target.classList.contains('edit-button')) {

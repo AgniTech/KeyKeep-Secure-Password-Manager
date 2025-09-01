@@ -7,11 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load saved settings (if any - using localStorage for example)
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-        if (themeToggle) {
-            themeToggle.checked = false;
-        }
+    if (themeToggle) {
+        themeToggle.checked = savedTheme !== 'light';
     }
 
     const savedClipboardTimeout = localStorage.getItem('clipboardTimeout');
@@ -29,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggle.addEventListener('change', () => {
             const theme = themeToggle.checked ? 'dark' : 'light';
             localStorage.setItem('theme', theme);
-            document.body.classList.toggle('light-theme', theme === 'light');
+            document.documentElement.classList.toggle('light-theme', theme === 'light');
         });
     }
 
@@ -94,4 +91,3 @@ function showToast(message) {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2500);
 }
-

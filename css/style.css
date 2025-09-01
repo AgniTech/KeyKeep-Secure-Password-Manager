@@ -24,6 +24,20 @@
     --transition-ease: ease-in-out;
 }
 
+html.light-theme {
+    --bg-color: #F5F7FA;
+    --primary-color: #5A55E0;
+    --text-color: #1F2937;
+    --secondary-text-color: #6B7280;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --input-bg: #FFFFFF;
+
+    --glass-bg-base: rgba(255, 255, 255, 0.7);
+    --glass-border-base: rgba(0, 0, 0, 0.1);
+    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --glass-blur: 10px;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background: var(--bg-color) url('/images/background.jpg') no-repeat center center fixed;
