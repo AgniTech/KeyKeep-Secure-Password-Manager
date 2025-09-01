@@ -1,7 +1,6 @@
 // File: /api/vault/save.js
 import { connectDB } from '../util/db.js';
 import Vault from '../models/Vault.js';
-import { encryptVaultData } from '../util/encryption.js';
 import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
@@ -32,6 +31,7 @@ export default async function handler(req, res) {
 
     // Validate request data - support both old and new format
     const { 
+      id,
       site, 
       secret, 
       title, 
@@ -52,41 +52,49 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('Saving vault entry for:', credentialTitle);
+    console.log(`${id ? 'Updating' : 'Saving'} vault entry for:`, credentialTitle);
 
-    // Prepare data for encryption
-    const vaultData = {
+    // Prepare data for saving/updating
+    const dataToSave = {
       title: credentialTitle,
       url: url || '',
       username: username || '',
       password: credentialPassword,
       category: category || 'other',
-      notes: notes || ''
+      notes: notes || '',
+      // Also include legacy fields for consistency
+      site: credentialTitle,
+      secret: credentialPassword
     };
 
-    // Encrypt sensitive data
-    const encryptedData = encryptVaultData(vaultData);
+    let savedEntry;
 
-    // Create new vault entry
-    const vaultEntry = new Vault({
-      userId,
-      title: encryptedData.title,
-      url: encryptedData.url,
-      username: encryptedData.username,
-      password: encryptedData.password,
-      category: vaultData.category, // Category doesn't need encryption
-      notes: encryptedData.notes,
-      // Legacy fields for backward compatibility
-      site: credentialTitle,
-      secret: encryptedData.password
-    });
+    if (id) {
+      // Update existing entry
+      dataToSave.updatedAt = new Date();
 
-    // Save to database
-    const savedEntry = await vaultEntry.save();
-    console.log('Vault entry saved successfully:', savedEntry._id);
+      savedEntry = await Vault.findOneAndUpdate(
+        { _id: id, userId }, // Query
+        { $set: dataToSave }, // Update
+        { new: true, runValidators: true } // Options
+      );
+
+      if (!savedEntry) {
+        return res.status(404).json({ error: 'Credential not found or you do not have permission to edit it.' });
+      }
+      console.log('Vault entry updated successfully:', savedEntry._id.toString());
+    } else {
+      // Create new vault entry
+      const vaultEntry = new Vault({
+        userId,
+        ...dataToSave
+      });
+      savedEntry = await vaultEntry.save();
+      console.log('Vault entry saved successfully:', savedEntry._id);
+    }
 
     res.status(201).json({ 
-      message: 'Vault saved successfully',
+      message: `Vault entry ${id ? 'updated' : 'saved'} successfully`,
       id: savedEntry._id
     });
   } catch (e) {

@@ -2,7 +2,6 @@
 
 import { connectDB } from '../util/db.js';
 import Vault from '../models/Vault.js';
-import { decryptVaultData } from '../util/encryption.js';
 import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
@@ -38,27 +37,19 @@ export default async function handler(req, res) {
     // Decrypt and format the data
     const decryptedEntries = vaultEntries.map(entry => {
       try {
-        // Decrypt sensitive fields
-        const decryptedData = decryptVaultData({
-          title: entry.title,
-          username: entry.username,
-          password: entry.password,
-          notes: entry.notes
-        });
-
         return {
           id: entry._id,
-          title: decryptedData.title || entry.site, // Fallback to legacy field
+          title: entry.title || entry.site, // Fallback to legacy field
           url: entry.url || '',
-          username: decryptedData.username || '',
-          password: decryptedData.password || entry.secret, // Fallback to legacy field
+          username: entry.username || '',
+          password: entry.password || entry.secret, // Fallback to legacy field
           category: entry.category || 'other',
-          notes: decryptedData.notes || '',
+          notes: entry.notes || '',
           createdAt: entry.createdAt,
           updatedAt: entry.updatedAt,
           // Legacy fields for backward compatibility
-          site: entry.site || decryptedData.title,
-          secret: decryptedData.password || entry.secret
+          site: entry.site || entry.title,
+          secret: entry.password || entry.secret
         };
       } catch (decryptError) {
         console.error('Decryption error for entry:', entry._id, decryptError);

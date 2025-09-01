@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     credentialsList.addEventListener('click', (e) => {
         const target = e.target;
         const card = target.closest('.credential-card');
-        const id = card ? parseInt(card.dataset.id) : null;
+        const id = card ? card.dataset.id : null;
 
         // Show/Hide Password
         if (target.classList.contains('show-hide-password') || target.closest('.show-hide-password')) {
@@ -260,62 +260,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleCredentialSubmit = async (e) => {
         e.preventDefault();
 
-        const id = document.getElementById('credentialId').value;
-        const title = document.getElementById('websiteName').value;
-        const url = document.getElementById('url').value;
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const category = document.getElementById('category').value;
-
+        const credentialId = document.getElementById('credentialId').value;
+        const isEdit = !!credentialId;
         const token = localStorage.getItem('token');
 
-        const newCredential = {
-            id: id ? parseInt(id) : Date.now(),
-            title,
-            url,
-            username,
-            password,
-            category,
-            tags: [],
-            notes: ''
+        const credentialData = {
+            title: document.getElementById('websiteName').value,
+            url: document.getElementById('url').value,
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+            category: document.getElementById('category').value,
+            notes: '', // Notes field is not in the modal, but schema supports it
+            // Legacy fields for backward compatibility
+            site: document.getElementById('websiteName').value,
+            secret: document.getElementById('password').value
         };
 
-        try {
-            // Prepare complete credential data
-            const credentialData = {
-                title: title,
-                url: url,
-                username: username,
-                password: password,
-                category: category,
-                notes: '',
-                // Legacy fields for backward compatibility
-                site: title,
-                secret: password
-            };
+        if (isEdit) {
+            credentialData.id = credentialId;
+        }
 
+        try {
             console.log('Sending credential data:', { ...credentialData, password: '[HIDDEN]', secret: '[HIDDEN]' });
 
             const response = await fetch('/api/vault/save', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(credentialData)
             });
 
             if (!response.ok) {
-                throw new Error("Failed to save to vault");
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save to vault');
             }
 
-            showToast('Credential saved to vault!', 'success');
-            credentials.push(newCredential);
-            applyFilters();
+            showToast(`Credential ${isEdit ? 'updated' : 'saved'} successfully!`, 'success');
             closeAddEditModal();
+            await fetchVault(); // Re-fetch data from server to ensure UI is in sync
+
         } catch (err) {
             console.error("Save error:", err);
-            showToast('Error saving credential.', 'error');
+            showToast(`Error: ${err.message}`, 'error');
         }
 
     };
