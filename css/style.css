@@ -265,6 +265,10 @@ select:focus {
     padding: 5px;
     outline: none;
     transition: color var(--transition-speed);
+    /* Center the image inside the button */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .password-input .toggle-password:hover {
     color: var(--accent-color);

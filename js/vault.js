@@ -214,8 +214,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <label for="password">Password:</label>
                     <div class="password-input">
                         <input type="password" id="password" value="${isEdit ? credential.password : ''}" required>
-                        <button type="button" class="generate-password-modal" aria-label="Generate password">✨</button>
-                        <button type="button" class="toggle-password" aria-label="Show password">👁️</button>
+                        <button type="button" class="generate-password-modal" aria-label="Generate password">✨</button>                        
+                        <button type="button" class="toggle-password" aria-label="Show password">
+                            <img src="images/unsee.png" alt="Show" class="password-toggle-icon" width="20" height="20">
+                        </button>
                     </div>
                 </div>
                 <div class="input-group">

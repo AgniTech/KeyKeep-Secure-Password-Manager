@@ -33,13 +33,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Generic password visibility toggle for any page
     const setupPasswordToggles = (container) => {
         const togglePasswordButtons = container.querySelectorAll('.toggle-password');
-        togglePasswordButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const passwordInput = this.parentElement.querySelector('input');
+        togglePasswordButtons.forEach(button => {            
+            button.addEventListener('click', function () {                
+                const passwordInput = this.closest('.password-input').querySelector('input');
+                const iconImg = this.querySelector('img');
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
-                this.textContent = type === 'password' ? '👁️' : ' Hide';
-                this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+
+                if (iconImg) {
+                    // Image-based toggle
+                    iconImg.src = type === 'password' ? 'images/unsee.png' : 'images/see.png';
+                    iconImg.alt = type === 'password' ? 'Show' : 'Hide';
+                    this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+                } else {
+                    // Fallback to text-based toggle for other pages
+                    this.textContent = type === 'password' ? '👁️' : ' Hide';
+                    this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+                }
             });
         });
     };
