@@ -173,30 +173,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Delete Button
         if (target.classList.contains('delete-button')) {
-            if (confirm('Are you sure you want to permanently delete this credential?')) {
-                try {
-                    const token = localStorage.getItem('token');
-                    const response = await fetch('/api/vault/delete', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ id: id })
-                    });
+            const deleteCredential = async () => {
+                 try {
+                     const token = localStorage.getItem('token');
+                     const response = await fetch('/api/vault/delete', {
+                         method: 'POST',
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'Authorization': `Bearer ${token}`
+                         },
+                         body: JSON.stringify({ id: id })
+                     });
 
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Failed to delete credential');
-                    }
+                     if (!response.ok) {
+                         const errorData = await response.json();
+                         throw new Error(errorData.error || 'Failed to delete credential');
+                     }
 
-                    showToast('Credential deleted successfully!', 'success');
-                    await fetchVault(); // Re-fetch data from server to update UI
-                } catch (err) {
-                    console.error('Delete error:', err);
-                    showToast(`Error: ${err.message}`, 'error');
-                }
-            }
+                     showToast('Credential deleted successfully!', 'success');
+                     await fetchVault(); // Re-fetch data from server to update UI
+                 } catch (err) {
+                     console.error('Delete error:', err);
+                     showToast(`Error: ${err.message}`, 'error');
+                 }
+            };
+
+            openConfirmModal(
+                'Confirm Deletion',
+                'Are you sure you want to permanently delete this credential? This action cannot be undone.',
+                deleteCredential
+            );
         }
 
         // Add First Credential Button (in empty state)
@@ -268,6 +274,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Accessibility: Focus trapping
+        trapFocus(addEditModal);
+    };
+
+    const openConfirmModal = (title, message, onConfirm) => {
+        addEditModal.innerHTML = `
+            <h2>${title}</h2>
+            <p>${message}</p>
+            <div class="modal-actions">
+                <button type="button" class="button secondary close-modal">Cancel</button>
+                <button type="button" class="button danger" id="confirmActionBtn">Confirm</button>
+            </div>
+        `;
+
+        addEditModal.classList.add('show');
+        modalOverlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+
+        addEditModal.querySelector('.close-modal').addEventListener('click', closeAddEditModal);
+        const confirmBtn = addEditModal.querySelector('#confirmActionBtn');
+
+        const confirmHandler = () => {
+            closeAddEditModal();
+            onConfirm();
+        };
+
+        confirmBtn.addEventListener('click', confirmHandler, { once: true });
         trapFocus(addEditModal);
     };
 

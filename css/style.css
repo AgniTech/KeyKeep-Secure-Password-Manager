@@ -184,6 +184,19 @@ select:focus {
     transform: translateY(-2px);
 }
 
+.button.danger {
+    background-color: var(--error-color);
+    color: var(--text-color);
+    border: 1px solid transparent;
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
+}
+
+.button.danger:hover {
+    background-color: #c9302c; /* A darker, more opaque red */
+    box-shadow: 0 0 25px var(--error-color);
+    transform: translateY(-2px);
+}
+
 .button.icon-button {
     padding: 10px;
     font-size: 1.3em;
