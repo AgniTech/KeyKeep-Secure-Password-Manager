@@ -51,7 +51,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = generatedPasswordInput.value;
             if (password) {
                 navigator.clipboard.writeText(password).then(() => {
-                    showToast('Password copied to clipboard!');
+                    showToast('Password copied to clipboard!', 'success');
+
+                    // Add auto-clear logic here as well for consistency
+                    const clipboardTimeout = parseInt(localStorage.getItem('clipboardTimeout') || '15', 10);
+                    if (clipboardTimeout > 0) {
+                        setTimeout(() => {
+                            navigator.clipboard.writeText('').catch(() => {
+                                console.warn('Could not clear clipboard immediately (tab likely not focused). Will try again on focus.');
+                                const clearOnFocus = () => {
+                                    if (document.visibilityState === 'visible') {
+                                        navigator.clipboard.writeText('').catch(() => {});
+                                        document.removeEventListener('visibilitychange', clearOnFocus);
+                                    }
+                                };
+                                document.addEventListener('visibilitychange', clearOnFocus);
+                            });
+                        }, clipboardTimeout * 1000);
+                    }
                 }).catch(err => {
                     console.error('Failed to copy password: ', err);
                     showToast('Failed to copy password.');
