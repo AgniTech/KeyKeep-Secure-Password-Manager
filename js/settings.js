@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggle');
     const clipboardTimeoutSelect = document.getElementById('clipboardTimeout');
     const lockTimeoutInput = document.getElementById('lockTimeout');
+    const exportButton = document.getElementById('exportVaultBtn');
+    const importButton = document.getElementById('importVaultBtn');
+    const logoutButton = document.getElementById('logoutBtn');
 
     // Load saved settings (if any - using localStorage for example)
     const savedTheme = localStorage.getItem('theme');
@@ -18,9 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
         clipboardTimeoutSelect.value = savedValue;
     }
 
-    const savedLockTimeout = localStorage.getItem('lockTimeout');
-    if (lockTimeoutInput && savedLockTimeout) {
-        lockTimeoutInput.value = savedLockTimeout;
+    if (lockTimeoutInput) {
+        let savedLockValue = localStorage.getItem('lockTimeout');
+        if (!savedLockValue) {
+            savedLockValue = lockTimeoutInput.value; // Get default from HTML
+            localStorage.setItem('lockTimeout', savedLockValue);
+        }
+        lockTimeoutInput.value = savedLockValue;
     }
 
     // Event listeners to save settings
@@ -37,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const timeout = clipboardTimeoutSelect.value;
             localStorage.setItem('clipboardTimeout', timeout);
             window.showToast(`Clipboard auto-clear set to ${timeout} seconds.`, 'info');
-            // You might want to update the global clipboard timeout setting here if implemented
         });
     }
 
@@ -46,25 +52,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const timeout = lockTimeoutInput.value;
             localStorage.setItem('lockTimeout', timeout);
             window.showToast(`Idle lock timeout set to ${timeout} minutes.`, 'info');
-            // You would implement the actual idle lock timer logic elsewhere
         });
     }
 
-    // Export/Import vault buttons (using text matching)
-const buttons = document.querySelectorAll('.button.secondary');
-buttons.forEach(button => {
-    if (button.textContent.includes('Export Vault')) {
-        button.addEventListener('click', () => {
-            window.showToast('Export functionality coming soon!', 'info');
-        });
-    } else if (button.textContent.includes('Import Vault')) {
-        button.addEventListener('click', () => {
-            window.showToast('Import functionality coming soon!', 'info');
-        });
+    // --- Button Actions ---
+    if (exportButton) {
+        exportButton.addEventListener('click', () => window.showToast('Export functionality coming soon!', 'info'));
     }
-});
+    if (importButton) {
+        importButton.addEventListener('click', () => window.showToast('Import functionality coming soon!', 'info'));
+    }
 
-        const logoutButton = document.getElementById('logoutBtn');
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('token');
