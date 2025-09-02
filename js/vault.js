@@ -177,12 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (clipboardTimeout > 0) {
                     setTimeout(() => {
                         // Attempt to clear the clipboard. This may fail if the tab is not active.
-                        navigator.clipboard.writeText('').catch(() => {
+                        navigator.clipboard.writeText(' ').catch(() => {
                             console.warn('Could not clear clipboard immediately (tab likely not focused). Will try again on focus.');
                             // If it fails, set up a one-time listener to clear it when the user returns.
                             const clearOnFocus = () => {
                                 if (document.visibilityState === 'visible') {
-                                    navigator.clipboard.writeText('').catch(() => {}); // Attempt to clear, ignore error
+                                    navigator.clipboard.writeText(' ').catch(() => {}); // Attempt to clear, ignore error
                                     document.removeEventListener('visibilitychange', clearOnFocus);
                                 }
                             };
