@@ -60,6 +60,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Make window.setupPasswordToggles globally available for modals
     window.setupPasswordToggles = setupPasswordToggles;
 
+    // --- Clipboard Auto-Clear Utility ---
+    window.setupClipboardAutoClear = () => {
+        const timeoutSeconds = parseInt(localStorage.getItem('clipboardTimeout') || '15', 10);
+        if (timeoutSeconds <= 0) return;
+
+        const clearClipboard = () => navigator.clipboard.writeText(' ').catch(() => {});
+
+        const attemptClear = () => {
+            // Try to clear. If it fails, set up listeners for when the user returns.
+            navigator.clipboard.writeText(' ').catch(() => {
+                console.warn('Clipboard clear failed (tab likely inactive). Setting up fallback listeners.');
+
+                const fallbackClear = () => {
+                    // When the tab is visible again, try to clear the clipboard
+                    if (document.visibilityState === 'visible') {
+                        clearClipboard();
+                        // Clean up listeners to prevent them from firing multiple times
+                        window.removeEventListener('focus', fallbackClear);
+                        document.removeEventListener('visibilitychange', fallbackClear);
+                    }
+                };
+
+                window.addEventListener('focus', fallbackClear);
+                document.addEventListener('visibilitychange', fallbackClear);
+            });
+        };
+
+        setTimeout(attemptClear, timeoutSeconds * 1000);
+    };
+
     // --- Idle Lock Functionality ---
     const setupIdleTimer = () => {
         // Only run on pages that are not the lock or login pages

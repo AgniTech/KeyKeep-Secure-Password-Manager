@@ -172,24 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             navigator.clipboard.writeText(textToCopy).then(() => {
                 showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} copied!`, 'success');
-
-                const clipboardTimeout = parseInt(localStorage.getItem('clipboardTimeout') || '15', 10);
-                if (clipboardTimeout > 0) {
-                    setTimeout(() => {
-                        // Attempt to clear the clipboard. This may fail if the tab is not active.
-                        navigator.clipboard.writeText(' ').catch(() => {
-                            console.warn('Could not clear clipboard immediately (tab likely not focused). Will try again on focus.');
-                            // If it fails, set up a one-time listener to clear it when the user returns.
-                            const clearOnFocus = () => {
-                                if (document.visibilityState === 'visible') {
-                                    navigator.clipboard.writeText(' ').catch(() => {}); // Attempt to clear, ignore error
-                                    document.removeEventListener('visibilitychange', clearOnFocus);
-                                }
-                            };
-                            document.addEventListener('visibilitychange', clearOnFocus);
-                        });
-                    }, clipboardTimeout * 1000);
-                }
+                window.setupClipboardAutoClear();
             }).catch(err => {
                 showToast('Failed to copy.', 'error');
             });

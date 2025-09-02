@@ -9,15 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme');
     if (themeToggle) themeToggle.checked = savedTheme !== 'light';
 
-    let savedClipboardTimeout = localStorage.getItem('clipboardTimeout');
     if (clipboardTimeoutSelect) {
-        if (savedClipboardTimeout) {
-            clipboardTimeoutSelect.value = savedClipboardTimeout;
-        } else {
-            // If no setting is saved, save the default value from the dropdown
-            savedClipboardTimeout = clipboardTimeoutSelect.value;
-            localStorage.setItem('clipboardTimeout', savedClipboardTimeout);
+        let savedValue = localStorage.getItem('clipboardTimeout');
+        if (!savedValue) {
+            savedValue = clipboardTimeoutSelect.value; // Get default from HTML
+            localStorage.setItem('clipboardTimeout', savedValue);
         }
+        clipboardTimeoutSelect.value = savedValue;
     }
 
     const savedLockTimeout = localStorage.getItem('lockTimeout');
