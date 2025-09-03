@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="49021fc7-9ab5-4735-8f25-667179101718" name="Changes" comment="Fixed clipboard timeout" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Dinesh-Vishwakarma&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/AgniTech/KeyKeep-Secure-Password-Manager&quot;,
+    &quot;accountId&quot;: &quot;400c5c86-03f4-4e52-900d-dfaa10d89bb7&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="326LvHqGbrwfhCwxdNP13ZqsQha" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.index.html.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "AbhrantChanges",
+    "last_opened_file_path": "D:/Project/KeyKeep",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2025.1.4.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-WS-251.27812.50" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="49021fc7-9ab5-4735-8f25-667179101718" name="Changes" comment="" />
+      <created>1756736304051</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1756736304051</updated>
+      <workItem from="1756736306162" duration="146000" />
+      <workItem from="1756736466452" duration="7259000" />
+      <workItem from="1756781356379" duration="388000" />
+      <workItem from="1756798214354" duration="2713000" />
+      <workItem from="1756811396705" duration="448000" />
+      <workItem from="1756817128243" duration="1890000" />
+      <workItem from="1756887707013" duration="863000" />
+    </task>
+    <task id="LOCAL-00001" summary="Well lets test it">
+      <option name="closed" value="true" />
+      <created>1756737430212</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1756737430212</updated>
+    </task>
+    <task id="LOCAL-00002" summary="updated drop down menu">
+      <option name="closed" value="true" />
+      <created>1756738110369</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1756738110369</updated>
+    </task>
+    <task id="LOCAL-00003" summary="updated drop down menu">
+      <option name="closed" value="true" />
+      <created>1756739562927</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1756739562927</updated>
+    </task>
+    <task id="LOCAL-00004" summary="updated drop down menu">
+      <option name="closed" value="true" />
+      <created>1756739855005</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1756739855005</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Updated delet logic">
+      <option name="closed" value="true" />
+      <created>1756740264710</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1756740264710</updated>
+    </task>
+    <task id="LOCAL-00006" summary="added a confirmation button for deletation">
+      <option name="closed" value="true" />
+      <created>1756740515706</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1756740515706</updated>
+    </task>
+    <task id="LOCAL-00007" summary="added a background image and fixed unknown appearance">
+      <option name="closed" value="true" />
+      <created>1756740930753</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1756740930753</updated>
+    </task>
+    <task id="LOCAL-00008" summary="fix bg">
+      <option name="closed" value="true" />
+      <created>1756741091800</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1756741091800</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Fixed setting">
+      <option name="closed" value="true" />
+      <created>1756741521356</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1756741521356</updated>
+    </task>
+    <task id="LOCAL-00010" summary="fixed auto clear clipboard">
+      <option name="closed" value="true" />
+      <created>1756741853242</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1756741853242</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Fixed clipboard timeout">
+      <option name="closed" value="true" />
+      <created>1756817334437</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1756817334437</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Fixed clipboard timeout">
+      <option name="closed" value="true" />
+      <created>1756817892870</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1756817892870</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Fixed clipboard timeout">
+      <option name="closed" value="true" />
+      <created>1756818468514</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1756818468514</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Fixed clipboard timeout">
+      <option name="closed" value="true" />
+      <created>1756887884413</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1756887884413</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Fixed clipboard timeout">
+      <option name="closed" value="true" />
+      <created>1756888167286</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1756888167286</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Fixed clipboard timeout">
+      <option name="closed" value="true" />
+      <created>1756888195133</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1756888195133</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="CUSTOM_BOOLEAN_PROPERTIES">
+                <map>
+                  <entry key="Show.Git.Branches" value="true" />
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Well lets test it" />
+    <MESSAGE value="updated drop down menu" />
+    <MESSAGE value="Updated delet logic" />
+    <MESSAGE value="added a confirmation button for deletation" />
+    <MESSAGE value="added a background image and fixed unknown appearance" />
+    <MESSAGE value="fix bg" />
+    <MESSAGE value="Fixed setting" />
+    <MESSAGE value="fixed auto clear clipboard" />
+    <MESSAGE value="Fixed clipboard timeout" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed clipboard timeout" />
+  </component>
+</project>
