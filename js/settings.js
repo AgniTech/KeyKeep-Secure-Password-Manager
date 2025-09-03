@@ -1,72 +1,72 @@
 // js/settings.js
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Selectors ---
     const themeToggle = document.getElementById('themeToggle');
-    const clipboardTimeoutMinutesInput = document.getElementById('clipboardTimeoutMinutes');
-    const clipboardTimeoutSecondsInput = document.getElementById('clipboardTimeoutSeconds');
+    const clipboardTimeoutSelect = document.getElementById('clipboardTimeout');
     const lockTimeoutInput = document.getElementById('lockTimeout');
     const exportButton = document.getElementById('exportVaultBtn');
     const importButton = document.getElementById('importVaultBtn');
     const logoutButton = document.getElementById('logoutBtn');
+    const saveButton = document.getElementById('saveSettingsBtn');
 
-    // Load saved settings (if any - using localStorage for example)
-    const savedTheme = localStorage.getItem('theme');
-    if (themeToggle) themeToggle.checked = savedTheme !== 'light';
+    // --- Load Initial Settings ---
+    // This function sets the form inputs to match what's currently saved.
+    const loadSettings = () => {
+        const savedTheme = localStorage.getItem('theme');
+        if (themeToggle) themeToggle.checked = savedTheme !== 'light';
 
-    if (clipboardTimeoutMinutesInput && clipboardTimeoutSecondsInput) {
-        let savedValue = localStorage.getItem('clipboardTimeout');
-        if (savedValue) {
-            const totalSeconds = parseInt(savedValue, 10);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            clipboardTimeoutMinutesInput.value = minutes;
-            clipboardTimeoutSecondsInput.value = seconds;
-        } else {
-            const minutes = parseInt(clipboardTimeoutMinutesInput.value, 10) || 0;
-            const seconds = parseInt(clipboardTimeoutSecondsInput.value, 10) || 0;
-            const totalSeconds = (minutes * 60) + seconds;
-            localStorage.setItem('clipboardTimeout', totalSeconds);
+        if (clipboardTimeoutSelect) {
+            let savedValue = localStorage.getItem('clipboardTimeout');
+            if (!savedValue) {
+                savedValue = clipboardTimeoutSelect.value; // Get default from HTML
+                localStorage.setItem('clipboardTimeout', savedValue);
+            }
+            clipboardTimeoutSelect.value = savedValue;
         }
 
-        const listener = () => {
-            const minutes = parseInt(clipboardTimeoutMinutesInput.value, 10) || 0;
-            const seconds = parseInt(clipboardTimeoutSecondsInput.value, 10) || 0;
-            const totalSeconds = (minutes * 60) + seconds;
-            localStorage.setItem('clipboardTimeout', totalSeconds);
-            window.showToast(`Clipboard auto-clear set to ${minutes}m ${seconds}s.`, 'info');
-        };
-
-        clipboardTimeoutMinutesInput.addEventListener('change', listener);
-        clipboardTimeoutSecondsInput.addEventListener('change', listener);
-    }
-
-    if (lockTimeoutInput) {
-        let savedLockValue = localStorage.getItem('lockTimeout');
-        if (!savedLockValue) {
-            savedLockValue = lockTimeoutInput.value; // Get default from HTML
-            localStorage.setItem('lockTimeout', savedLockValue);
+        if (lockTimeoutInput) {
+            let savedLockValue = localStorage.getItem('lockTimeout');
+            if (!savedLockValue) {
+                savedLockValue = lockTimeoutInput.value; // Get default from HTML
+                localStorage.setItem('lockTimeout', savedLockValue);
+            }
+            lockTimeoutInput.value = savedLockValue;
         }
-        lockTimeoutInput.value = savedLockValue;
-    }
+    };
 
-    // Event listeners to save settings
-    if (themeToggle) {
-        themeToggle.addEventListener('change', () => {
+    // --- Save All Settings ---
+    const saveSettings = () => {
+        // 1. Save Theme
+        if (themeToggle) {
             const theme = themeToggle.checked ? 'dark' : 'light';
             localStorage.setItem('theme', theme);
+            // Apply theme immediately so it's correct when redirecting
             document.documentElement.classList.toggle('light-theme', theme === 'light');
-        });
+        }
+
+        // 2. Save Clipboard Timeout
+        if (clipboardTimeoutSelect) {
+            localStorage.setItem('clipboardTimeout', clipboardTimeoutSelect.value);
+        }
+
+        // 3. Save Lock Timeout
+        if (lockTimeoutInput) {
+            localStorage.setItem('lockTimeout', lockTimeoutInput.value);
+        }
+
+        // 4. Show toast and redirect
+        window.showToast('Settings saved successfully!', 'success');
+        setTimeout(() => {
+            window.location.href = "vault.html";
+        }, 1000); // Wait for toast to be visible
+    };
+
+    // --- Event Listeners ---
+    if (saveButton) {
+        saveButton.addEventListener('click', saveSettings);
     }
 
-    if (lockTimeoutInput) {
-        lockTimeoutInput.addEventListener('change', () => {
-            const timeout = lockTimeoutInput.value;
-            localStorage.setItem('lockTimeout', timeout);
-            window.showToast(`Idle lock timeout set to ${timeout} minutes.`, 'info');
-        });
-    }
-
-    // --- Button Actions ---
     if (exportButton) {
         exportButton.addEventListener('click', () => window.showToast('Export functionality coming soon!', 'info'));
     }
@@ -84,4 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Initial Setup ---
+    loadSettings();
 });
