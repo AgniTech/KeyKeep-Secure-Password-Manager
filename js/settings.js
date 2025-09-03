@@ -2,7 +2,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggle');
-    const clipboardTimeoutSelect = document.getElementById('clipboardTimeout');
+    const clipboardTimeoutMinutesInput = document.getElementById('clipboardTimeoutMinutes');
+    const clipboardTimeoutSecondsInput = document.getElementById('clipboardTimeoutSeconds');
     const lockTimeoutInput = document.getElementById('lockTimeout');
     const exportButton = document.getElementById('exportVaultBtn');
     const importButton = document.getElementById('importVaultBtn');
@@ -12,13 +13,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme');
     if (themeToggle) themeToggle.checked = savedTheme !== 'light';
 
-    if (clipboardTimeoutSelect) {
+    if (clipboardTimeoutMinutesInput && clipboardTimeoutSecondsInput) {
         let savedValue = localStorage.getItem('clipboardTimeout');
-        if (!savedValue) {
-            savedValue = clipboardTimeoutSelect.value; // Get default from HTML
-            localStorage.setItem('clipboardTimeout', savedValue);
+        if (savedValue) {
+            const totalSeconds = parseInt(savedValue, 10);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            clipboardTimeoutMinutesInput.value = minutes;
+            clipboardTimeoutSecondsInput.value = seconds;
+        } else {
+            const minutes = parseInt(clipboardTimeoutMinutesInput.value, 10) || 0;
+            const seconds = parseInt(clipboardTimeoutSecondsInput.value, 10) || 0;
+            const totalSeconds = (minutes * 60) + seconds;
+            localStorage.setItem('clipboardTimeout', totalSeconds);
         }
-        clipboardTimeoutSelect.value = savedValue;
+
+        const listener = () => {
+            const minutes = parseInt(clipboardTimeoutMinutesInput.value, 10) || 0;
+            const seconds = parseInt(clipboardTimeoutSecondsInput.value, 10) || 0;
+            const totalSeconds = (minutes * 60) + seconds;
+            localStorage.setItem('clipboardTimeout', totalSeconds);
+            window.showToast(`Clipboard auto-clear set to ${minutes}m ${seconds}s.`, 'info');
+        };
+
+        clipboardTimeoutMinutesInput.addEventListener('change', listener);
+        clipboardTimeoutSecondsInput.addEventListener('change', listener);
     }
 
     if (lockTimeoutInput) {
@@ -36,14 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const theme = themeToggle.checked ? 'dark' : 'light';
             localStorage.setItem('theme', theme);
             document.documentElement.classList.toggle('light-theme', theme === 'light');
-        });
-    }
-
-    if (clipboardTimeoutSelect) {
-        clipboardTimeoutSelect.addEventListener('change', () => {
-            const timeout = clipboardTimeoutSelect.value;
-            localStorage.setItem('clipboardTimeout', timeout);
-            window.showToast(`Clipboard auto-clear set to ${timeout} seconds.`, 'info');
         });
     }
 
