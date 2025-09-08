@@ -101,10 +101,10 @@ KeyKeep uses **libsodium** (via `libsodium-wrappers`) for strong encryption.
 
 ## 🧪 Technologies Used
 
-| Frontend         | Backend              | Security              |
-|------------------|----------------------|------------------------|
-| HTML/CSS/JS      | Node.js + Express.js | bcrypt, JWT, libsodium|
-| Vanilla JavaScript | MongoDB (via Mongoose) | Encryption via Sodium |
+| Frontend         | Backend              | Security               |
+|:-----------------|:---------------------|:-----------------------|
+| HTML/CSS/JS      | Node.js + Express.js | bcrypt, JWT, libsodium |
+| Vanilla JavaScript | MongoDB (via Mongoose) | Encryption via Sodium  |
 
 ---
 
