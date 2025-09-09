@@ -7,11 +7,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const foldersList = document.getElementById('folders'); // For category filtering
     const addNewCredentialButton = document.getElementById('addNewCredential');
     const addEditModal = document.getElementById('addEditModal');
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
     const modalOverlay = document.getElementById('modalOverlay');
+    const deleteCredentialNameSpan = document.getElementById('deleteCredentialName');
+    const cancelDeleteButton = document.getElementById('cancelDelete');
+    const confirmDeleteButton = document.getElementById('confirmDelete');
 
     let credentials = [];
     let sessionPassword = null; // Caches the password in memory for the session
-    let currentFilter = 'all'; // For category filtering
+    let currentCredentialToDeleteId = null; // Stores the ID of the credential to be deleted
 
     // --- MODALS & UI FUNCTIONS (DEFINITIONS FIRST) ---
     function openPasswordModal(message, callback) {
@@ -61,6 +65,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             form.reset();
             document.getElementById('credentialId').value = ''; // Clear hidden ID
         }
+    };
+
+    const closeDeleteConfirmModal = () => {
+        deleteConfirmModal.classList.remove('show');
+        modalOverlay.classList.remove('show');
+        currentCredentialToDeleteId = null; // Clear the stored ID
     };
 
     function showToast(message, type = 'info') {
@@ -127,6 +137,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.setupPasswordToggles(addEditModal);
     };
 
+    const openDeleteConfirmModal = (credentialId, credentialTitle) => {
+        currentCredentialToDeleteId = credentialId;
+        deleteCredentialNameSpan.textContent = credentialTitle;
+        deleteConfirmModal.classList.add('show');
+        modalOverlay.classList.add('show');
+    };
+
     // --- UI RENDERING FUNCTIONS (DEFINITIONS FIRST) ---
     const renderCredentials = (filteredCredentials = credentials) => {
         credentialsList.innerHTML = '';
@@ -169,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>`;
             credentialsList.appendChild(card);
         });
-    }; // Corrected closing for renderCredentials - removed extra ')'
+    };
 
     const applyFilters = () => {
         const searchTerm = searchInput.value.toLowerCase();
@@ -272,6 +289,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    async function executeDelete(credentialId) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/vault/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ id: credentialId, password: sessionPassword })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                if (response.status === 401) sessionPassword = null; // Clear bad password
+                throw new Error(errorData.error || 'Failed to delete credential');
+            }
+
+            showToast(`Credential deleted!`, 'success');
+            closeDeleteConfirmModal();
+            await fetchVault(); // Re-fetch to display the updated list
+
+        } catch (err) {
+            showToast(`Error: ${err.message}`, 'error');
+        }
+    }
+
     async function handleCredentialSubmit(e) {
         e.preventDefault();
         const credentialId = document.getElementById('credentialId').value;
@@ -345,9 +391,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (target.matches('.copy-button')) {
             const type = target.dataset.type;
             const textToCopy = type === 'password' ? cred.password : cred.username;
+            const originalButtonText = target.innerHTML;
+
             navigator.clipboard.writeText(textToCopy).then(() => {
+                target.innerHTML = `📋 Copied!`; // Change text to Copied!
                 showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} copied!`, 'success');
-            }).catch(() => showToast('Failed to copy.', 'error'));
+                setTimeout(() => {
+                    target.innerHTML = originalButtonText; // Revert text after a delay
+                }, 2000); // 2 seconds delay
+            }).catch(() => {
+                showToast('Failed to copy.', 'error');
+                target.innerHTML = originalButtonText; // Revert text even on failure
+            });
         }
 
         if (target.matches('.edit-button')) {
@@ -355,33 +410,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (target.matches('.delete-button')) {
-            if (confirm(`Are you sure you want to delete ${cred.title}?`)) {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    window.location.href = 'index.html';
-                    return;
-                }
+            openDeleteConfirmModal(cred.id, cred.title);
+        }
+    });
 
-                try {
-                    const response = await fetch('/api/vault/delete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ id: cred.id, password: sessionPassword })
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        if (response.status === 401) sessionPassword = null; // Clear bad password
-                        throw new Error(errorData.error || 'Failed to delete credential');
-                    }
-
-                    showToast(`Credential ${cred.title} deleted!`, 'success');
-                    await fetchVault(); // Re-fetch to display the updated list
-
-                } catch (err) {
-                    showToast(`Error: ${err.message}`, 'error');
-                }
-            }
+    // Event listeners for the delete confirmation modal
+    cancelDeleteButton.addEventListener('click', closeDeleteConfirmModal);
+    confirmDeleteButton.addEventListener('click', () => {
+        if (currentCredentialToDeleteId) {
+            executeDelete(currentCredentialToDeleteId);
         }
     });
 
@@ -397,7 +434,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    searchInput.addEventListener('input', applyFilters); // This call is now safe
+    searchInput.addEventListener('input', applyFilters);
 
     // --- INITIALIZATION ---
     fetchVault(); // Start by fetching the vault on load.
