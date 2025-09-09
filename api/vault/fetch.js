@@ -1,87 +1,128 @@
 // File: /api/vault/fetch.js
-
-import { connectDB } from '../util/db.js';
-import Vault from '../models/Vault.js';
+import crypto from 'crypto';
+import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
+import { connectDB } from '../util/db.js';
+import User from '../models/user.js';
+import Vault from '../models/Vault.js';
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
+  // Changed to POST to securely receive master password in the body
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  try {
-    // Connect to database
-    await connectDB();
-    console.log('Database connected successfully for vault fetch');
+  // Scoped variables for sensitive data to ensure cleanup
+  let PKEK, rsaPrivateKey;
 
-    // Verify JWT token
+  try {
+    await connectDB();
+
+    // 1. Verify JWT token to get the authenticated user's ID
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Unauthorized: No valid token provided' });
     }
-
     const token = authHeader.split(' ')[1];
-    if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET not configured');
-      return res.status(500).json({ error: 'Server configuration error' });
-    }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
-    console.log('User authenticated for fetch:', userId);
 
-    // Fetch all vault entries for the user
-    const vaultEntries = await Vault.find({ userId }).sort({ updatedAt: -1 });
-    console.log(`Found ${vaultEntries.length} vault entries for user`);
+    // 2. Get master password from the request body
+    const { masterPassword } = req.body;
+    if (!masterPassword) {
+      return res.status(400).json({ error: 'Master password is required.' });
+    }
 
-    // Decrypt and format the data
-    const decryptedEntries = vaultEntries.map(entry => {
-      try {
-        return {
-          id: entry._id,
-          title: entry.title || entry.site, // Fallback to legacy field
-          url: entry.url || '',
-          username: entry.username || '',
-          password: entry.password || entry.secret, // Fallback to legacy field
-          category: entry.category || 'other',
-          notes: entry.notes || '',
-          createdAt: entry.createdAt,
-          updatedAt: entry.updatedAt,
-          // Legacy fields for backward compatibility
-          site: entry.site || entry.title,
-          secret: entry.password || entry.secret
-        };
-      } catch (decryptError) {
-        console.error('Decryption error for entry:', entry._id, decryptError);
-        // Return entry with original data if decryption fails
-        return {
-          id: entry._id,
-          title: entry.title || entry.site,
-          url: entry.url || '',
-          username: entry.username || '',
-          password: entry.password || entry.secret,
-          category: entry.category || 'other',
-          notes: entry.notes || '',
-          createdAt: entry.createdAt,
-          updatedAt: entry.updatedAt,
-          site: entry.site,
-          secret: entry.secret
-        };
-      }
+    // 3. Re-Authenticate and Derive PKEK
+    const user = await User.findById(userId).exec();
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    const isAuth = await user.comparePassword(masterPassword);
+    if (!isAuth) {
+      return res.status(401).json({ error: 'Invalid master password.' });
+    }
+
+    const argon2Salt = Buffer.from(user.argon2Salt, 'base64');
+    PKEK = await argon2.hash(masterPassword, {
+        salt: argon2Salt,
+        raw: true,
+        type: argon2.argon2id,
+        memoryCost: 2 ** 16,
+        timeCost: 3,
+        parallelism: 4,
     });
 
+    // 4. Decrypt RSA Private Key into a temporary variable
+    const privateKeyIv = Buffer.from(user.privateKeyIv, 'base64');
+    const privateKeyAuthTag = Buffer.from(user.privateKeyAuthTag, 'base64');
+    const encryptedRsaPrivateKey = Buffer.from(user.encryptedRsaPrivateKey, 'base64');
+    
+    const decipher = crypto.createDecipheriv('aes-256-gcm', PKEK, privateKeyIv);
+    decipher.setAuthTag(privateKeyAuthTag);
+    
+    rsaPrivateKey = Buffer.concat([decipher.update(encryptedRsaPrivateKey), decipher.final()]).toString('utf8');
+
+    // 5. Fetch all vault entries for the user
+    const vaultEntries = await Vault.find({ userId }).sort({ createdAt: -1 }).exec();
+
+    // 6. Decrypt each entry
+    const decryptedEntries = [];
+    for (const entry of vaultEntries) {
+      let vaultKey = null; // Scoped to the loop for cleanup
+      try {
+        // 6a. Unwrap Symmetric Key (RSA Decrypt)
+        const encryptedVaultKey = Buffer.from(entry.encryptedVaultKey, 'base64');
+        vaultKey = crypto.privateDecrypt(
+          {
+            key: rsaPrivateKey,
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: 'sha256'
+          },
+          encryptedVaultKey
+        );
+
+        // 6b. Decrypt Vault Data (ChaCha20-Poly1305)
+        const vaultNonce = Buffer.from(entry.vaultNonce, 'base64');
+        const encryptedVaultData = Buffer.from(entry.encryptedVaultData, 'base64');
+        const vaultDecipher = crypto.createDecipheriv('chacha20-poly1305', vaultKey, vaultNonce);
+        const decryptedDataString = Buffer.concat([
+            vaultDecipher.update(encryptedVaultData),
+            vaultDecipher.final()
+        ]).toString('utf8');
+
+        // 6c. Finalize: Parse the JSON and add the database ID
+        const decryptedData = JSON.parse(decryptedDataString);
+        decryptedEntries.push({
+          id: entry._id,
+          ...decryptedData
+        });
+
+      } catch (e) {
+        console.error(`Failed to decrypt vault entry ${entry._id}:`, e.message);
+        decryptedEntries.push({
+          id: entry._id,
+          error: 'Failed to decrypt this item.'
+        });
+      } finally {
+        if (vaultKey) vaultKey.fill(0); // Clean up the single-use vault key
+      }
+    }
+
     res.status(200).json(decryptedEntries);
+
   } catch (e) {
     console.error('Fetch vault error:', e);
-    
-    // Provide more specific error messages
-    if (e.name === 'JsonWebTokenError') {
-      return res.status(401).json({ error: 'Invalid token' });
+    if (e.name === 'JsonWebTokenError') return res.status(401).json({ error: 'Invalid token' });
+    if (e.name === 'TokenExpiredError') return res.status(401).json({ error: 'Token expired' });
+    if (e.code && e.code.startsWith('ERR_CRYPTO')) {
+        return res.status(401).json({ error: 'Decryption failed. Master password may be incorrect.' });
     }
-    if (e.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Token expired' });
-    }
-    
-    res.status(500).json({ error: 'Server error: ' + e.message });
+    res.status(500).json({ error: 'An unexpected server error occurred.' });
+  } finally {
+    // 7. Memory Cleanup: Securely wipe all sensitive data from memory
+    if (PKEK) PKEK.fill(0);
+    if (rsaPrivateKey) rsaPrivateKey = null;
   }
 }

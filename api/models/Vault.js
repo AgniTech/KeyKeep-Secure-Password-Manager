@@ -7,51 +7,17 @@ const VaultSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  url: {
-    type: String,
-    trim: true,
-    validate: {
-      validator: function(v) {
-        // Allow empty strings or valid URLs
-        if (!v) return true;
-        try {
-          new URL(v);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      message: 'Please enter a valid URL'
-    }
-  },
-  username: {
-    type: String,
-    trim: true
-  },
-  password: {
+  encryptedVaultData: {
     type: String,
     required: true
   },
-  category: {
+  encryptedVaultKey: {
     type: String,
-    enum: ['work', 'social', 'bank', 'other'],
-    default: 'other'
+    required: true
   },
-  notes: {
+  vaultNonce: {
     type: String,
-    maxlength: 1000
-  },
-  // Legacy field for backward compatibility
-  site: {
-    type: String
-  },
-  secret: {
-    type: String
+    required: true
   },
   createdAt: {
     type: Date,

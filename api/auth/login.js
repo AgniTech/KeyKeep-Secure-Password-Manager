@@ -3,11 +3,12 @@ import { connectDB } from '../util/db.js';
 import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 connectDB().catch(err => {
   console.error('MongoDB connection error:', err);
-  throw err;
+  process.exit(1);
 });
 
 export default async function handler(req, res) {
@@ -16,39 +17,41 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, masterPassword } = req.body;
+    // The client will send the master password, which we now call 'password' internally
+    const { email, password: masterPassword } = req.body;
 
     if (!email || !masterPassword) {
-      return res.status(400).json({ error: 'Email and password required' });
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await User.findOne({ email }).exec(); // ✅ FIXED: Moved up + .exec()
+    // 1. Authenticate User: Find user and verify password
+    const user = await User.findOne({ email }).exec();
 
     if (!user) {
-      return res.status(401).json({ msg: 'Email or password is incorrect. Please try again.' });
+      // Use a generic error message to prevent email enumeration
+      return res.status(401).json({ msg: 'Invalid credentials. Please try again.' });
     }
 
-    console.log("Login attempt for:", email);                           
-    console.log("User found:", user); // ✅ Works now
-    console.log("Password in request:", masterPassword);
-
+    // The comparePassword method is defined on the User model
     const isMatch = await user.comparePassword(masterPassword);
-    console.log("Password match:", isMatch);
 
     if (!isMatch) {
-      return res.status(401).json({ msg: 'Email or password is incorrect. Please try again.' });
+      return res.status(401).json({ msg: 'Invalid credentials. Please try again.' });
     }
 
+    // 2. If authentication is successful, generate and return a JWT
+    // The JWT proves the user is authenticated for subsequent API calls.
+    // It does NOT contain any sensitive key material.
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: '2h' }
+      { expiresIn: '2h' } // Keep session duration reasonable
     );
 
     return res.status(200).json({ token });
 
   } catch (e) {
     console.error('Login error:', e);
-    return res.status(500).json({ error: 'Server Error' });
+    return res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
   }
 }

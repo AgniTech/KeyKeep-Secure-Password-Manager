@@ -1,8 +1,6 @@
 // api/models/User.js
 import mongoose from 'mongoose';
-
-import bcrypt from 'bcryptjs';
-
+import bcrypt from 'bcrypt';
 
 const UserSchema = new mongoose.Schema({
     email: {
@@ -12,10 +10,29 @@ const UserSchema = new mongoose.Schema({
         lowercase: true,
         trim: true
     },
-    masterPassword: {
+    password: {
         type: String,
-        required: true,
-        minlength: 8 // Enforce minimum length
+        required: true
+    },
+    rsaPublicKey: {
+        type: String,
+        required: true
+    },
+    encryptedRsaPrivateKey: {
+        type: String,
+        required: true
+    },
+    privateKeyIv: {
+        type: String,
+        required: true
+    },
+    privateKeyAuthTag: {
+        type: String,
+        required: true
+    },
+    argon2Salt: {
+        type: String,
+        required: true
     },
     createdAt: {
         type: Date,
@@ -23,21 +40,9 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-// Hash master password before saving (pre-save hook)
-UserSchema.pre('save', async function(next) {
-    if (!this.isModified('masterPassword')) {
-        return next();
-    }
-    const salt = await bcrypt.genSalt(10);
-    this.masterPassword = await bcrypt.hash(this.masterPassword, salt);
-    next();
-});
-
 // Method to compare master password (for login)
 UserSchema.methods.comparePassword = async function(candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.masterPassword);
+    return await bcrypt.compare(candidatePassword, this.password);
 };
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);
-
-
