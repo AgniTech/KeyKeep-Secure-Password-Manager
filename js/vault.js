@@ -4,29 +4,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- DOM Elements ---
     const credentialsList = document.getElementById('credentialsList');
     const searchInput = document.getElementById('searchCredentials');
-    const foldersList = document.getElementById('folders');
+    const foldersList = document.getElementById('folders'); // Added for category filtering
     const addNewCredentialButton = document.getElementById('addNewCredential');
     const addEditModal = document.getElementById('addEditModal');
     const modalOverlay = document.getElementById('modalOverlay');
 
     let credentials = [];
     let sessionPassword = null; // Caches the password in memory for the session
+    let currentFilter = 'all'; // Added for category filtering
 
     // --- PASSWORD MODAL & SESSION CACHE ---
-    /**
-     * Gets the user's password. It will only prompt the user once per session,
-     * caching the password in a local variable for subsequent calls.
-     * @param {string} message The message to display in the password prompt.
-     * @returns {Promise<string>} A promise that resolves with the password.
-     */
     function getSessionPassword(message) {
         return new Promise((resolve, reject) => {
-            // If we already have the password for this session, return it immediately.
             if (sessionPassword) {
                 return resolve(sessionPassword);
             }
-
-            // Use a custom modal for password prompt
             openPasswordModal(message, (enteredPassword) => {
                 if (enteredPassword) {
                     sessionPassword = enteredPassword; // Cache the password
@@ -47,7 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            // Get password from session cache or new modal prompt.
             const password = await getSessionPassword('Please enter your password to decrypt your vault:');
 
             const res = await fetch('/api/vault/fetch', {
@@ -60,15 +51,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sessionPassword = null; // Clear the bad password
                 const errorData = await res.json();
                 showToast(errorData.error || 'Invalid password.', 'error');
-                // Display empty state or error message on UI
                 credentialsList.innerHTML = `<div class="empty-state"><p>Invalid password. Please refresh and try again.</p></div>`;
                 return;
             }
             if (!res.ok) throw new Error('Failed to fetch credentials.');
 
             const data = await res.json();
-            credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed' } : entry);
-            applyFilters(); // Re-render with the new data
+            credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed', username: '[Encrypted]', password: '[Encrypted]' } : entry);
+            applyFilters(); // Re-render with the new data, applying current filters
 
         } catch (err) {
             showToast(err.message, 'error');
@@ -83,7 +73,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!sessionPassword) {
             showToast('Session expired. Please unlock your vault again.', 'error');
-            // Force re-authentication if session password is lost
             window.location.href = 'index.html'; 
             return;
         }
@@ -161,32 +150,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         modalOverlay.onclick = close;
     }
 
-    const renderCredentials = (filteredCredentials = credentials) => {
+    const renderCredentials = (itemsToRender) => {
         credentialsList.innerHTML = '';
-        if (filteredCredentials.length === 0) {
+        if (!itemsToRender || itemsToRender.length === 0) {
             credentialsList.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">🛡️</div>
                 <p>Your vault is empty. Let's secure your first account!</p>
                 <button class="button primary" id="addFirstCredential">Add New Credential</button>
             </div>`;
-            const addFirstBtn = document.getElementById('addFirstCredential');
-            if(addFirstBtn) {
-                addFirstBtn.addEventListener('click', () => openAddEditModal('add'));
-            }
+            document.getElementById('addFirstCredential').addEventListener('click', () => openAddEditModal('add'));
             return;
         }
 
-        filteredCredentials.forEach(cred => {
+        itemsToRender.forEach(cred => {
             const faviconUrl = cred.url ? `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}` : '/images/default-favicon.png';
-            const fallbackFavicon = '/images/default-favicon.png';
-
             const card = document.createElement('div');
             card.className = 'credential-card glassmorphism';
             card.dataset.id = cred.id;
             card.innerHTML = `
             <div class="credential-header">
-                <img src="${faviconUrl}" alt="${cred.title} favicon" class="credential-favicon" onerror="this.onerror=null;this.src='${fallbackFavicon}'">
+                <img src="${faviconUrl}" alt="${cred.title} favicon" class="credential-favicon" onerror="this.onerror=null;this.src='/images/default-favicon.png'">
                 <h4>${cred.title}</h4>
             </div>
             <div class="credential-info">
@@ -209,9 +193,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     credentialsList.addEventListener('click', async (e) => {
         const target = e.target;
         const card = target.closest('.credential-card');
-        const id = card ? card.dataset.id : null;
-        if (!id) return;
-
+        if (!card) return;
+        const id = card.dataset.id;
         const cred = credentials.find(c => String(c.id) === String(id));
         if (!cred) return;
 
@@ -304,6 +287,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     addNewCredentialButton.addEventListener('click', () => openAddEditModal('add'));
+
+    // --- CATEGORY FILTERING --- // NEWLY ADDED
+    foldersList.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+            document.querySelectorAll('#folders a').forEach(a => a.classList.remove('active'));
+            e.target.classList.add('active');
+            currentFilter = e.target.dataset.filter;
+            applyFilters();
+        }
+    });
+
+    searchInput.addEventListener('input', applyFilters); // Added for search filtering
+
+    const applyFilters = () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        let filtered = credentials;
+
+        if (currentFilter !== 'all') {
+            filtered = filtered.filter(c => c.category === currentFilter);
+        }
+
+        if (searchTerm) {
+            filtered = filtered.filter(c =>
+                (c.title && c.title.toLowerCase().includes(searchTerm)) ||
+                (c.url && c.url.toLowerCase().includes(searchTerm)) ||
+                (c.username && c.username.toLowerCase().includes(searchTerm))
+            );
+        }
+        renderCredentials(filtered);
+    };
 
     // --- INITIALIZATION ---
     fetchVault(); // Start by fetching the vault on load.

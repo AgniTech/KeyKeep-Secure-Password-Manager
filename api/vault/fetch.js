@@ -64,6 +64,11 @@ export default async function handler(req, res) {
     for (const entry of vaultEntries) {
       let vaultKey = null;
       try {
+        // Defensive checks for missing data from old entries
+        if (!entry.encryptedVaultKey || !entry.vaultNonce || !entry.encryptedVaultData || !entry.vaultAuthTag) {
+            throw new Error('Missing encrypted data components for this entry.');
+        }
+
         const encryptedVaultKey = Buffer.from(entry.encryptedVaultKey, 'base64');
         vaultKey = crypto.privateDecrypt(
           {
@@ -76,10 +81,10 @@ export default async function handler(req, res) {
 
         const vaultNonce = Buffer.from(entry.vaultNonce, 'base64');
         const encryptedVaultData = Buffer.from(entry.encryptedVaultData, 'base64');
-        const vaultAuthTag = Buffer.from(entry.vaultAuthTag, 'base64'); // NEW: Get the auth tag
+        const vaultAuthTag = Buffer.from(entry.vaultAuthTag, 'base64');
 
         const vaultDecipher = crypto.createDecipheriv('chacha20-poly1305', vaultKey, vaultNonce);
-        vaultDecipher.setAuthTag(vaultAuthTag); // NEW: Set the auth tag
+        vaultDecipher.setAuthTag(vaultAuthTag);
 
         const decryptedDataString = Buffer.concat([
             vaultDecipher.update(encryptedVaultData),
@@ -96,7 +101,10 @@ export default async function handler(req, res) {
         console.error(`Failed to decrypt vault entry ${entry._id}:`, e.message);
         decryptedEntries.push({
           id: entry._id,
-          error: 'Failed to decrypt this item.'
+          error: 'Failed to decrypt this item.',
+          title: 'Decryption Failed', // Provide a fallback title for UI
+          username: '[Encrypted]', // Fallback for UI
+          password: '[Encrypted]' // Fallback for UI
         });
       } finally {
         if (vaultKey) vaultKey.fill(0);
