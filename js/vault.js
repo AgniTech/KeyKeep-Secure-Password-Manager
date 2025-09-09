@@ -146,10 +146,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- UI RENDERING FUNCTIONS (DEFINITIONS FIRST) ---
     const renderCredentials = (filteredCredentials = credentials) => {
+        console.log('renderCredentials called. filteredCredentials length:', filteredCredentials.length, 'sessionPassword:', sessionPassword);
         credentialsList.innerHTML = '';
         if (!filteredCredentials || filteredCredentials.length === 0) {
             let emptyStateContent = '';
             if (sessionPassword === null) {
+                console.log('Rendering empty state: Unlock Vault scenario.');
                 // User cancelled password prompt or password was incorrect
                 emptyStateContent = `
                     <div class="empty-state">
@@ -158,6 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <button class="button primary" id="unlockVaultButton">Unlock Vault</button>
                     </div>`;
             } else {
+                console.log('Rendering empty state: Add New Credential scenario.');
                 // Vault is genuinely empty after successful unlock
                 emptyStateContent = `
                     <div class="empty-state">
@@ -259,12 +262,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         let password = null;
+        console.log('fetchVault: sessionPassword before getSessionPassword:', sessionPassword);
         try {
             password = await getSessionPassword('Please enter your password to decrypt your vault:');
         } catch (err) {
             // User cancelled the password modal
             showToast(err.message, 'info'); // Use info for cancellation, not error
             credentials = []; // Ensure credentials array is empty
+            sessionPassword = null; // Explicitly set to null on cancellation
+            console.log('fetchVault: Password prompt cancelled. sessionPassword set to:', sessionPassword);
             applyFilters(); // Render empty state
             return;
         }
@@ -272,6 +278,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // If password is null (e.g., user cancelled the modal) - redundant with catch block but good for clarity
         if (!password) {
             credentials = []; // Ensure credentials array is empty
+            sessionPassword = null; // Explicitly set to null if password is empty
+            console.log('fetchVault: Password empty. sessionPassword set to:', sessionPassword);
             applyFilters(); // Render empty state
             return;
         }
@@ -288,22 +296,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const errorData = await res.json();
                 showToast(errorData.error || 'Invalid password.', 'error');
                 credentials = []; // Ensure credentials array is empty
+                console.log('fetchVault: 401 Unauthorized. sessionPassword set to:', sessionPassword);
                 applyFilters(); // Render empty state
                 return;
             }
             if (!res.ok) {
-                const errorData = await response.json();
+                const errorData = await res.json();
                 throw new Error(errorData.error || 'Failed to fetch credentials.');
             }
 
             const data = await res.json();
             credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed', username: '[Encrypted]', password: '[Encrypted]' } : entry);
+            console.log('fetchVault: Credentials fetched successfully. sessionPassword:', sessionPassword);
             applyFilters(); // Re-render with the new data, applying current filters
 
         } catch (err) {
             console.error('Fetch error:', err);
             showToast('An unexpected error occurred while fetching the vault: ' + err.message, 'error');
             credentials = []; // Ensure credentials array is empty
+            sessionPassword = null; // Explicitly set to null on general fetch error
+            console.log('fetchVault: General fetch error. sessionPassword set to:', sessionPassword);
             applyFilters(); // Render empty state
         }
     }
