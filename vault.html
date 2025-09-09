@@ -17,7 +17,19 @@
             <div class="right-actions">
                 <a href="health.html" class="button secondary" aria-label="Password Health">🛡️ Health</a>
                 <a href="settings.html" class="button icon-button" aria-label="Settings">⚙️</a>
-                <a href="lock.html" class="button icon-button" aria-label="Lock Vault">🔒</a>
+                <!-- Replaced Lock with Profile Button and Dropdown -->
+                <div class="profile-dropdown-container">
+                    <button class="button icon-button" id="profileButton" aria-label="Profile">👤</button>
+                    <div id="profileDropdown" class="profile-dropdown glassmorphism">
+                        <div class="dropdown-header">
+                            <span id="userEmailDisplay">user@example.com</span> <!-- Placeholder for user email -->
+                        </div>
+                        <a href="profile.html" class="dropdown-item">Profile</a>
+                        <a href="settings.html" class="dropdown-item">Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" id="logoutButton">Logout</a>
+                    </div>
+                </div>
             </div>
         </nav>
         <aside class="sidebar glassmorphism">

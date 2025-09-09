@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cancelDeleteButton = document.getElementById('cancelDelete');
     const confirmDeleteButton = document.getElementById('confirmDelete');
 
+    // Profile Dropdown Elements
+    const profileButton = document.getElementById('profileButton');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const userEmailDisplay = document.getElementById('userEmailDisplay');
+    const logoutButton = document.getElementById('logoutButton');
+
     let credentials = [];
     let sessionPassword = null; // Caches the password in memory for the session
     let currentFilter = 'all'; // For category filtering
@@ -211,8 +217,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
-    const applyFilters = (filterParam) => { // Removed default parameter here
-        const filter = filterParam !== undefined ? filterParam : 'all'; // Explicitly check and use 'all' as default
+    const applyFilters = (filterParam) => { 
+        const filter = filterParam !== undefined ? filterParam : 'all'; 
         const searchTerm = searchInput.value.toLowerCase();
         let filtered = credentials;
 
@@ -456,6 +462,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     addNewCredentialButton.addEventListener('click', () => openAddEditModal('add'));
+
+    // --- Profile Dropdown Logic ---
+    profileButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent document click from closing it immediately
+        profileDropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!profileDropdown.contains(event.target) && !profileButton.contains(event.target)) {
+            profileDropdown.classList.remove('show');
+        }
+    });
+
+    // Populate user email (placeholder for now, replace with actual user data)
+    // In a real app, you'd decode the JWT token or fetch user data
+    userEmailDisplay.textContent = localStorage.getItem('userEmail') || 'user@example.com';
+
+    // Logout functionality
+    logoutButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        localStorage.removeItem('token'); // Clear authentication token
+        localStorage.removeItem('userEmail'); // Clear stored email
+        sessionPassword = null; // Clear session password
+        window.location.href = 'index.html'; // Redirect to login page
+    });
 
     // --- CATEGORY FILTERING & SEARCH EVENT LISTENERS (NOW AFTER applyFilters DEFINITION) ---
     foldersList.addEventListener('click', (e) => {
