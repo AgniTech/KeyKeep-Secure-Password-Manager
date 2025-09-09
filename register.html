@@ -8,42 +8,38 @@
     <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
-    <div class="container auth-container">
+    <div id="toastContainer"></div> <!-- For clean notifications -->
+
+    <div class="auth-container-standalone">
         <header>
-            <h1>Create Account</h1>
-            <p class="tagline">Secure your digital life with KeyKeep.</p>
+            <h1>KeyKeep</h1>
+            <p class="tagline">Create your secure account.</p>
         </header>
-        <main class="register-form">
-            <h2>Register</h2>
+        <main class="form-container-standalone">
+            <h2>Sign Up</h2>
             <form id="registerForm">
                 <div class="input-group">
                     <label for="registerEmail">Email:</label>
-                    <input type="email" id="registerEmail" name="registerEmail" required>
+                    <input type="email" id="registerEmail" required>
                 </div>
                 <div class="input-group">
-                    <label for="registerPassword">Master Password:</label>
-                    <div class="password-input">
-                        <input type="password" id="registerPassword" name="registerPassword" required>
-                        <button type="button" class="toggle-password" aria-label="Show password">👁️</button>
-                    </div>
+                    <label for="registerPassword">Password:</label>
+                    <input type="password" id="registerPassword" required minlength="8">
                 </div>
                 <div class="input-group">
                     <label for="confirmPassword">Confirm Password:</label>
-                    <div class="password-input">
-                        <input type="password" id="confirmPassword" name="confirmPassword" required>
-                        <button type="button" class="toggle-password" aria-label="Show password">👁️</button>
-                    </div>
+                    <input type="password" id="confirmPassword" required>
                 </div>
                 <button type="submit" class="button primary">Sign Up</button>
-                <p class="login-link">Already have an account? <a href="index.html" data-route="login">Log In</a></p>
                 <div class="error-message" id="registerError"></div>
+                <p class="form-switch-link">Already have an account? <a href="index.html">Sign In</a></p>
             </form>
         </main>
         <footer>
             <p>&copy; 2025 KeyKeep</p>
         </footer>
     </div>
-    <script src="js/script.js"></script>
+
     <script src="js/auth.js"></script>
 </body>
 </html>
