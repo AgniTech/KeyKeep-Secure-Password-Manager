@@ -161,11 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <button class="button secondary copy-button" data-type="password">📋 Copy Pass</button>
                 <button class="button secondary edit-button">✏️ Edit</button>
                 <button class="button danger delete-button">🗑️ Delete</button>
-            }
-            `;
+            </div>`;
             credentialsList.appendChild(card);
         });
-    });
+    }; // Corrected closing for renderCredentials - removed extra ')'
 
     const applyFilters = () => {
         const searchTerm = searchInput.value.toLowerCase();
