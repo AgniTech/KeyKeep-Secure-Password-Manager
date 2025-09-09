@@ -32,9 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generic password visibility toggle for any page
     const setupPasswordToggles = (container) => {
+        console.log('setupPasswordToggles called on container:', container);
         const togglePasswordButtons = container.querySelectorAll('.toggle-password');
+        console.log('Found toggle buttons:', togglePasswordButtons.length);
         togglePasswordButtons.forEach(button => {            
             button.addEventListener('click', function () {                
+                console.log('Toggle button clicked!');
                 const passwordInput = this.closest('.password-input').querySelector('input');
                 const iconImg = this.querySelector('img');
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
