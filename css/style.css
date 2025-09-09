@@ -289,6 +289,12 @@ select:focus {
     align-items: center;
     justify-content: center;
 }
+
+.password-input .toggle-password img {
+    width: 24px; /* Set a fixed width for the image */
+    height: 24px; /* Set a fixed height for the image */
+}
+
 .password-input .toggle-password:hover {
     color: var(--accent-color);
 }
