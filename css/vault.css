@@ -154,7 +154,7 @@
 
 .dashboard {
     grid-area: main;
-    padding: 20px; /* Added padding for more space from edges */
+    padding: 20px; /* Reverted padding-top to 20px */
 }
 
 /* --- UPDATED SEARCH BAR STYLES --- */
