@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KeyKeep - Register</title>
+    <title>KeyKeep - Secure Password Manager</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
-    <div id="toastContainer"></div> <!-- For clean notifications -->
+    <div id="toastContainer"></div> <!-- Added for clean notifications -->
 
-    <div class="auth-container-standalone">
+    <div class="container auth-container">
         <header>
             <h1>KeyKeep</h1>
             <p class="tagline">Create your secure account.</p>
         </header>
-        <main class="form-container-standalone">
+        <main class="register-form">
             <h2>Sign Up</h2>
             <form id="registerForm">
                 <div class="input-group">
@@ -32,7 +32,7 @@
                 </div>
                 <button type="submit" class="button primary">Sign Up</button>
                 <div class="error-message" id="registerError"></div>
-                <p class="form-switch-link">Already have an account? <a href="index.html">Sign In</a></p>
+                <p class="signup-link">Already have an account? <a href="index.html">Sign In</a></p>
             </form>
         </main>
         <footer>
