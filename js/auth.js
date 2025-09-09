@@ -1,4 +1,4 @@
-// js/auth.js
+// js/auth.js - REFACTORED FOR UX IMPROVEMENTS
 
 document.addEventListener('DOMContentLoaded', () => {
     const signUpButton = document.getElementById('signUp');
@@ -38,10 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/login`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    // FIX: Changed masterPassword to password to match backend API
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
                 });
 
@@ -81,20 +78,18 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/register`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    // FIX: Changed masterPassword to password to match backend API
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    // On successful registration, prompt the user to log in.
+                    // UX FIX: Show a success message and automatically switch to the sign-in panel.
                     alert(data.message || 'Registration successful! Please sign in.');
-                    // Trigger the click to slide the panel to the sign-in form.
-                    if(signInButton) signInButton.click();
+                    if (signInButton) {
+                        signInButton.click();
+                    }
                 } else {
                     errorContainer.textContent = data.msg || 'Registration failed. Please try again.';
                 }

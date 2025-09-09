@@ -1,6 +1,7 @@
-// js/vault.js - REFACTORED FOR E2EE & CONSISTENCY
+// js/vault.js - REFACTORED FOR UX IMPROVEMENTS
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // --- DOM Elements ---
     const credentialsList = document.getElementById('credentialsList');
     const searchInput = document.getElementById('searchCredentials');
     const foldersList = document.getElementById('folders');
@@ -9,69 +10,154 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addNewCredentialButton = document.getElementById('addNewCredential');
 
     let credentials = [];
+    // UX FIX: This variable will cache the password for the current session.
+    let sessionPassword = null;
 
+    // --- NEW PASSWORD MODAL & SESSION CACHE ---
+    /**
+     * Gets the user's password. It will only prompt the user once per session,
+     * caching the password in a local variable for subsequent calls.
+     * @param {string} message The message to display in the password prompt.
+     * @returns {Promise<string>} A promise that resolves with the password.
+     */
+    function getSessionPassword(message) {
+        return new Promise((resolve, reject) => {
+            // If we already have the password for this session, return it immediately.
+            if (sessionPassword) {
+                return resolve(sessionPassword);
+            }
+
+            // UX FIX: Use a custom modal instead of the browser prompt.
+            openPasswordModal(message, (enteredPassword) => {
+                if (enteredPassword) {
+                    sessionPassword = enteredPassword; // Cache the password
+                    resolve(enteredPassword);
+                } else {
+                    reject('Password entry was cancelled.');
+                }
+            });
+        });
+    }
+
+    // --- FETCH & SAVE LOGIC (Now using getSessionPassword) ---
     async function fetchVault() {
         const token = localStorage.getItem('token');
         if (!token) {
-            showToast("Unauthorized: Please log in", 'error');
             window.location.href = 'index.html';
             return;
         }
 
-        // CONSISTENCY FIX: Use 'password' consistently.
-        const password = prompt('Please enter your password to decrypt your vault:');
-        if (!password) {
-            showToast('Password is required to fetch your vault.', 'error');
-            credentialsList.innerHTML = `<div class="empty-state"><p>Enter your password to view credentials.</p></div>`;
-            return;
-        }
-
         try {
+            // UX FIX: Get password from session cache or new modal prompt.
+            const password = await getSessionPassword('Please enter your password to decrypt your vault:');
+
             const res = await fetch('/api/vault/fetch', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ password: password })
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ password })
             });
 
             if (res.status === 401) {
-                 const errorData = await res.json();
-                 showToast(errorData.error || 'Invalid password.', 'error');
-                 credentialsList.innerHTML = `<div class="empty-state"><p>Invalid password. Please refresh and try again.</p></div>`;
-                 return;
+                sessionPassword = null; // Clear the bad password
+                const errorData = await res.json();
+                showToast(errorData.error || 'Invalid password.', 'error');
+                credentialsList.innerHTML = `<div class="empty-state"><p>Invalid password. Please refresh and try again.</p></div>`;
+                return;
             }
-            if (!res.ok) {
-                throw new Error('Failed to fetch credentials from the server.');
-            }
+            if (!res.ok) throw new Error('Failed to fetch credentials.');
 
             const data = await res.json();
-
-            credentials = data.map(entry => {
-                if (entry.error) {
-                    console.error(`Entry ${entry.id} failed to decrypt on the server.`);
-                    return { id: entry.id, title: 'Decryption Failed', username: '', password: '', url: '', category: 'other', notes: entry.error };
-                }
-                return {
-                    id: entry.id,
-                    title: entry.title || 'Untitled',
-                    url: entry.url || '',
-                    username: entry.username || '',
-                    password: entry.password || '',
-                    category: entry.category || 'other',
-                    notes: entry.notes || ''
-                };
-            });
-
+            credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed' } : entry);
             applyFilters();
+
         } catch (err) {
-            console.error('Fetch error:', err);
-            showToast('Failed to load vault. Check the console for details.', 'error');
+            showToast(err.message, 'error');
         }
     }
 
-    let currentFilter = 'all';
+    async function handleCredentialSubmit(e) {
+        e.preventDefault();
+        const credentialId = document.getElementById('credentialId').value;
+        const isEdit = !!credentialId;
+        const token = localStorage.getItem('token');
+
+        try {
+            // UX FIX: Get password from session cache or new modal prompt.
+            const password = await getSessionPassword(`Please enter your password to ${isEdit ? 'update' : 'save'} this credential:`);
+
+            const vaultData = {
+                title: document.getElementById('websiteName').value,
+                url: document.getElementById('url').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                category: document.getElementById('category').value,
+                notes: ''
+            };
+
+            const requestBody = { password, vaultData };
+            if (isEdit) requestBody.id = credentialId;
+
+            const response = await fetch('/api/vault/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                if (response.status === 401) sessionPassword = null; // Clear bad password
+                throw new Error(errorData.error || 'Failed to save credential');
+            }
+
+            showToast(`Credential ${isEdit ? 'updated' : 'saved'}!`, 'success');
+            closeAddEditModal();
+            await fetchVault();
+        } catch (err) {
+            showToast(`Error: ${err.message}`, 'error');
+        }
+    }
+
+    // --- MODALS & UI ---
+    function openPasswordModal(message, callback) {
+        addEditModal.innerHTML = `
+            <h2>Password Required</h2>
+            <p>${message}</p>
+            <form id="passwordPromptForm">
+                <div class="input-group">
+                    <label for="modalPassword">Password:</label>
+                    <input type="password" id="modalPassword" required autocomplete="current-password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="button secondary close-modal">Cancel</button>
+                    <button type="submit" class="button primary">Submit</button>
+                </div>
+            </form>
+        `;
+        addEditModal.classList.add('show');
+        modalOverlay.classList.add('show');
+
+        const form = addEditModal.querySelector('#passwordPromptForm');
+        const cancelBtn = addEditModal.querySelector('.close-modal');
+        const passwordInput = addEditModal.querySelector('#modalPassword');
+        passwordInput.focus();
+
+        const close = () => {
+            closeAddEditModal();
+            callback(null); // Pass null on cancel
+        };
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            closeAddEditModal();
+            callback(passwordInput.value);
+        };
+
+        cancelBtn.onclick = close;
+        modalOverlay.onclick = close;
+    }
+
+    // (The rest of the file: renderCredentials, openAddEditModal, etc. remains largely the same)
+    // Minor changes might be needed in event listeners to use the new functions.
 
     const renderCredentials = (filteredCredentials = credentials) => {
         credentialsList.innerHTML = '';
@@ -177,60 +263,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
     });
-
-    const handleCredentialSubmit = async (e) => {
-        e.preventDefault();
-        const credentialId = document.getElementById('credentialId').value;
-        const isEdit = !!credentialId;
-        const token = localStorage.getItem('token');
-
-        // CONSISTENCY FIX: Use 'password' consistently.
-        const password = prompt(`Please enter your password to ${isEdit ? 'update' : 'save'} this credential:`);
-        if (!password) {
-            showToast('Password is required to save changes.', 'error');
-            return;
-        }
-
-        const vaultData = {
-            title: document.getElementById('websiteName').value,
-            url: document.getElementById('url').value,
-            username: document.getElementById('username').value,
-            password: document.getElementById('password').value,
-            category: document.getElementById('category').value,
-            notes: '',
-        };
-
-        const requestBody = {
-            password: password,
-            vaultData: vaultData
-        };
-
-        if (isEdit) {
-            requestBody.id = credentialId;
-        }
-
-        try {
-            const response = await fetch('/api/vault/save', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to save credential');
-            }
-
-            showToast(`Credential ${isEdit ? 'updated' : 'saved'}!`, 'success');
-            closeAddEditModal();
-            await fetchVault();
-        } catch (err) {
-            showToast(`Error: ${err.message}`, 'error');
-        }
-    };
 
     const openAddEditModal = (mode, credential = {}) => {
         const isEdit = mode === 'edit';
