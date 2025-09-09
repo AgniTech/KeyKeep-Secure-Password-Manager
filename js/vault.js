@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p class="password-masked">
                     <strong>Password:</strong>
                     <span>********</span>
-                    <button class="button secondary show-hide-button" aria-label="Show password"><img src="images/unsee.png" alt="Show password"></button>
+                    <button class="button secondary show-hide-button toggle-password" aria-label="Show password"><img src="images/unsee.png" alt="Show password"></button>
                 </p>
             </div>
             <div class="credential-actions">
