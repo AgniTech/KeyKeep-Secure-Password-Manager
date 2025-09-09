@@ -7,18 +7,15 @@ import User from '../models/user.js';
 import Vault from '../models/Vault.js';
 
 export default async function handler(req, res) {
-  // Changed to POST to securely receive master password in the body
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // Scoped variables for sensitive data to ensure cleanup
   let PKEK, rsaPrivateKey;
 
   try {
     await connectDB();
 
-    // 1. Verify JWT token to get the authenticated user's ID
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Unauthorized: No valid token provided' });
@@ -27,25 +24,25 @@ export default async function handler(req, res) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    // 2. Get master password from the request body
-    const { masterPassword } = req.body;
-    if (!masterPassword) {
-      return res.status(400).json({ error: 'Master password is required.' });
+    // CONSISTENCY FIX: Changed 'masterPassword' to 'password'
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required.' });
     }
 
-    // 3. Re-Authenticate and Derive PKEK
     const user = await User.findById(userId).exec();
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }
 
-    const isAuth = await user.comparePassword(masterPassword);
+    // Use the consistent 'password' variable for authentication
+    const isAuth = await user.comparePassword(password);
     if (!isAuth) {
-      return res.status(401).json({ error: 'Invalid master password.' });
+      return res.status(401).json({ error: 'Invalid password.' });
     }
 
     const argon2Salt = Buffer.from(user.argon2Salt, 'base64');
-    PKEK = await argon2.hash(masterPassword, {
+    PKEK = await argon2.hash(password, {
         salt: argon2Salt,
         raw: true,
         type: argon2.argon2id,
@@ -54,7 +51,6 @@ export default async function handler(req, res) {
         parallelism: 4,
     });
 
-    // 4. Decrypt RSA Private Key into a temporary variable
     const privateKeyIv = Buffer.from(user.privateKeyIv, 'base64');
     const privateKeyAuthTag = Buffer.from(user.privateKeyAuthTag, 'base64');
     const encryptedRsaPrivateKey = Buffer.from(user.encryptedRsaPrivateKey, 'base64');
@@ -64,15 +60,12 @@ export default async function handler(req, res) {
     
     rsaPrivateKey = Buffer.concat([decipher.update(encryptedRsaPrivateKey), decipher.final()]).toString('utf8');
 
-    // 5. Fetch all vault entries for the user
     const vaultEntries = await Vault.find({ userId }).sort({ createdAt: -1 }).exec();
 
-    // 6. Decrypt each entry
     const decryptedEntries = [];
     for (const entry of vaultEntries) {
-      let vaultKey = null; // Scoped to the loop for cleanup
+      let vaultKey = null;
       try {
-        // 6a. Unwrap Symmetric Key (RSA Decrypt)
         const encryptedVaultKey = Buffer.from(entry.encryptedVaultKey, 'base64');
         vaultKey = crypto.privateDecrypt(
           {
@@ -83,7 +76,6 @@ export default async function handler(req, res) {
           encryptedVaultKey
         );
 
-        // 6b. Decrypt Vault Data (ChaCha20-Poly1305)
         const vaultNonce = Buffer.from(entry.vaultNonce, 'base64');
         const encryptedVaultData = Buffer.from(entry.encryptedVaultData, 'base64');
         const vaultDecipher = crypto.createDecipheriv('chacha20-poly1305', vaultKey, vaultNonce);
@@ -92,7 +84,6 @@ export default async function handler(req, res) {
             vaultDecipher.final()
         ]).toString('utf8');
 
-        // 6c. Finalize: Parse the JSON and add the database ID
         const decryptedData = JSON.parse(decryptedDataString);
         decryptedEntries.push({
           id: entry._id,
@@ -106,7 +97,7 @@ export default async function handler(req, res) {
           error: 'Failed to decrypt this item.'
         });
       } finally {
-        if (vaultKey) vaultKey.fill(0); // Clean up the single-use vault key
+        if (vaultKey) vaultKey.fill(0);
       }
     }
 
@@ -117,11 +108,10 @@ export default async function handler(req, res) {
     if (e.name === 'JsonWebTokenError') return res.status(401).json({ error: 'Invalid token' });
     if (e.name === 'TokenExpiredError') return res.status(401).json({ error: 'Token expired' });
     if (e.code && e.code.startsWith('ERR_CRYPTO')) {
-        return res.status(401).json({ error: 'Decryption failed. Master password may be incorrect.' });
+        return res.status(401).json({ error: 'Decryption failed. Password may be incorrect.' });
     }
     res.status(500).json({ error: 'An unexpected server error occurred.' });
   } finally {
-    // 7. Memory Cleanup: Securely wipe all sensitive data from memory
     if (PKEK) PKEK.fill(0);
     if (rsaPrivateKey) rsaPrivateKey = null;
   }

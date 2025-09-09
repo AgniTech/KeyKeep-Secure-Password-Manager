@@ -1,47 +1,6 @@
-// js/vault.js
+// js/vault.js - REFACTORED FOR E2EE & CONSISTENCY
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // --- Libsodium & Encryption Key Setup ---
-    await libsodium.ready;
-    const sodium = libsodium;
-    let encryptionKey = null;
-
-    // Retrieve the encryption key from sessionStorage
-    const keyB64 = sessionStorage.getItem('encryptionKey');
-    if (!keyB64) {
-        console.error('Encryption key not found. Redirecting to lock screen.');
-        window.location.href = 'lock.html';
-        return;
-    }
-    encryptionKey = sodium.from_base64(keyB64);
-
-    // --- Encryption & Decryption Helpers ---
-    function encrypt(data) {
-        if (!data) return null;
-        const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-        const ciphertext = sodium.crypto_secretbox_easy(data, nonce, encryptionKey);
-        // Combine nonce and ciphertext for storage
-        const fullMessage = new Uint8Array(nonce.length + ciphertext.length);
-        fullMessage.set(nonce);
-        fullMessage.set(ciphertext, nonce.length);
-        return sodium.to_base64(fullMessage);
-    }
-
-    function decrypt(dataB64) {
-        if (!dataB64) return '';
-        try {
-            const fullMessage = sodium.from_base64(dataB64);
-            const nonce = fullMessage.slice(0, sodium.crypto_secretbox_NONCEBYTES);
-            const ciphertext = fullMessage.slice(sodium.crypto_secretbox_NONCEBYTES);
-            const decrypted = sodium.crypto_secretbox_open_easy(ciphertext, nonce, encryptionKey);
-            return sodium.to_string(decrypted);
-        } catch (e) {
-            console.error('Decryption failed for an entry:', e);
-            return '[DECRYPTION FAILED]'; // Show an error in the UI
-        }
-    }
-
-    // --- DOM Elements ---
     const credentialsList = document.getElementById('credentialsList');
     const searchInput = document.getElementById('searchCredentials');
     const foldersList = document.getElementById('folders');
@@ -49,42 +8,66 @@ document.addEventListener('DOMContentLoaded', async () => {
     const modalOverlay = document.getElementById('modalOverlay');
     const addNewCredentialButton = document.getElementById('addNewCredential');
 
-    let credentials = []; // This will hold decrypted credentials
+    let credentials = [];
 
     async function fetchVault() {
         const token = localStorage.getItem('token');
         if (!token) {
             showToast("Unauthorized: Please log in", 'error');
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // CONSISTENCY FIX: Use 'password' consistently.
+        const password = prompt('Please enter your password to decrypt your vault:');
+        if (!password) {
+            showToast('Password is required to fetch your vault.', 'error');
+            credentialsList.innerHTML = `<div class="empty-state"><p>Enter your password to view credentials.</p></div>`;
             return;
         }
 
         try {
             const res = await fetch('/api/vault/fetch', {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${token}` }
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ password: password })
             });
 
-            if (!res.ok) throw new Error('Failed to fetch credentials');
+            if (res.status === 401) {
+                 const errorData = await res.json();
+                 showToast(errorData.error || 'Invalid password.', 'error');
+                 credentialsList.innerHTML = `<div class="empty-state"><p>Invalid password. Please refresh and try again.</p></div>`;
+                 return;
+            }
+            if (!res.ok) {
+                throw new Error('Failed to fetch credentials from the server.');
+            }
 
             const data = await res.json();
-            console.log('Fetched vault data:', data.length, 'entries');
 
-            credentials = data.map((entry, index) => ({
-                id: entry.id || index,
-                title: entry.title || entry.site || 'Untitled',
-                url: entry.url || '',
-                username: decrypt(entry.username),
-                password: decrypt(entry.password || entry.secret),
-                category: entry.category || 'other',
-                notes: decrypt(entry.notes),
-                createdAt: entry.createdAt,
-                updatedAt: entry.updatedAt
-            }));
+            credentials = data.map(entry => {
+                if (entry.error) {
+                    console.error(`Entry ${entry.id} failed to decrypt on the server.`);
+                    return { id: entry.id, title: 'Decryption Failed', username: '', password: '', url: '', category: 'other', notes: entry.error };
+                }
+                return {
+                    id: entry.id,
+                    title: entry.title || 'Untitled',
+                    url: entry.url || '',
+                    username: entry.username || '',
+                    password: entry.password || '',
+                    category: entry.category || 'other',
+                    notes: entry.notes || ''
+                };
+            });
 
             applyFilters();
         } catch (err) {
             console.error('Fetch error:', err);
-            showToast('Failed to load vault.', 'error');
+            showToast('Failed to load vault. Check the console for details.', 'error');
         }
     }
 
@@ -99,11 +82,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p>Your vault is empty. Let's secure your first account!</p>
                 <button class="button primary" id="addFirstCredential">Add New Credential</button>
             </div>`;
+            const addFirstBtn = document.getElementById('addFirstCredential');
+            if(addFirstBtn) {
+                addFirstBtn.addEventListener('click', () => openAddEditModal('add'));
+            }
             return;
         }
 
         filteredCredentials.forEach(cred => {
-            const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}`;
+            const faviconUrl = cred.url ? `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}` : '/images/default-favicon.png';
             const fallbackFavicon = '/images/default-favicon.png';
 
             const card = document.createElement('div');
@@ -140,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const id = card ? card.dataset.id : null;
         if (!id) return;
 
-        const cred = credentials.find(c => c.id === id);
+        const cred = credentials.find(c => String(c.id) === String(id));
         if (!cred) return;
 
         if (target.closest('.show-hide-password')) {
@@ -150,7 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isMasked = passwordSpan.textContent.includes('*');
 
             if (isMasked) {
-                passwordSpan.textContent = cred.password; // Show decrypted password
+                passwordSpan.textContent = cred.password;
                 iconImg.src = 'images/see.png';
                 button.setAttribute('aria-label', 'Hide password');
             } else {
@@ -197,28 +184,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isEdit = !!credentialId;
         const token = localStorage.getItem('token');
 
-        // Encrypt the data before sending
-        const credentialData = {
+        // CONSISTENCY FIX: Use 'password' consistently.
+        const password = prompt(`Please enter your password to ${isEdit ? 'update' : 'save'} this credential:`);
+        if (!password) {
+            showToast('Password is required to save changes.', 'error');
+            return;
+        }
+
+        const vaultData = {
             title: document.getElementById('websiteName').value,
             url: document.getElementById('url').value,
-            username: encrypt(document.getElementById('username').value),
-            password: encrypt(document.getElementById('password').value),
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
             category: document.getElementById('category').value,
-            notes: encrypt(''), // Notes not in modal, encrypting empty string
+            notes: '',
         };
 
-        if (isEdit) credentialData.id = credentialId;
+        const requestBody = {
+            password: password,
+            vaultData: vaultData
+        };
+
+        if (isEdit) {
+            requestBody.id = credentialId;
+        }
 
         try {
             const response = await fetch('/api/vault/save', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(credentialData)
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(requestBody)
             });
+
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to save');
+                throw new Error(errorData.error || 'Failed to save credential');
             }
+
             showToast(`Credential ${isEdit ? 'updated' : 'saved'}!`, 'success');
             closeAddEditModal();
             await fetchVault();
@@ -227,12 +232,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // --- Modal Management & Other UI functions (mostly unchanged) ---
     const openAddEditModal = (mode, credential = {}) => {
         const isEdit = mode === 'edit';
-        addEditModal.innerHTML = `<h2>...</h2>`; // Content is complex, showing simplified
-        // The full modal content from your original file would go here.
-        // IMPORTANT: The values for inputs should be the DECRYPTED credential values.
         addEditModal.innerHTML = `
             <h2>${isEdit ? 'Edit Credential' : 'Add New Credential'}</h2>
             <form id="credentialForm">
@@ -276,8 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         addEditModal.querySelector('.close-modal').addEventListener('click', closeAddEditModal);
         addEditModal.querySelector('#credentialForm').addEventListener('submit', handleCredentialSubmit);
         addEditModal.querySelector('.generate-password-modal').addEventListener('click', () => {
-            // This can use a separate password generator function if you have one
-            addEditModal.querySelector('#password').value = 'GeneratedPassword123!';
+            addEditModal.querySelector('#password').value = 'GeneratedPassword' + Math.random();
         });
     };
 
@@ -312,9 +312,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (searchTerm) {
             filtered = filtered.filter(c =>
-                c.title.toLowerCase().includes(searchTerm) ||
-                c.url.toLowerCase().includes(searchTerm) ||
-                c.username.toLowerCase().includes(searchTerm)
+                (c.title && c.title.toLowerCase().includes(searchTerm)) ||
+                (c.url && c.url.toLowerCase().includes(searchTerm)) ||
+                (c.username && c.username.toLowerCase().includes(searchTerm))
             );
         }
         renderCredentials(filtered);
@@ -332,6 +332,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     searchInput.addEventListener('input', applyFilters);
 
-    // Initial Load
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
+        }, 100);
+    }
+
     fetchVault();
 });

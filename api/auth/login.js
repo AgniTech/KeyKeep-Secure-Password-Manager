@@ -17,35 +17,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    // The client will send the master password, which we now call 'password' internally
-    const { email, password: masterPassword } = req.body;
+    // SIMPLIFICATION: Use 'password' consistently. No more renaming.
+    const { email, password } = req.body;
 
-    if (!email || !masterPassword) {
+    if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    // 1. Authenticate User: Find user and verify password
     const user = await User.findOne({ email }).exec();
 
     if (!user) {
-      // Use a generic error message to prevent email enumeration
       return res.status(401).json({ msg: 'Invalid credentials. Please try again.' });
     }
 
-    // The comparePassword method is defined on the User model
-    const isMatch = await user.comparePassword(masterPassword);
+    // The user model's comparePassword method will compare the provided password
+    // with the hash stored in the database.
+    const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
       return res.status(401).json({ msg: 'Invalid credentials. Please try again.' });
     }
 
-    // 2. If authentication is successful, generate and return a JWT
-    // The JWT proves the user is authenticated for subsequent API calls.
-    // It does NOT contain any sensitive key material.
+    // If authentication is successful, generate and return a JWT.
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: '2h' } // Keep session duration reasonable
+      { expiresIn: '2h' }
     );
 
     return res.status(200).json({ token });

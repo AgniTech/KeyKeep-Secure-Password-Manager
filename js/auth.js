@@ -8,13 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
 
    const API_BASE_URL = '/api/auth';
-// Ensure this matches your backend server URL
 
     // --- Sliding Panel Animation Logic ---
     if (signUpButton) {
         signUpButton.addEventListener('click', () => {
             container.classList.add("right-panel-active");
-            // Clear previous errors when switching panels
             if (document.getElementById('loginError')) document.getElementById('loginError').textContent = '';
             if (document.getElementById('registerError')) document.getElementById('registerError').textContent = '';
         });
@@ -23,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (signInButton) {
         signInButton.addEventListener('click', () => {
             container.classList.remove("right-panel-active");
-            // Clear previous errors when switching panels
             if (document.getElementById('loginError')) document.getElementById('loginError').textContent = '';
             if (document.getElementById('registerError')) document.getElementById('registerError').textContent = '';
         });
@@ -34,9 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
-            const masterPassword = document.getElementById('password').value;
+            const password = document.getElementById('password').value;
             const errorContainer = document.getElementById('loginError');
-            errorContainer.textContent = ''; // Clear previous errors
+            errorContainer.textContent = '';
 
             try {
                 const response = await fetch(`${API_BASE_URL}/login`, {
@@ -44,26 +41,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email, masterPassword }),
-
-
+                    // FIX: Changed masterPassword to password to match backend API
+                    body: JSON.stringify({ email, password }),
                 });
 
                 const data = await response.json();
 
-                if (response.ok) { // Check if the response status is 2xx
-                    console.log('Login successful:', data);
-                    // Store the JWT token
+                if (response.ok) {
                     localStorage.setItem('token', data.token);
-                    // Redirect to the vault page
                     window.location.href = 'vault.html';
                 } else {
-                    // Handle errors from the backend (e.g., "Invalid Credentials")
-                    console.error('Login failed:', data.msg);
                     errorContainer.textContent = data.msg || 'Login failed. Please try again.';
                 }
             } catch (error) {
-                console.error('Network error during login:', error);
                 errorContainer.textContent = 'Network error. Please check your connection.';
             }
         });
@@ -74,16 +64,16 @@ document.addEventListener('DOMContentLoaded', () => {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('registerEmail').value;
-            const masterPassword = document.getElementById('registerPassword').value;
+            const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const errorContainer = document.getElementById('registerError');
-            errorContainer.textContent = ''; // Clear previous errors
+            errorContainer.textContent = '';
 
-            if (masterPassword !== confirmPassword) {
+            if (password !== confirmPassword) {
                 errorContainer.textContent = 'Passwords do not match.';
                 return;
             }
-            if (masterPassword.length < 8) { // Basic frontend validation matching backend
+            if (password.length < 8) {
                 errorContainer.textContent = 'Password must be at least 8 characters long.';
                 return;
             }
@@ -94,27 +84,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email, masterPassword }),
-
-
+                    // FIX: Changed masterPassword to password to match backend API
+                    body: JSON.stringify({ email, password }),
                 });
 
                 const data = await response.json();
 
-                if (response.ok) { // Check if the response status is 2xx
-                    console.log('Registration successful:', data);
-                    // Store the JWT token (optional, could just redirect to login)
-                    localStorage.setItem('token', data.token);
-                    // Optionally, show a success message and then switch to the sign-in panel
-                    // For now, let's redirect directly to the vault as per previous flow
-                    window.location.href = 'vault.html';
+                if (response.ok) {
+                    // On successful registration, prompt the user to log in.
+                    alert(data.message || 'Registration successful! Please sign in.');
+                    // Trigger the click to slide the panel to the sign-in form.
+                    if(signInButton) signInButton.click();
                 } else {
-                    // Handle errors from the backend (e.g., "User already exists")
-                    console.error('Registration failed:', data.msg);
                     errorContainer.textContent = data.msg || 'Registration failed. Please try again.';
                 }
             } catch (error) {
-                console.error('Network error during registration:', error);
                 errorContainer.textContent = 'Network error. Please check your connection.';
             }
         });
