@@ -148,12 +148,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const renderCredentials = (filteredCredentials = credentials) => {
         credentialsList.innerHTML = '';
         if (!filteredCredentials || filteredCredentials.length === 0) {
-            credentialsList.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🛡️</div>
-                <p>Your vault is empty. Let's secure your first account!</p>
-                <button class="button primary" id="addFirstCredential">Add New Credential</button>
-            </div>`;
+            let emptyStateContent = '';
+            if (sessionPassword === null) {
+                // User cancelled password prompt or password was incorrect
+                emptyStateContent = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔒</div>
+                        <p>To open your vault, please click the button below.</p>
+                        <button class="button primary" id="unlockVaultButton">Unlock Vault</button>
+                    </div>`;
+            } else {
+                // Vault is genuinely empty after successful unlock
+                emptyStateContent = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛡️</div>
+                        <p>Your vault is empty. Let's secure your first account!</p>
+                        <button class="button primary" id="addFirstCredential">Add New Credential</button>
+                    </div>`;
+            }
+            credentialsList.innerHTML = emptyStateContent;
+
+            const unlockVaultBtn = document.getElementById('unlockVaultButton');
+            if (unlockVaultBtn) {
+                unlockVaultBtn.addEventListener('click', fetchVault);
+            }
+
             const addFirstBtn = document.getElementById('addFirstCredential');
             if(addFirstBtn) {
                 addFirstBtn.addEventListener('click', () => openAddEditModal('add'));
@@ -273,7 +292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             if (!res.ok) {
-                const errorData = await res.json();
+                const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to fetch credentials.');
             }
 
