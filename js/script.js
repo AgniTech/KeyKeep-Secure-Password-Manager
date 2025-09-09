@@ -40,6 +40,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Toggle button clicked!');
                 const passwordInput = this.closest('.password-input').querySelector('input');
                 const iconImg = this.querySelector('img');
+                
+                console.log('passwordInput element:', passwordInput);
+                console.log('iconImg element:', iconImg);
+
+                if (!passwordInput) {
+                    console.error('Password input not found!');
+                    return;
+                }
+
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
 
