@@ -1,30 +1,38 @@
-// js/vault.js - REWRITTEN TO FIX VAULT LOADING BUG AND RESTORE ORIGINAL UI
+// js/vault.js - REWRITTEN TO FIX VAULT LOADING AND UI ISSUES
 
 document.addEventListener('DOMContentLoaded', async () => {
     // --- DOM Elements ---
     const credentialsList = document.getElementById('credentialsList');
     const searchInput = document.getElementById('searchCredentials');
-    const foldersList = document.getElementById('folders'); // Added for category filtering
+    const foldersList = document.getElementById('folders'); // For category filtering
     const addNewCredentialButton = document.getElementById('addNewCredential');
     const addEditModal = document.getElementById('addEditModal');
     const modalOverlay = document.getElementById('modalOverlay');
 
     let credentials = [];
     let sessionPassword = null; // Caches the password in memory for the session
-    let currentFilter = 'all'; // Added for category filtering
+    let currentFilter = 'all'; // For category filtering
 
     // --- PASSWORD MODAL & SESSION CACHE ---
+    /**
+     * Gets the user's password. It will only prompt the user once per session,
+     * caching the password in a local variable for subsequent calls.
+     * @param {string} message The message to display in the password prompt.
+     * @returns {Promise<string>} A promise that resolves with the password.
+     */
     function getSessionPassword(message) {
         return new Promise((resolve, reject) => {
             if (sessionPassword) {
                 return resolve(sessionPassword);
             }
+
+            // Use a custom modal for password prompt
             openPasswordModal(message, (enteredPassword) => {
                 if (enteredPassword) {
                     sessionPassword = enteredPassword; // Cache the password
                     resolve(enteredPassword);
                 } else {
-                    reject('Password entry was cancelled.');
+                    reject(new Error('Password entry was cancelled or empty.'));
                 }
             });
         });
@@ -38,9 +46,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        let password = null;
         try {
-            const password = await getSessionPassword('Please enter your password to decrypt your vault:');
+            password = await getSessionPassword('Please enter your password to decrypt your vault:');
+        } catch (err) {
+            // User cancelled the password modal
+            showToast(err.message, 'info'); // Use info for cancellation, not error
+            credentials = []; // Ensure credentials array is empty
+            applyFilters(); // Render empty state
+            return;
+        }
 
+        // If password is null (e.g., user cancelled the modal) - redundant with catch block but good for clarity
+        if (!password) {
+            credentials = []; // Ensure credentials array is empty
+            applyFilters(); // Render empty state
+            return;
+        }
+
+        try {
             const res = await fetch('/api/vault/fetch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -51,17 +75,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sessionPassword = null; // Clear the bad password
                 const errorData = await res.json();
                 showToast(errorData.error || 'Invalid password.', 'error');
-                credentialsList.innerHTML = `<div class="empty-state"><p>Invalid password. Please refresh and try again.</p></div>`;
+                credentials = []; // Ensure credentials array is empty
+                applyFilters(); // Render empty state
                 return;
             }
-            if (!res.ok) throw new Error('Failed to fetch credentials.');
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Failed to fetch credentials.');
+            }
 
             const data = await res.json();
             credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed', username: '[Encrypted]', password: '[Encrypted]' } : entry);
             applyFilters(); // Re-render with the new data, applying current filters
 
         } catch (err) {
-            showToast(err.message, 'error');
+            console.error('Fetch error:', err);
+            showToast('An unexpected error occurred while fetching the vault: ' + err.message, 'error');
+            credentials = []; // Ensure credentials array is empty
+            applyFilters(); // Render empty state
         }
     }
 
@@ -150,20 +181,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         modalOverlay.onclick = close;
     }
 
-    const renderCredentials = (itemsToRender) => {
+    const renderCredentials = (filteredCredentials = credentials) => {
         credentialsList.innerHTML = '';
-        if (!itemsToRender || itemsToRender.length === 0) {
+        if (!filteredCredentials || filteredCredentials.length === 0) {
             credentialsList.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">🛡️</div>
                 <p>Your vault is empty. Let's secure your first account!</p>
                 <button class="button primary" id="addFirstCredential">Add New Credential</button>
             </div>`;
-            document.getElementById('addFirstCredential').addEventListener('click', () => openAddEditModal('add'));
+            const addFirstBtn = document.getElementById('addFirstCredential');
+            if(addFirstBtn) {
+                addFirstBtn.addEventListener('click', () => openAddEditModal('add'));
+            }
             return;
         }
 
-        itemsToRender.forEach(cred => {
+        filteredCredentials.forEach(cred => {
             const faviconUrl = cred.url ? `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}` : '/images/default-favicon.png';
             const card = document.createElement('div');
             card.className = 'credential-card glassmorphism';
@@ -193,8 +227,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     credentialsList.addEventListener('click', async (e) => {
         const target = e.target;
         const card = target.closest('.credential-card');
-        if (!card) return;
-        const id = card.dataset.id;
+        const id = card ? card.dataset.id : null;
+        if (!id) return;
+
         const cred = credentials.find(c => String(c.id) === String(id));
         if (!cred) return;
 
@@ -268,6 +303,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closeAddEditModal = () => {
         addEditModal.classList.remove('show');
         modalOverlay.classList.remove('show');
+        // Clear form fields when modal is closed
+        const form = document.getElementById('credentialForm');
+        if (form) {
+            form.reset();
+            document.getElementById('credentialId').value = ''; // Clear hidden ID
+        }
     };
 
     function showToast(message, type = 'info') {
