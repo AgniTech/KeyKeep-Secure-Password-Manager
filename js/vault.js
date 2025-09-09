@@ -23,15 +23,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     function getSessionPassword(message) {
         return new Promise((resolve, reject) => {
             if (sessionPassword) {
+                console.log('getSessionPassword: Returning cached password.'); // DEBUG
                 return resolve(sessionPassword);
             }
 
-            // Use a custom modal for password prompt
             openPasswordModal(message, (enteredPassword) => {
                 if (enteredPassword) {
                     sessionPassword = enteredPassword; // Cache the password
+                    console.log('getSessionPassword: Password entered and cached.'); // DEBUG
                     resolve(enteredPassword);
                 } else {
+                    console.log('getSessionPassword: Password entry cancelled or empty.'); // DEBUG
                     reject(new Error('Password entry was cancelled or empty.'));
                 }
             });
@@ -40,8 +42,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- FETCH & SAVE LOGIC ---
     async function fetchVault() {
+        console.log('fetchVault: Called.'); // DEBUG
         const token = localStorage.getItem('token');
         if (!token) {
+            console.log('fetchVault: No token, redirecting to index.html.'); // DEBUG
             window.location.href = 'index.html';
             return;
         }
@@ -49,8 +53,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         let password = null;
         try {
             password = await getSessionPassword('Please enter your password to decrypt your vault:');
+            console.log('fetchVault: Password obtained from getSessionPassword.'); // DEBUG
         } catch (err) {
-            // User cancelled the password modal
+            console.error('fetchVault: Error getting password:', err); // DEBUG
             showToast(err.message, 'info'); // Use info for cancellation, not error
             credentials = []; // Ensure credentials array is empty
             applyFilters(); // Render empty state
@@ -59,17 +64,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // If password is null (e.g., user cancelled the modal) - redundant with catch block but good for clarity
         if (!password) {
+            console.log('fetchVault: Password is null after getSessionPassword (user cancelled).'); // DEBUG
             credentials = []; // Ensure credentials array is empty
             applyFilters(); // Render empty state
             return;
         }
 
         try {
+            console.log('fetchVault: Making fetch call to /api/vault/fetch.'); // DEBUG
             const res = await fetch('/api/vault/fetch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ password })
             });
+
+            console.log('fetchVault: Fetch response status:', res.status); // DEBUG
 
             if (res.status === 401) {
                 sessionPassword = null; // Clear the bad password
@@ -85,11 +94,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const data = await res.json();
+            console.log('fetchVault: Received data from backend:', data); // DEBUG: Crucial log
             credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed', username: '[Encrypted]', password: '[Encrypted]' } : entry);
-            applyFilters(); // Re-render with the new data, applying current filters
+            console.log('fetchVault: Credentials array updated:', credentials); // DEBUG
+            applyFilters(); // This calls renderCredentials
+            console.log('fetchVault: applyFilters called.'); // DEBUG
 
         } catch (err) {
-            console.error('Fetch error:', err);
+            console.error('fetchVault: Error during fetch operation:', err); // DEBUG
             showToast('An unexpected error occurred while fetching the vault: ' + err.message, 'error');
             credentials = []; // Ensure credentials array is empty
             applyFilters(); // Render empty state
@@ -144,6 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- MODALS & UI FUNCTIONS ---
     function openPasswordModal(message, callback) {
+        console.log('openPasswordModal: Displaying modal.'); // DEBUG
         addEditModal.innerHTML = `
             <h2>Password Required</h2>
             <p>${message}</p>
@@ -167,12 +180,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         passwordInput.focus();
 
         const close = () => {
+            console.log('openPasswordModal: Modal closed (cancelled).'); // DEBUG
             closeAddEditModal();
             callback(null); // Pass null on cancel
         };
 
         form.onsubmit = (e) => {
             e.preventDefault();
+            console.log('openPasswordModal: Password submitted.'); // DEBUG
             closeAddEditModal();
             callback(passwordInput.value);
         };
@@ -182,8 +197,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const renderCredentials = (filteredCredentials = credentials) => {
+        console.log('renderCredentials: Called with', filteredCredentials); // DEBUG
         credentialsList.innerHTML = '';
         if (!filteredCredentials || filteredCredentials.length === 0) {
+            console.log('renderCredentials: Displaying empty state.'); // DEBUG
             credentialsList.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">🛡️</div>
@@ -197,6 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        console.log('renderCredentials: Rendering', filteredCredentials.length, 'credentials.'); // DEBUG
         filteredCredentials.forEach(cred => {
             const faviconUrl = cred.url ? `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}` : '/images/default-favicon.png';
             const card = document.createElement('div');
@@ -360,5 +378,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // --- INITIALIZATION ---
+    console.log('DOMContentLoaded: Calling fetchVault().'); // DEBUG
     fetchVault(); // Start by fetching the vault on load.
 });
