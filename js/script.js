@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     iconImg.src = type === 'password' ? 'images/unsee.png' : 'images/see.png';
                     iconImg.alt = type === 'password' ? 'Show' : 'Hide';
                     this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+                    console.log('New iconImg src:', iconImg.src);
                 } else {
                     // Fallback to text-based toggle for other pages
                     this.textContent = type === 'password' ? '👁️' : ' Hide';

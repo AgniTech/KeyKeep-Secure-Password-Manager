@@ -67,10 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 errorContainer.textContent = 'Network error. Please check your connection.';
             }
         });
-        // Call setupPasswordToggles after the form is loaded
-        if (window.setupPasswordToggles) {
-            window.setupPasswordToggles(loginForm);
-        }
     }
 
     // --- REGISTER PAGE LOGIC ---
@@ -111,9 +107,5 @@ document.addEventListener('DOMContentLoaded', () => {
                 errorContainer.textContent = 'Network error. Please check your connection.';
             }
         });
-        // Call setupPasswordToggles after the form is loaded
-        if (window.setupPasswordToggles) {
-            window.setupPasswordToggles(registerForm);
-        }
     }
 });

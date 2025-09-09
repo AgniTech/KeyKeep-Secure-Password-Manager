@@ -152,7 +152,7 @@
 
 .credentials-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); /* Increased minmax from 320px to 380px */
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); /* Increased minmax from 380px to 420px */
     gap: 35px; /* Increased from 25px for more space between cards */
 }
 
