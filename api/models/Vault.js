@@ -19,6 +19,10 @@ const VaultSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  vaultAuthTag: { // NEW FIELD ADDED
+    type: String,
+    required: true
+  },
   createdAt: {
     type: Date,
     default: Date.now

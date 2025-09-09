@@ -24,7 +24,6 @@ export default async function handler(req, res) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
-    // CONSISTENCY FIX: Changed 'masterPassword' to 'password'
     const { password, vaultData, id: vaultId } = req.body;
     if (!password || !vaultData) {
       return res.status(400).json({ error: 'Password and vault data are required.' });
@@ -35,7 +34,6 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'User not found.' });
     }
 
-    // Use the consistent 'password' variable for authentication
     const isAuth = await user.comparePassword(password);
     if (!isAuth) {
       return res.status(401).json({ error: 'Invalid password.' });
@@ -69,6 +67,8 @@ export default async function handler(req, res) {
         vaultCipher.update(vaultDataString, 'utf8'),
         vaultCipher.final()
     ]);
+    
+    const vaultAuthTag = vaultCipher.getAuthTag(); // NEW: Get the auth tag
 
     const encryptedVaultKey = crypto.publicEncrypt(
         {
@@ -83,7 +83,8 @@ export default async function handler(req, res) {
       userId,
       encryptedVaultData: encryptedVaultData.toString('base64'),
       encryptedVaultKey: encryptedVaultKey.toString('base64'),
-      vaultNonce: vaultNonce.toString('base64')
+      vaultNonce: vaultNonce.toString('base64'),
+      vaultAuthTag: vaultAuthTag.toString('base64') // NEW: Store the auth tag
     };
 
     let savedEntry;

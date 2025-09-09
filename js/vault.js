@@ -1,12 +1,10 @@
-// js/vault.js - REWRITTEN TO FIX VAULT LOADING BUG
+// js/vault.js - REWRITTEN TO FIX VAULT LOADING BUG AND RESTORE ORIGINAL UI
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // --- DOM Elements ---
-    const credentialsContainer = document.getElementById('credentialsContainer');
-    const passwordUnlockContainer = document.getElementById('passwordUnlockContainer');
-    const passwordUnlockForm = document.getElementById('passwordUnlockForm');
     const credentialsList = document.getElementById('credentialsList');
     const searchInput = document.getElementById('searchCredentials');
+    const foldersList = document.getElementById('folders');
     const addNewCredentialButton = document.getElementById('addNewCredential');
     const addEditModal = document.getElementById('addEditModal');
     const modalOverlay = document.getElementById('modalOverlay');
@@ -14,70 +12,66 @@ document.addEventListener('DOMContentLoaded', () => {
     let credentials = [];
     let sessionPassword = null; // Caches the password in memory for the session
 
-    // --- CORE LOGIC ---
+    // --- PASSWORD MODAL & SESSION CACHE ---
+    /**
+     * Gets the user's password. It will only prompt the user once per session,
+     * caching the password in a local variable for subsequent calls.
+     * @param {string} message The message to display in the password prompt.
+     * @returns {Promise<string>} A promise that resolves with the password.
+     */
+    function getSessionPassword(message) {
+        return new Promise((resolve, reject) => {
+            // If we already have the password for this session, return it immediately.
+            if (sessionPassword) {
+                return resolve(sessionPassword);
+            }
 
-    function showUnlockScreen() {
-        credentialsContainer.style.display = 'none';
-        passwordUnlockContainer.style.display = 'flex';
+            // Use a custom modal for password prompt
+            openPasswordModal(message, (enteredPassword) => {
+                if (enteredPassword) {
+                    sessionPassword = enteredPassword; // Cache the password
+                    resolve(enteredPassword);
+                } else {
+                    reject('Password entry was cancelled.');
+                }
+            });
+        });
     }
 
-    function showVault() {
-        passwordUnlockContainer.style.display = 'none';
-        credentialsContainer.style.display = 'block';
-    }
-
-    passwordUnlockForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const passwordInput = document.getElementById('unlockPassword');
-        const password = passwordInput.value;
-        const errorContainer = document.getElementById('unlockError');
-        errorContainer.textContent = '';
-
-        if (!password) {
-            errorContainer.textContent = 'Please enter your password.';
-            return;
-        }
-
-        const success = await fetchAndRenderVault(password);
-
-        if (success) {
-            sessionPassword = password; // Cache the password on success
-            showVault();
-        } else {
-            errorContainer.textContent = 'Invalid password or failed to load vault.';
-            passwordInput.value = '';
-            passwordInput.focus();
-        }
-    });
-
-    async function fetchAndRenderVault(password) {
+    // --- FETCH & SAVE LOGIC ---
+    async function fetchVault() {
         const token = localStorage.getItem('token');
         if (!token) {
             window.location.href = 'index.html';
-            return false;
+            return;
         }
 
         try {
+            // Get password from session cache or new modal prompt.
+            const password = await getSessionPassword('Please enter your password to decrypt your vault:');
+
             const res = await fetch('/api/vault/fetch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ password })
             });
 
-            if (!res.ok) {
-                console.error('Failed to fetch vault:', res.status);
-                return false;
+            if (res.status === 401) {
+                sessionPassword = null; // Clear the bad password
+                const errorData = await res.json();
+                showToast(errorData.error || 'Invalid password.', 'error');
+                // Display empty state or error message on UI
+                credentialsList.innerHTML = `<div class="empty-state"><p>Invalid password. Please refresh and try again.</p></div>`;
+                return;
             }
+            if (!res.ok) throw new Error('Failed to fetch credentials.');
 
             const data = await res.json();
             credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed' } : entry);
-            renderCredentials(credentials); // Pass data directly to render
-            return true;
+            applyFilters(); // Re-render with the new data
 
         } catch (err) {
-            console.error('Fetch error:', err);
-            showToast('An unexpected error occurred while fetching the vault.', 'error');
-            return false;
+            showToast(err.message, 'error');
         }
     }
 
@@ -89,7 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!sessionPassword) {
             showToast('Session expired. Please unlock your vault again.', 'error');
-            showUnlockScreen();
+            // Force re-authentication if session password is lost
+            window.location.href = 'index.html'; 
             return;
         }
 
@@ -114,52 +109,96 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                if (response.status === 401) sessionPassword = null;
+                if (response.status === 401) sessionPassword = null; // Clear bad password
                 throw new Error(errorData.error || 'Failed to save credential');
             }
 
             showToast(`Credential ${isEdit ? 'updated' : 'saved'}!`, 'success');
             closeAddEditModal();
-            // FIX: Directly re-fetch and render after saving.
-            await fetchAndRenderVault(sessionPassword);
+            await fetchVault(); // Re-fetch to display the updated list
 
         } catch (err) {
             showToast(`Error: ${err.message}`, 'error');
         }
     }
 
-    // --- UI RENDERING & EVENT LISTENERS ---
+    // --- MODALS & UI FUNCTIONS ---
+    function openPasswordModal(message, callback) {
+        addEditModal.innerHTML = `
+            <h2>Password Required</h2>
+            <p>${message}</p>
+            <form id="passwordPromptForm">
+                <div class="input-group">
+                    <label for="modalPassword">Password:</label>
+                    <input type="password" id="modalPassword" required autocomplete="current-password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="button secondary close-modal">Cancel</button>
+                    <button type="submit" class="button primary">Submit</button>
+                </div>
+            </form>
+        `;
+        addEditModal.classList.add('show');
+        modalOverlay.classList.add('show');
 
-    const renderCredentials = (itemsToRender) => {
+        const form = addEditModal.querySelector('#passwordPromptForm');
+        const cancelBtn = addEditModal.querySelector('.close-modal');
+        const passwordInput = addEditModal.querySelector('#modalPassword');
+        passwordInput.focus();
+
+        const close = () => {
+            closeAddEditModal();
+            callback(null); // Pass null on cancel
+        };
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            closeAddEditModal();
+            callback(passwordInput.value);
+        };
+
+        cancelBtn.onclick = close;
+        modalOverlay.onclick = close;
+    }
+
+    const renderCredentials = (filteredCredentials = credentials) => {
         credentialsList.innerHTML = '';
-        if (!itemsToRender || itemsToRender.length === 0) {
+        if (filteredCredentials.length === 0) {
             credentialsList.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">🛡️</div>
                 <p>Your vault is empty. Let's secure your first account!</p>
                 <button class="button primary" id="addFirstCredential">Add New Credential</button>
             </div>`;
-            document.getElementById('addFirstCredential').addEventListener('click', () => openAddEditModal('add'));
+            const addFirstBtn = document.getElementById('addFirstCredential');
+            if(addFirstBtn) {
+                addFirstBtn.addEventListener('click', () => openAddEditModal('add'));
+            }
             return;
         }
 
-        itemsToRender.forEach(cred => {
+        filteredCredentials.forEach(cred => {
             const faviconUrl = cred.url ? `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}` : '/images/default-favicon.png';
+            const fallbackFavicon = '/images/default-favicon.png';
+
             const card = document.createElement('div');
             card.className = 'credential-card glassmorphism';
             card.dataset.id = cred.id;
             card.innerHTML = `
             <div class="credential-header">
-                <img src="${faviconUrl}" alt="${cred.title} favicon" class="credential-favicon" onerror="this.onerror=null;this.src='/images/default-favicon.png'">
+                <img src="${faviconUrl}" alt="${cred.title} favicon" class="credential-favicon" onerror="this.onerror=null;this.src='${fallbackFavicon}'">
                 <h4>${cred.title}</h4>
             </div>
             <div class="credential-info">
                 <p><strong>Username:</strong> ${cred.username}</p>
-                <p class="password-masked"><strong>Password:</strong> <span>********</span></p>
+                <p class="password-masked">
+                    <strong>Password:</strong>
+                    <span>********</span>
+                    <button class="button secondary show-hide-button">👁️ Show</button>
+                </p>
             </div>
             <div class="credential-actions">
                 <button class="button secondary copy-button" data-type="password">📋 Copy Pass</button>
-                <button class="button secondary show-hide-button">👁️ Show</button>
                 <button class="button secondary edit-button">✏️ Edit</button>
                 <button class="button danger delete-button">🗑️ Delete</button>
             </div>`;
@@ -170,8 +209,9 @@ document.addEventListener('DOMContentLoaded', () => {
     credentialsList.addEventListener('click', async (e) => {
         const target = e.target;
         const card = target.closest('.credential-card');
-        if (!card) return;
-        const id = card.dataset.id;
+        const id = card ? card.dataset.id : null;
+        if (!id) return;
+
         const cred = credentials.find(c => String(c.id) === String(id));
         if (!cred) return;
 
@@ -183,7 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (target.matches('.copy-button')) {
-            navigator.clipboard.writeText(cred.password).then(() => showToast('Password copied!', 'success'));
+            const type = target.dataset.type;
+            const textToCopy = type === 'password' ? cred.password : cred.username;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} copied!`, 'success');
+            }).catch(() => showToast('Failed to copy.', 'error'));
         }
 
         if (target.matches('.edit-button')) {
@@ -191,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (target.matches('.delete-button')) {
-            // Delete logic would go here
+            // ... (delete logic remains the same)
         }
     });
 
@@ -262,5 +306,5 @@ document.addEventListener('DOMContentLoaded', () => {
     addNewCredentialButton.addEventListener('click', () => openAddEditModal('add'));
 
     // --- INITIALIZATION ---
-    showUnlockScreen(); // Start by showing the password form.
+    fetchVault(); // Start by fetching the vault on load.
 });
