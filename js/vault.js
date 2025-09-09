@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let credentials = [];
     let sessionPassword = null; // Caches the password in memory for the session
+    let currentFilter = 'all'; // For category filtering
     let currentCredentialToDeleteId = null; // Stores the ID of the credential to be deleted
 
     // --- MODALS & UI FUNCTIONS (DEFINITIONS FIRST) ---
@@ -210,12 +211,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
-    const applyFilters = () => {
+    const applyFilters = (filterParam) => { // Removed default parameter here
+        const filter = filterParam !== undefined ? filterParam : 'all'; // Explicitly check and use 'all' as default
         const searchTerm = searchInput.value.toLowerCase();
         let filtered = credentials;
 
-        if (currentFilter !== 'all') {
-            filtered = filtered.filter(c => c.category === currentFilter);
+        if (filter !== 'all') {
+            filtered = filtered.filter(c => c.category === filter);
         }
 
         if (searchTerm) {
@@ -271,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             credentials = []; // Ensure credentials array is empty
             sessionPassword = null; // Explicitly set to null on cancellation
             console.log('fetchVault: Password prompt cancelled. sessionPassword set to:', sessionPassword);
-            applyFilters(); // Render empty state
+            applyFilters(currentFilter); // Pass currentFilter explicitly
             return;
         }
 
@@ -280,7 +282,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             credentials = []; // Ensure credentials array is empty
             sessionPassword = null; // Explicitly set to null if password is empty
             console.log('fetchVault: Password empty. sessionPassword set to:', sessionPassword);
-            applyFilters(); // Render empty state
+            applyFilters(currentFilter); // Pass currentFilter explicitly
             return;
         }
 
@@ -297,7 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showToast(errorData.error || 'Invalid password.', 'error');
                 credentials = []; // Ensure credentials array is empty
                 console.log('fetchVault: 401 Unauthorized. sessionPassword set to:', sessionPassword);
-                applyFilters(); // Render empty state
+                applyFilters(currentFilter); // Pass currentFilter explicitly
                 return;
             }
             if (!res.ok) {
@@ -308,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await res.json();
             credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed', username: '[Encrypted]', password: '[Encrypted]' } : entry);
             console.log('fetchVault: Credentials fetched successfully. sessionPassword:', sessionPassword);
-            applyFilters(); // Re-render with the new data, applying current filters
+            applyFilters(currentFilter); // Re-render with the new data, applying current filters
 
         } catch (err) {
             console.error('Fetch error:', err);
@@ -316,7 +318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             credentials = []; // Ensure credentials array is empty
             sessionPassword = null; // Explicitly set to null on general fetch error
             console.log('fetchVault: General fetch error. sessionPassword set to:', sessionPassword);
-            applyFilters(); // Render empty state
+            applyFilters(currentFilter); // Pass currentFilter explicitly
         }
     }
 
@@ -461,11 +463,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelectorAll('#folders a').forEach(a => a.classList.remove('active'));
             e.target.classList.add('active');
             currentFilter = e.target.dataset.filter;
-            applyFilters(); // This call is now safe
+            applyFilters(currentFilter); // Pass currentFilter explicitly
         }
     });
 
-    searchInput.addEventListener('input', applyFilters);
+    searchInput.addEventListener('input', () => applyFilters(currentFilter)); // Pass currentFilter explicitly
 
     // --- INITIALIZATION ---
     fetchVault(); // Start by fetching the vault on load.
