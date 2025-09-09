@@ -24,11 +24,17 @@
                 </div>
                 <div class="input-group">
                     <label for="registerPassword">Password:</label>
-                    <input type="password" id="registerPassword" required minlength="8">
+                    <div class="password-input">
+                        <input type="password" id="registerPassword" required minlength="8">
+                        <button type="button" class="toggle-password" aria-label="Show password"><img src="images/unsee.png" alt="Show password"></button>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label for="confirmPassword">Confirm Password:</label>
-                    <input type="password" id="confirmPassword" required>
+                    <div class="password-input">
+                        <input type="password" id="confirmPassword" required>
+                        <button type="button" class="toggle-password" aria-label="Show password"><img src="images/unsee.png" alt="Show password"></button>
+                    </div>
                 </div>
                 <button type="submit" class="button primary">Sign Up</button>
                 <div class="error-message" id="registerError"></div>

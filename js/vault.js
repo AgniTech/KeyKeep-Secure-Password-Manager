@@ -99,7 +99,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
                 <div class="input-group">
                     <label for="password">Password:</label>
-                    <input type="password" id="password" value="${isEdit ? credential.password : ''}" required>
+                    <div class="password-input">
+                        <input type="password" id="password" value="${isEdit ? credential.password : ''}" required>
+                        <button type="button" class="toggle-password" aria-label="Show password"><img src="images/unsee.png" alt="Show password"></button>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label for="category">Category:</label>
@@ -120,6 +123,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         modalOverlay.classList.add('show');
         addEditModal.querySelector('.close-modal').addEventListener('click', closeAddEditModal);
         addEditModal.querySelector('#credentialForm').addEventListener('submit', handleCredentialSubmit);
+        // Setup password toggles for the newly added modal content
+        window.setupPasswordToggles(addEditModal);
     };
 
     // --- UI RENDERING FUNCTIONS (DEFINITIONS FIRST) ---
@@ -154,7 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p class="password-masked">
                     <strong>Password:</strong>
                     <span>********</span>
-                    <button class="button secondary show-hide-button">👁️ Show</button>
+                    <button class="button secondary show-hide-button" aria-label="Show password"><img src="images/unsee.png" alt="Show password"></button>
                 </p>
             </div>
             <div class="credential-actions">
@@ -323,11 +328,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cred = credentials.find(c => String(c.id) === String(id));
         if (!cred) return;
 
-        if (target.matches('.show-hide-button')) {
+        if (target.matches('.show-hide-button') || target.closest('.show-hide-button')) {
+            const button = target.closest('.show-hide-button');
             const passwordSpan = card.querySelector('.password-masked span');
-            const isMasked = passwordSpan.textContent.includes('*');
+            const iconImg = button.querySelector('img');
+            const isMasked = passwordSpan.textContent.includes('********');
+            
             passwordSpan.textContent = isMasked ? cred.password : '********';
-            target.textContent = isMasked ? '🙈 Hide' : '👁️ Show';
+            if (iconImg) {
+                iconImg.src = isMasked ? 'images/see.png' : 'images/unsee.png';
+                iconImg.alt = isMasked ? 'Hide password' : 'Show password';
+                button.setAttribute('aria-label', isMasked ? 'Hide password' : 'Show password');
+            }
         }
 
         if (target.matches('.copy-button')) {
@@ -343,7 +355,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (target.matches('.delete-button')) {
-            // ... (delete logic remains the same)
+            if (confirm(`Are you sure you want to delete ${cred.title}?`)) {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/vault/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ id: cred.id, password: sessionPassword })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        if (response.status === 401) sessionPassword = null; // Clear bad password
+                        throw new Error(errorData.error || 'Failed to delete credential');
+                    }
+
+                    showToast(`Credential ${cred.title} deleted!`, 'success');
+                    await fetchVault(); // Re-fetch to display the updated list
+
+                } catch (err) {
+                    showToast(`Error: ${err.message}`, 'error');
+                }
+            }
         }
     });
 
