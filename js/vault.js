@@ -13,6 +13,178 @@ document.addEventListener('DOMContentLoaded', async () => {
     let sessionPassword = null; // Caches the password in memory for the session
     let currentFilter = 'all'; // For category filtering
 
+    // --- MODALS & UI FUNCTIONS (DEFINITIONS FIRST) ---
+    function openPasswordModal(message, callback) {
+        addEditModal.innerHTML = `
+            <h2>Password Required</h2>
+            <p>${message}</p>
+            <form id="passwordPromptForm">
+                <div class="input-group">
+                    <label for="modalPassword">Password:</label>
+                    <input type="password" id="modalPassword" required autocomplete="current-password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="button secondary close-modal">Cancel</button>
+                    <button type="submit" class="button primary">Submit</button>
+                </div>
+            </form>
+        `;
+        addEditModal.classList.add('show');
+        modalOverlay.classList.add('show');
+
+        const form = addEditModal.querySelector('#passwordPromptForm');
+        const cancelBtn = addEditModal.querySelector('.close-modal');
+        const passwordInput = addEditModal.querySelector('#modalPassword');
+        passwordInput.focus();
+
+        const close = () => {
+            closeAddEditModal();
+            callback(null); // Pass null on cancel
+        };
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            closeAddEditModal();
+            callback(passwordInput.value);
+        };
+
+        cancelBtn.onclick = close;
+        modalOverlay.onclick = close;
+    }
+
+    const closeAddEditModal = () => {
+        addEditModal.classList.remove('show');
+        modalOverlay.classList.remove('show');
+        // Clear form fields when modal is closed
+        const form = document.getElementById('credentialForm');
+        if (form) {
+            form.reset();
+            document.getElementById('credentialId').value = ''; // Clear hidden ID
+        }
+    };
+
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) return;
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
+        }, 100);
+    }
+
+    const openAddEditModal = (mode, credential = {}) => {
+        const isEdit = mode === 'edit';
+        addEditModal.innerHTML = `
+            <h2>${isEdit ? 'Edit Credential' : 'Add New Credential'}</h2>
+            <form id="credentialForm">
+                <input type="hidden" id="credentialId" value="${isEdit ? credential.id : ''}">
+                <div class="input-group">
+                    <label for="websiteName">Website Name:</label>
+                    <input type="text" id="websiteName" value="${isEdit ? credential.title : ''}" required>
+                </div>
+                <div class="input-group">
+                    <label for="url">URL:</label>
+                    <input type="url" id="url" value="${isEdit ? credential.url : ''}" placeholder="https://example.com">
+                </div>
+                <div class="input-group">
+                    <label for="username">Username/Email:</label>
+                    <input type="text" id="username" value="${isEdit ? credential.username : ''}">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" value="${isEdit ? credential.password : ''}" required>
+                </div>
+                <div class="input-group">
+                    <label for="category">Category:</label>
+                    <select id="category">
+                        <option value="work" ${credential?.category === 'work' ? 'selected' : ''}>Work</option>
+                        <option value="social" ${credential?.category === 'social' ? 'selected' : ''}>Social</option>
+                        <option value="bank" ${credential?.category === 'bank' ? 'selected' : ''}>Bank</option>
+                        <option value="other" ${credential?.category === 'other' || !isEdit ? 'selected' : ''}>Other</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="button secondary close-modal">Cancel</button>
+                    <button type="submit" class="button primary">${isEdit ? 'Update' : 'Save'}</button>
+                </div>
+            </form>`;
+
+        addEditModal.classList.add('show');
+        modalOverlay.classList.add('show');
+        addEditModal.querySelector('.close-modal').addEventListener('click', closeAddEditModal);
+        addEditModal.querySelector('#credentialForm').addEventListener('submit', handleCredentialSubmit);
+    };
+
+    // --- UI RENDERING FUNCTIONS (DEFINITIONS FIRST) ---
+    const renderCredentials = (filteredCredentials = credentials) => {
+        credentialsList.innerHTML = '';
+        if (!filteredCredentials || filteredCredentials.length === 0) {
+            credentialsList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">🛡️</div>
+                <p>Your vault is empty. Let's secure your first account!</p>
+                <button class="button primary" id="addFirstCredential">Add New Credential</button>
+            </div>`;
+            const addFirstBtn = document.getElementById('addFirstCredential');
+            if(addFirstBtn) {
+                addFirstBtn.addEventListener('click', () => openAddEditModal('add'));
+            }
+            return;
+        }
+
+        filteredCredentials.forEach(cred => {
+            const faviconUrl = cred.url ? `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}` : '/images/default-favicon.png';
+            const card = document.createElement('div');
+            card.className = 'credential-card glassmorphism';
+            card.dataset.id = cred.id;
+            card.innerHTML = `
+            <div class="credential-header">
+                <img src="${faviconUrl}" alt="${cred.title} favicon" class="credential-favicon" onerror="this.onerror=null;this.src='/images/default-favicon.png'">
+                <h4>${cred.title}</h4>
+            </div>
+            <div class="credential-info">
+                <p><strong>Username:</strong> ${cred.username}</p>
+                <p class="password-masked">
+                    <strong>Password:</strong>
+                    <span>********</span>
+                    <button class="button secondary show-hide-button">👁️ Show</button>
+                </p>
+            </div>
+            <div class="credential-actions">
+                <button class="button secondary copy-button" data-type="password">📋 Copy Pass</button>
+                <button class="button secondary edit-button">✏️ Edit</button>
+                <button class="button danger delete-button">🗑️ Delete</button>
+            }
+            `;
+            credentialsList.appendChild(card);
+        });
+    });
+
+    const applyFilters = () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        let filtered = credentials;
+
+        if (currentFilter !== 'all') {
+            filtered = filtered.filter(c => c.category === currentFilter);
+        }
+
+        if (searchTerm) {
+            filtered = filtered.filter(c =>
+                (c.title && c.title.toLowerCase().includes(searchTerm)) ||
+                (c.url && c.url.toLowerCase().includes(searchTerm)) ||
+                (c.username && c.username.toLowerCase().includes(searchTerm))
+            );
+        }
+        renderCredentials(filtered);
+    };
+
     // --- PASSWORD MODAL & SESSION CACHE ---
     /**
      * Gets the user's password. It will only prompt the user once per session,
@@ -23,17 +195,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     function getSessionPassword(message) {
         return new Promise((resolve, reject) => {
             if (sessionPassword) {
-                console.log('getSessionPassword: Returning cached password.'); // DEBUG
                 return resolve(sessionPassword);
             }
 
+            // Use a custom modal for password prompt
             openPasswordModal(message, (enteredPassword) => {
                 if (enteredPassword) {
                     sessionPassword = enteredPassword; // Cache the password
-                    console.log('getSessionPassword: Password entered and cached.'); // DEBUG
                     resolve(enteredPassword);
                 } else {
-                    console.log('getSessionPassword: Password entry cancelled or empty.'); // DEBUG
                     reject(new Error('Password entry was cancelled or empty.'));
                 }
             });
@@ -42,10 +212,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- FETCH & SAVE LOGIC ---
     async function fetchVault() {
-        console.log('fetchVault: Called.'); // DEBUG
         const token = localStorage.getItem('token');
         if (!token) {
-            console.log('fetchVault: No token, redirecting to index.html.'); // DEBUG
             window.location.href = 'index.html';
             return;
         }
@@ -53,9 +221,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         let password = null;
         try {
             password = await getSessionPassword('Please enter your password to decrypt your vault:');
-            console.log('fetchVault: Password obtained from getSessionPassword.'); // DEBUG
         } catch (err) {
-            console.error('fetchVault: Error getting password:', err); // DEBUG
+            // User cancelled the password modal
             showToast(err.message, 'info'); // Use info for cancellation, not error
             credentials = []; // Ensure credentials array is empty
             applyFilters(); // Render empty state
@@ -64,21 +231,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // If password is null (e.g., user cancelled the modal) - redundant with catch block but good for clarity
         if (!password) {
-            console.log('fetchVault: Password is null after getSessionPassword (user cancelled).'); // DEBUG
             credentials = []; // Ensure credentials array is empty
             applyFilters(); // Render empty state
             return;
         }
 
         try {
-            console.log('fetchVault: Making fetch call to /api/vault/fetch.'); // DEBUG
             const res = await fetch('/api/vault/fetch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ password })
             });
-
-            console.log('fetchVault: Fetch response status:', res.status); // DEBUG
 
             if (res.status === 401) {
                 sessionPassword = null; // Clear the bad password
@@ -94,14 +257,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const data = await res.json();
-            console.log('fetchVault: Received data from backend:', data); // DEBUG: Crucial log
             credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed', username: '[Encrypted]', password: '[Encrypted]' } : entry);
-            console.log('fetchVault: Credentials array updated:', credentials); // DEBUG
-            applyFilters(); // This calls renderCredentials
-            console.log('fetchVault: applyFilters called.'); // DEBUG
+            applyFilters(); // Re-render with the new data, applying current filters
 
         } catch (err) {
-            console.error('fetchVault: Error during fetch operation:', err); // DEBUG
+            console.error('Fetch error:', err);
             showToast('An unexpected error occurred while fetching the vault: ' + err.message, 'error');
             credentials = []; // Ensure credentials array is empty
             applyFilters(); // Render empty state
@@ -154,94 +314,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- MODALS & UI FUNCTIONS ---
-    function openPasswordModal(message, callback) {
-        console.log('openPasswordModal: Displaying modal.'); // DEBUG
-        addEditModal.innerHTML = `
-            <h2>Password Required</h2>
-            <p>${message}</p>
-            <form id="passwordPromptForm">
-                <div class="input-group">
-                    <label for="modalPassword">Password:</label>
-                    <input type="password" id="modalPassword" required autocomplete="current-password">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="button secondary close-modal">Cancel</button>
-                    <button type="submit" class="button primary">Submit</button>
-                </div>
-            </form>
-        `;
-        addEditModal.classList.add('show');
-        modalOverlay.classList.add('show');
-
-        const form = addEditModal.querySelector('#passwordPromptForm');
-        const cancelBtn = addEditModal.querySelector('.close-modal');
-        const passwordInput = addEditModal.querySelector('#modalPassword');
-        passwordInput.focus();
-
-        const close = () => {
-            console.log('openPasswordModal: Modal closed (cancelled).'); // DEBUG
-            closeAddEditModal();
-            callback(null); // Pass null on cancel
-        };
-
-        form.onsubmit = (e) => {
-            e.preventDefault();
-            console.log('openPasswordModal: Password submitted.'); // DEBUG
-            closeAddEditModal();
-            callback(passwordInput.value);
-        };
-
-        cancelBtn.onclick = close;
-        modalOverlay.onclick = close;
-    }
-
-    const renderCredentials = (filteredCredentials = credentials) => {
-        console.log('renderCredentials: Called with', filteredCredentials); // DEBUG
-        credentialsList.innerHTML = '';
-        if (!filteredCredentials || filteredCredentials.length === 0) {
-            console.log('renderCredentials: Displaying empty state.'); // DEBUG
-            credentialsList.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🛡️</div>
-                <p>Your vault is empty. Let's secure your first account!</p>
-                <button class="button primary" id="addFirstCredential">Add New Credential</button>
-            </div>`;
-            const addFirstBtn = document.getElementById('addFirstCredential');
-            if(addFirstBtn) {
-                addFirstBtn.addEventListener('click', () => openAddEditModal('add'));
-            }
-            return;
-        }
-
-        console.log('renderCredentials: Rendering', filteredCredentials.length, 'credentials.'); // DEBUG
-        filteredCredentials.forEach(cred => {
-            const faviconUrl = cred.url ? `https://www.google.com/s2/favicons?sz=64&domain_url=${cred.url}` : '/images/default-favicon.png';
-            const card = document.createElement('div');
-            card.className = 'credential-card glassmorphism';
-            card.dataset.id = cred.id;
-            card.innerHTML = `
-            <div class="credential-header">
-                <img src="${faviconUrl}" alt="${cred.title} favicon" class="credential-favicon" onerror="this.onerror=null;this.src='/images/default-favicon.png'">
-                <h4>${cred.title}</h4>
-            </div>
-            <div class="credential-info">
-                <p><strong>Username:</strong> ${cred.username}</p>
-                <p class="password-masked">
-                    <strong>Password:</strong>
-                    <span>********</span>
-                    <button class="button secondary show-hide-button">👁️ Show</button>
-                </p>
-            </div>
-            <div class="credential-actions">
-                <button class="button secondary copy-button" data-type="password">📋 Copy Pass</button>
-                <button class="button secondary edit-button">✏️ Edit</button>
-                <button class="button danger delete-button">🗑️ Delete</button>
-            </div>`;
-            credentialsList.appendChild(card);
-        });
-    };
-
+    // --- EVENT LISTENERS (ATTACHMENTS AFTER ALL DEFINITIONS) ---
     credentialsList.addEventListener('click', async (e) => {
         const target = e.target;
         const card = target.closest('.credential-card');
@@ -275,109 +348,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    const openAddEditModal = (mode, credential = {}) => {
-        const isEdit = mode === 'edit';
-        addEditModal.innerHTML = `
-            <h2>${isEdit ? 'Edit Credential' : 'Add New Credential'}</h2>
-            <form id="credentialForm">
-                <input type="hidden" id="credentialId" value="${isEdit ? credential.id : ''}">
-                <div class="input-group">
-                    <label for="websiteName">Website Name:</label>
-                    <input type="text" id="websiteName" value="${isEdit ? credential.title : ''}" required>
-                </div>
-                <div class="input-group">
-                    <label for="url">URL:</label>
-                    <input type="url" id="url" value="${isEdit ? credential.url : ''}" placeholder="https://example.com">
-                </div>
-                <div class="input-group">
-                    <label for="username">Username/Email:</label>
-                    <input type="text" id="username" value="${isEdit ? credential.username : ''}">
-                </div>
-                <div class="input-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" value="${isEdit ? credential.password : ''}" required>
-                </div>
-                <div class="input-group">
-                    <label for="category">Category:</label>
-                    <select id="category">
-                        <option value="work" ${credential?.category === 'work' ? 'selected' : ''}>Work</option>
-                        <option value="social" ${credential?.category === 'social' ? 'selected' : ''}>Social</option>
-                        <option value="bank" ${credential?.category === 'bank' ? 'selected' : ''}>Bank</option>
-                        <option value="other" ${credential?.category === 'other' || !isEdit ? 'selected' : ''}>Other</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="button secondary close-modal">Cancel</button>
-                    <button type="submit" class="button primary">${isEdit ? 'Update' : 'Save'}</button>
-                </div>
-            </form>`;
-
-        addEditModal.classList.add('show');
-        modalOverlay.classList.add('show');
-        addEditModal.querySelector('.close-modal').addEventListener('click', closeAddEditModal);
-        addEditModal.querySelector('#credentialForm').addEventListener('submit', handleCredentialSubmit);
-    };
-
-    const closeAddEditModal = () => {
-        addEditModal.classList.remove('show');
-        modalOverlay.classList.remove('show');
-        // Clear form fields when modal is closed
-        const form = document.getElementById('credentialForm');
-        if (form) {
-            form.reset();
-            document.getElementById('credentialId').value = ''; // Clear hidden ID
-        }
-    };
-
-    function showToast(message, type = 'info') {
-        const toastContainer = document.getElementById('toastContainer');
-        if (!toastContainer) return;
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.textContent = message;
-        toastContainer.appendChild(toast);
-        setTimeout(() => {
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 500);
-            }, 5000);
-        }, 100);
-    }
-
     addNewCredentialButton.addEventListener('click', () => openAddEditModal('add'));
 
-    // --- CATEGORY FILTERING --- // NEWLY ADDED
+    // --- CATEGORY FILTERING & SEARCH EVENT LISTENERS (NOW AFTER applyFilters DEFINITION) ---
     foldersList.addEventListener('click', (e) => {
         if (e.target.tagName === 'A') {
             document.querySelectorAll('#folders a').forEach(a => a.classList.remove('active'));
             e.target.classList.add('active');
             currentFilter = e.target.dataset.filter;
-            applyFilters();
+            applyFilters(); // This call is now safe
         }
     });
 
-    searchInput.addEventListener('input', applyFilters); // Added for search filtering
-
-    const applyFilters = () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        let filtered = credentials;
-
-        if (currentFilter !== 'all') {
-            filtered = filtered.filter(c => c.category === currentFilter);
-        }
-
-        if (searchTerm) {
-            filtered = filtered.filter(c =>
-                (c.title && c.title.toLowerCase().includes(searchTerm)) ||
-                (c.url && c.url.toLowerCase().includes(searchTerm)) ||
-                (c.username && c.username.toLowerCase().includes(searchTerm))
-            );
-        }
-        renderCredentials(filtered);
-    };
+    searchInput.addEventListener('input', applyFilters); // This call is now safe
 
     // --- INITIALIZATION ---
-    console.log('DOMContentLoaded: Calling fetchVault().'); // DEBUG
     fetchVault(); // Start by fetching the vault on load.
 });
