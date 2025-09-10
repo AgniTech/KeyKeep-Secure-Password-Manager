@@ -14,6 +14,7 @@ export async function connectDB() {
 
   if (!cached.promise) {
     const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
+    console.log(`MONGO_URI: ${MONGO_URI}`);
     if (!MONGO_URI) {
       throw new Error('MONGODB_URI or MONGO_URI is not defined in environment variables');
     }
