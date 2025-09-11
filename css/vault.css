@@ -56,24 +56,26 @@
 
 /* Profile Dropdown Styles */
 .profile-image-button {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid var(--primary-color);
+    object-fit: cover;
 }
 
 .profile-dropdown-container {
     position: relative;
     display: inline-block; /* Allows the dropdown to position relative to the button */
+    flex-shrink: 0;
 }
 
 .profile-dropdown {
     position: absolute;
-    top: 100%; /* Position below the button */
+    top: calc(100% + 10px); /* Position below the button with a small gap */
     right: 0; /* Align to the right of the button */
-    min-width: 200px;
-    z-index: 100;
+    min-width: 240px; /* Increased width */
+    z-index: 1000; /* Increased z-index */
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);
@@ -125,10 +127,11 @@
 }
 
 .profile-image-large {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     border: 3px solid var(--primary-color);
+    object-fit: cover;
 }
 
 .profile-actions {
@@ -207,6 +210,7 @@
 .search-bar {
     position: relative;
     margin-bottom: 30px;
+    margin-right: 15px; /* Added margin to prevent overlap */
 }
 
 .search-bar .search-icon {
