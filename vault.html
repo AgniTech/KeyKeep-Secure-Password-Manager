@@ -6,6 +6,7 @@
     <title>KeyKeep - Vault</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/vault.css">
+    <link rel="stylesheet" href="css/profile-card.css">
     <script src="js/protect.js"></script>
 </head>
 <body>
@@ -17,25 +18,39 @@
             <div class="right-actions">
                 <a href="health.html" class="button secondary" aria-label="Password Health">🛡️ Health</a>
                 <a href="settings.html" class="button icon-button" aria-label="Settings">⚙️</a>
-                <!-- Replaced Lock with Profile Button and Dropdown -->
+                <!-- Profile Dropdown -->
                 <div class="profile-dropdown-container">
-                    <img src="images/e.jpg" alt="Profile" id="profileButton" class="profile-image-button">
+                    <button class="button icon-button" id="profileButton" aria-label="Profile">👤</button>
                     <div id="profileDropdown" class="profile-dropdown glassmorphism">
-                        <div class="profile-view">
-                            <img src="images/e.jpg" alt="Profile" class="profile-image-large">
-                            <div class="profile-actions">
-                                <input type="file" id="uploadProfileImage" style="display: none;">
-                                <button class="button primary" onclick="document.getElementById('uploadProfileImage').click();">Upload</button>
-                                <button class="button secondary">Change</button>
-                                <button class="button danger">Remove</button>
+                        <div class="profile-card p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="image">
+                                    <img src="images/profile.png" class="rounded" width="155">
+                                </div>
+                                <div class="ml-3 w-100">
+                                    <h4 class="mb-0 mt-0"><a href="Profile.html" id="profileNameLink">Alex Morrison</a></h4>
+                                    <span id="verificationStatus">Verified ✔️</span>
+                                    <div class="p-2 mt-2 d-flex justify-content-between rounded stats">
+                                        <div class="d-flex flex-column">
+                                            <span class="articles">Saved</span>
+                                            <span class="number1" id="savedPasswords">0</span>
+                                        </div>
+                                        <div class="d-flex flex-column">
+                                            <span class="followers">Secure</span>
+                                            <span class="number2" id="securePasswords">0</span>
+                                        </div>
+                                        <div class="d-flex flex-column">
+                                            <span class="rating">Score</span>
+                                            <span class="number3" id="securityScore">0%</span>
+                                        </div>
+                                    </div>
+                                    <div class="button mt-2 d-flex flex-row align-items-center">
+                                        <button class="btn btn-sm btn-outline-primary w-100">Chat</button>
+                                        <button class="btn btn-sm btn-primary w-100 ml-2" id="logoutButton">Logout</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="user-info">
-                            <p class="user-name">User Name</p>
-                            <p class="user-email">user@example.com</p>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item" id="logoutButton">Logout</a>
                     </div>
                 </div>
             </div>
@@ -86,7 +101,6 @@
     <!-- Toast Notification -->
     <div id="toastNotification" class="toast"></div>
 
-    <script src="js/data.js"></script>
     <script src="js/script.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.13/dist/libsodium.min.js"></script>

@@ -260,6 +260,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // --- Health Analysis Logic ---
+    const analyzeVaultHealth = (credentials) => {
+        const totalPasswords = credentials.length;
+        if (totalPasswords === 0) return { score: 100, compromised: [], reused: [], weak: [], secure: 0 };
+
+        const compromised = credentials.filter(c => c.compromised);
+
+        const passwordCounts = {};
+        credentials.forEach(c => {
+            passwordCounts[c.password] = (passwordCounts[c.password] || 0) + 1;
+        });
+        const reusedPasswords = Object.keys(passwordCounts).filter(p => passwordCounts[p] > 1);
+        const reused = credentials.filter(c => reusedPasswords.includes(c.password));
+
+        const weak = credentials.filter(c => isWeak(c.password));
+
+        let score = 100;
+        score -= compromised.length * 15;
+        score -= reused.length * 5;
+        score -= weak.length * 5;
+        score = Math.max(0, Math.floor(score));
+
+        const vulnerablePasswords = new Set([...compromised.map(c => c.id), ...reused.map(c => c.id), ...weak.map(c => c.id)]);
+        const secure = totalPasswords - vulnerablePasswords.size;
+
+        return { score, compromised, reused, weak, secure, total: totalPasswords };
+    };
+
+    const isWeak = (password) => {
+        return password.length < 8 || /^[a-zA-Z]+$/.test(password) || /^[0-9]+$/.test(password);
+    };
+
     // --- FETCH & SAVE LOGIC ---
     async function fetchVault() {
         const token = localStorage.getItem('token');
@@ -315,6 +347,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await res.json();
             credentials = data.map(entry => entry.error ? { ...entry, title: 'Decryption Failed', username: '[Encrypted]', password: '[Encrypted]' } : entry);
             console.log('fetchVault: Credentials fetched successfully. sessionPassword:', sessionPassword);
+
+            // Analyze and update profile card
+            const health = analyzeVaultHealth(credentials);
+            document.getElementById('savedPasswords').textContent = health.total;
+            document.getElementById('securePasswords').textContent = health.secure;
+            document.getElementById('securityScore').textContent = `${health.score}%`;
+            const verificationStatus = document.getElementById('verificationStatus');
+            if (health.score >= 80) {
+                verificationStatus.textContent = 'Verified ✔️';
+                verificationStatus.style.color = 'green';
+            } else {
+                verificationStatus.textContent = 'Not Verified ❌';
+                verificationStatus.style.color = 'red';
+            }
+
             applyFilters(currentFilter); // Re-render with the new data, applying current filters
 
         } catch (err) {
@@ -474,12 +521,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Populate user info
+    // Populate user name
     const userEmail = localStorage.getItem('userEmail') || 'user@example.com';
     const userName = userEmail.split('@')[0];
-    profileDropdown.querySelector('.user-name').textContent = userName;
-    profileDropdown.querySelector('.user-email').textContent = userEmail;
-
+    document.getElementById('profileNameLink').textContent = userName;
 
     // Logout functionality
     logoutButton.addEventListener('click', (event) => {
@@ -488,14 +533,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.removeItem('userEmail'); // Clear stored email
         sessionPassword = null; // Clear session password
         window.location.href = 'index.html'; // Redirect to login page
-    });
-
-    // Placeholder for profile actions
-    profileDropdown.querySelector('.profile-actions .secondary').addEventListener('click', () => {
-        console.log('Change profile image clicked');
-    });
-    profileDropdown.querySelector('.profile-actions .danger').addEventListener('click', () => {
-        console.log('Remove profile image clicked');
     });
 
     // --- CATEGORY FILTERING & SEARCH EVENT LISTENERS (NOW AFTER applyFilters DEFINITION) ---
