@@ -19,13 +19,21 @@
                 <a href="settings.html" class="button icon-button" aria-label="Settings">⚙️</a>
                 <!-- Replaced Lock with Profile Button and Dropdown -->
                 <div class="profile-dropdown-container">
-                    <button class="button icon-button" id="profileButton" aria-label="Profile">👤</button>
+                    <img src="images/e.jpg" alt="Profile" id="profileButton" class="profile-image-button">
                     <div id="profileDropdown" class="profile-dropdown glassmorphism">
-                        <div class="dropdown-header">
-                            <span id="userEmailDisplay">user@example.com</span> <!-- Placeholder for user email -->
+                        <div class="profile-view">
+                            <img src="images/e.jpg" alt="Profile" class="profile-image-large">
+                            <div class="profile-actions">
+                                <input type="file" id="uploadProfileImage" style="display: none;">
+                                <button class="button primary" onclick="document.getElementById('uploadProfileImage').click();">Upload</button>
+                                <button class="button secondary">Change</button>
+                                <button class="button danger">Remove</button>
+                            </div>
                         </div>
-                        <a href="profile.html" class="dropdown-item">Profile</a>
-                        <a href="settings.html" class="dropdown-item">Settings</a>
+                        <div class="user-info">
+                            <p class="user-name">User Name</p>
+                            <p class="user-email">user@example.com</p>
+                        </div>
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item" id="logoutButton">Logout</a>
                     </div>

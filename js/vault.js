@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Profile Dropdown Elements
     const profileButton = document.getElementById('profileButton');
     const profileDropdown = document.getElementById('profileDropdown');
-    const userEmailDisplay = document.getElementById('userEmailDisplay');
     const logoutButton = document.getElementById('logoutButton');
 
     let credentials = [];
@@ -475,9 +474,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Populate user email (placeholder for now, replace with actual user data)
-    // In a real app, you'd decode the JWT token or fetch user data
-    userEmailDisplay.textContent = localStorage.getItem('userEmail') || 'user@example.com';
+    // Populate user info
+    const userEmail = localStorage.getItem('userEmail') || 'user@example.com';
+    const userName = userEmail.split('@')[0];
+    profileDropdown.querySelector('.user-name').textContent = userName;
+    profileDropdown.querySelector('.user-email').textContent = userEmail;
+
 
     // Logout functionality
     logoutButton.addEventListener('click', (event) => {
@@ -486,6 +488,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.removeItem('userEmail'); // Clear stored email
         sessionPassword = null; // Clear session password
         window.location.href = 'index.html'; // Redirect to login page
+    });
+
+    // Placeholder for profile actions
+    profileDropdown.querySelector('.profile-actions .secondary').addEventListener('click', () => {
+        console.log('Change profile image clicked');
+    });
+    profileDropdown.querySelector('.profile-actions .danger').addEventListener('click', () => {
+        console.log('Remove profile image clicked');
     });
 
     // --- CATEGORY FILTERING & SEARCH EVENT LISTENERS (NOW AFTER applyFilters DEFINITION) ---
