@@ -1,0 +1,108 @@
+.profile-card {
+  width: 400px;
+  border: none;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.profile-card .stats{
+  background-color: #f2f5f8 !important;
+  color: #000 !important;
+}
+.profile-card .stats span {
+    color: #000 !important;
+}
+.profile-card .articles{
+  font-size:10px;
+  color: #a1aab9;
+}
+.profile-card .number1{
+  font-weight:500;
+}
+.profile-card .followers{
+    font-size:10px;
+  color: #a1aab9;
+}
+.profile-card .number2{
+  font-weight:500;
+}
+.profile-card .rating{
+    font-size:10px;
+  color: #a1aab9;
+}
+.profile-card .number3{
+  font-weight:500;
+}
+
+/* Flexbox Utilities */
+.profile-card .d-flex {
+    display: flex;
+}
+.profile-card .align-items-center {
+    align-items: center;
+}
+.profile-card .justify-content-between {
+    justify-content: space-between;
+}
+.profile-card .flex-column {
+    flex-direction: column;
+}
+.profile-card .w-100 {
+    width: 100%;
+}
+
+/* Margin & Padding Utilities */
+.profile-card .p-3 {
+    padding: 1rem;
+}
+.profile-card .p-2 {
+    padding: 0.5rem;
+}
+.profile-card .mt-2 {
+    margin-top: 0.5rem;
+}
+.profile-card .ml-2 {
+    margin-left: 0.5rem;
+}
+.profile-card .ml-3 {
+    margin-left: 1rem;
+}
+.profile-card .mb-0 {
+    margin-bottom: 0;
+}
+.profile-card .mt-0 {
+    margin-top: 0;
+}
+
+/* Button Utilities */
+.profile-card .btn {
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    border-radius: .25rem;
+    cursor: pointer;
+}
+.profile-card .btn-sm {
+    padding: .25rem .5rem;
+    font-size: .875rem;
+    border-radius: .2rem;
+}
+.profile-card .btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.profile-card .btn-outline-primary {
+    color: #007bff;
+    background-color: transparent;
+    border-color: #007bff;
+}
+.profile-card .rounded {
+    border-radius: .25rem!important;
+}
+.profile-card .text-white {
+    color: #fff!important;
+}
+.profile-card .bg-primary {
+    background-color: #007bff!important;
+}
