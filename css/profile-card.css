@@ -9,11 +9,11 @@
 }
 
 .profile-card .stats{
-  background-color: #f2f5f8 !important;
-  color: #000 !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-color) !important;
 }
 .profile-card .stats span {
-    color: #000 !important;
+    color: var(--text-color) !important;
 }
 .profile-card .articles{
   font-size:10px;
@@ -108,4 +108,37 @@
 }
 .profile-card .bg-primary {
     background-color: #007bff!important;
+}
+
+/* Profile Image Menu */
+.profile-image-container {
+    position: relative;
+    cursor: pointer;
+}
+
+.profile-image-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 160px;
+    padding: 8px 0;
+    border-radius: 8px;
+    z-index: 105;
+    display: none; /* Hidden by default */
+}
+
+.profile-image-menu a {
+    display: block;
+    padding: 8px 16px;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.profile-image-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.profile-image-menu a.danger-text {
+    color: var(--error-color);
 }
