@@ -1,8 +1,11 @@
 .profile-card {
   width: 400px;
-  border: none;
+  border: 1px solid var(--glass-border-base);
   border-radius: 10px;
-  background-color: #fff;
+  background: var(--glass-bg-base);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow);
 }
 
 .profile-card .stats{
