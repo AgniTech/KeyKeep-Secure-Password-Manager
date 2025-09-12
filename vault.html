@@ -24,8 +24,13 @@
                     <div id="profileDropdown" class="profile-dropdown glassmorphism">
                         <div class="profile-card p-3">
                             <div class="d-flex align-items-center">
-                                <div class="image">
-                                    <img src="images/profile.png" class="rounded" width="155">
+                                <div class="image profile-image-container">
+                                    <img src="images/profile.png" class="rounded" width="155" id="profileImage">
+                                    <div id="profileImageMenu" class="profile-image-menu glassmorphism">
+                                        <a href="#" id="uploadPhoto">Upload Photo</a>
+                                        <a href="#" id="changePhoto">Change Photo</a>
+                                        <a href="#" id="removePhoto" class="danger-text">Remove Photo</a>
+                                    </div>
                                 </div>
                                 <div class="ml-3 w-100">
                                     <h4 class="mb-0 mt-0"><a href="Profile.html" id="profileNameLink">Alex Morrison</a></h4>
@@ -36,7 +41,7 @@
                                             <span class="number1" id="savedPasswords">0</span>
                                         </div>
                                         <div class="d-flex flex-column">
-                                            <span class="followers">Secure</span>
+                                            <span class="followers">Risk</span>
                                             <span class="number2" id="securePasswords">0</span>
                                         </div>
                                         <div class="d-flex flex-column">

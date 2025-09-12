@@ -547,6 +547,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     searchInput.addEventListener('input', () => applyFilters(currentFilter)); // Pass currentFilter explicitly
 
+    // --- Profile Image Menu Logic ---
+    const profileImage = document.getElementById('profileImage');
+    const profileImageMenu = document.getElementById('profileImageMenu');
+
+    if (profileImage && profileImageMenu) {
+        profileImage.addEventListener('click', (event) => {
+            event.stopPropagation();
+            profileImageMenu.style.display = profileImageMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!profileImageMenu.contains(event.target) && !profileImage.contains(event.target)) {
+                profileImageMenu.style.display = 'none';
+            }
+        });
+    }
+
     // --- INITIALIZATION ---
     fetchVault(); // Start by fetching the vault on load.
 });
