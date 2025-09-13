@@ -45,7 +45,10 @@ export default async function handler(req, res) {
       { expiresIn: '2h' }
     );
 
-    return res.status(200).json({ token });
+    return res.status(200).json({
+      token,
+      profileInitialized: user.profileInitialized
+    });
 
   } catch (e) {
     console.error('Login error:', e);
