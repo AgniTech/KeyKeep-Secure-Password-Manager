@@ -53,6 +53,7 @@
 
 .top-nav .right-actions {
     display: flex;
+    align-items: center;
     gap: 15px;
 }
 

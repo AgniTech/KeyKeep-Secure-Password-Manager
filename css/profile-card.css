@@ -16,12 +16,16 @@
 .profile-card .rounded-circle {
     border-radius: 50% !important;
     border: 3px solid rgba(255, 255, 255, 0.2);
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
 }
 
 .profile-card h4 a {
     color: var(--primary-accent-color);
     text-decoration: none;
     font-weight: 600;
+    margin-bottom: 1rem;
 }
 .profile-card h4 a:hover {
     text-decoration: underline;
@@ -54,7 +58,8 @@
 .profile-card .button-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem; /* Space between buttons */
+    gap: 0.75rem; /* Space between buttons */
+    margin-top: 1rem;
 }
 
 /* Button Utilities */
