@@ -56,6 +56,11 @@
     gap: 15px;
 }
 
+.search-bar-container {
+    flex-grow: 1;
+    padding: 0 20px;
+}
+
 /* Profile Dropdown Styles */
 .profile-dropdown-container {
     position: relative;
@@ -162,7 +167,6 @@
 /* --- UPDATED SEARCH BAR STYLES --- */
 .search-bar {
     position: relative;
-    margin-bottom: 30px;
 }
 
 .search-bar .search-icon {
@@ -178,8 +182,8 @@
 
 .search-bar input[type="search"] {
     width: 100%;
-    padding: 15px 20px 15px 55px; /* Left padding to make space for the icon */
-    font-size: 1.1em;
+    padding: 18px 20px 18px 55px; /* Left padding to make space for the icon */
+    font-size: 1.2em;
     border-radius: 10px;
     border: 1px solid var(--glass-border-base);
     background: var(--glass-bg-base);

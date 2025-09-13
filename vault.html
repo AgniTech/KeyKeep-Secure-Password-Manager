@@ -15,12 +15,20 @@
             <div class="left-actions">
                 <button class="button primary icon-button" id="addNewCredential" aria-label="Add New Credential">➕ Add</button>
             </div>
+            <div class="search-bar-container">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="search" id="searchCredentials" placeholder="Search your vault...">
+                </div>
+            </div>
             <div class="right-actions">
                 <a href="health.html" class="button secondary" aria-label="Password Health">🛡️ Health</a>
                 <a href="settings.html" class="button icon-button" aria-label="Settings">⚙️</a>
                 <!-- Profile Dropdown -->
                 <div class="profile-dropdown-container">
-                    <button class="button icon-button" id="profileButton" aria-label="Profile">👤</button>
+                    <button class="button icon-button" id="profileButton" aria-label="Profile">
+                        <img src="images/profile.png" alt="Profile">
+                    </button>
                     <div id="profileDropdown" class="profile-dropdown glassmorphism">
                         <div class="profile-card p-3">
                             <div class="d-flex align-items-center">
@@ -74,11 +82,6 @@
             </ul>
         </aside>
         <main class="dashboard">
-            <!-- UPDATED SEARCH BAR STRUCTURE -->
-            <div class="search-bar">
-                <span class="search-icon">🔍</span>
-                <input type="search" id="searchCredentials" placeholder="Search your vault...">
-            </div>
             <div id="credentialsList" class="credentials-grid">
                 <!-- Credentials will be rendered here by JS -->
             </div>
