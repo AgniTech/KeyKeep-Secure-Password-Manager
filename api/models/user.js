@@ -37,6 +37,25 @@ const UserSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    profileInitialized: {
+        type: Boolean,
+        default: false
+    },
+    name: {
+        type: String,
+        trim: true
+    },
+    dob: {
+        type: Date
+    },
+    pin: {
+        type: String,
+        trim: true
+    },
+    petName: {
+        type: String,
+        trim: true
     }
 });
 

@@ -3,53 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KeyKeep - Profile</title>
+    <title>KeyKeep - Complete Your Profile</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/settings.css"> <!-- Reusing settings styles for simplicity -->
+    <link rel="stylesheet" href="css/profile-card.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <div class="container settings-container">
-        <header>
-            <h1>User Profile</h1>
-        </header>
-        <main>
-            <section class="setting-group">
-                <h2>Personal Information</h2>
-                <div class="setting-item">
-                    <label for="userName">Name:</label>
-                    <input type="text" id="userName" placeholder="Your Name">
+    <div id="toastContainer"></div>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="profile-card p-3">
+            <div class="d-flex align-items-center">
+                <div class="image">
+                    <img src="images/profile.png" class="rounded" width="155">
                 </div>
-                <div class="setting-item">
-                    <label for="userAddress">Address:</label>
-                    <input type="text" id="userAddress" placeholder="Your Address">
+                <div class="ml-3 w-100">
+                    <h4 class="mb-0 mt-0">Complete Your Profile</h4>
+                    <span>Tell us a bit about yourself</span>
+                    <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats">
+                        <div class="d-flex flex-column">
+                            <span class="articles">Status</span>
+                            <span class="number1">New</span>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <span class="followers">Member Since</span>
+                            <span class="number2" id="memberSince">2025</span>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <span class="rating">Profile</span>
+                            <span class="number3">0%</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="setting-item">
-                    <label for="userDob">Date of Birth:</label>
-                    <input type="date" id="userDob">
-                </div>
-                <div class="setting-item">
-                    <label for="userPin">Pin Code:</label>
-                    <input type="text" id="userPin" placeholder="Your Pin Code">
-                </div>
-            </section>
-
-            <section class="setting-group">
-                <h2>Security Question</h2>
-                <div class="setting-item">
-                    <label for="petName">Pet Name (Optional):</label>
-                    <input type="text" id="petName" placeholder="Your Pet's Name">
-                </div>
-            </section>
-
-            <div class="main-actions">
-                <a href="vault.html" class="button secondary">Back to Vault</a>
-                <button id="saveProfileBtn" class="button primary">Save Changes</button>
             </div>
-        </main>
-        <footer>
-            <p>&copy; 2025 KeyKeep</p>
-        </footer>
+            <main class="mt-3">
+                <div class="setting-group">
+                    <div class="setting-item">
+                        <label for="userName"><i class="fas fa-user"></i> Name:</label>
+                        <input type="text" id="userName" placeholder="Your Full Name">
+                    </div>
+                    <div class="setting-item">
+                        <label for="userDob"><i class="fas fa-calendar-alt"></i> Date of Birth:</label>
+                        <input type="date" id="userDob">
+                    </div>
+                    <div class="setting-item">
+                        <label for="userPin"><i class="fas fa-map-marker-alt"></i> Pin Code:</label>
+                        <input type="text" id="userPin" placeholder="e.g., 123456">
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h5 class="text-muted">Security Question</h5>
+                    <div class="setting-item">
+                        <label for="petName"><i class="fas fa-paw"></i> What is your pet's name?</label>
+                        <input type="text" id="petName" placeholder="For account recovery">
+                    </div>
+                </div>
+                <div class="main-actions mt-3">
+                    <button id="saveProfileBtn" class="button primary w-100">Save and Continue</button>
+                </div>
+            </main>
+            <footer class="text-center mt-3">
+                <p>&copy; 2025 KeyKeep</p>
+            </footer>
+        </div>
     </div>
     <script src="js/script.js"></script>
+    <script src="js/profile.js"></script> <!-- We will create this file -->
 </body>
 </html>

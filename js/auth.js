@@ -59,7 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
-                    window.location.href = 'vault.html';
+                    // Redirect based on whether the profile has been initialized
+                    if (data.profileInitialized) {
+                        window.location.href = 'vault.html';
+                    } else {
+                        window.location.href = 'Profile.html';
+                    }
                 } else {
                     errorContainer.textContent = data.msg || 'Login failed. Please try again.';
                 }
