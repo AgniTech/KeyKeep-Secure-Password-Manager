@@ -1,105 +1,115 @@
 .profile-card {
-  width: 400px;
-  border: 1px solid var(--glass-border-base);
-  border-radius: 10px;
-  background: var(--glass-bg-base);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  box-shadow: var(--glass-shadow);
+  width: 280px; /* Adjusted for a more compact vertical layout */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  background: rgba(30, 30, 40, 0.85); /* Made less transparent */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  text-align: center; /* Center align content */
 }
 
-.profile-card .stats{
-  background-color: rgba(255, 255, 255, 0.1) !important;
+.profile-card .profile-image-container {
+    margin-bottom: 1rem;
+}
+
+.profile-card .rounded-circle {
+    border-radius: 50% !important;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-card h4 a {
+    color: var(--primary-accent-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+.profile-card h4 a:hover {
+    text-decoration: underline;
+}
+
+.profile-card #verificationStatus {
+    font-size: 0.9rem;
+    color: var(--success-color);
+}
+
+.profile-card .stats {
+  background-color: rgba(255, 255, 255, 0.05) !important;
   color: var(--text-color) !important;
+  border-radius: 10px;
 }
 .profile-card .stats span {
     color: var(--text-color) !important;
 }
-.profile-card .articles{
-  font-size:10px;
+.profile-card .articles, .profile-card .followers, .profile-card .rating {
+  font-size: 0.8rem;
   color: #a1aab9;
+  text-transform: uppercase;
 }
-.profile-card .number1{
-  font-weight:500;
-}
-.profile-card .followers{
-    font-size:10px;
-  color: #a1aab9;
-}
-.profile-card .number2{
-  font-weight:500;
-}
-.profile-card .rating{
-    font-size:10px;
-  color: #a1aab9;
-}
-.profile-card .number3{
-  font-weight:500;
+.profile-card .number1, .profile-card .number2, .profile-card .number3 {
+  font-weight: 600;
+  font-size: 1.2rem;
 }
 
-/* Flexbox Utilities */
-.profile-card .d-flex {
+/* Button Group */
+.profile-card .button-group {
     display: flex;
-}
-.profile-card .align-items-center {
-    align-items: center;
-}
-.profile-card .justify-content-between {
-    justify-content: space-between;
-}
-.profile-card .flex-column {
     flex-direction: column;
-}
-.profile-card .w-100 {
-    width: 100%;
-}
-
-/* Margin & Padding Utilities */
-.profile-card .p-3 {
-    padding: 1rem;
-}
-.profile-card .p-2 {
-    padding: 0.5rem;
-}
-.profile-card .mt-2 {
-    margin-top: 0.5rem;
-}
-.profile-card .ml-2 {
-    margin-left: 0.5rem;
-}
-.profile-card .ml-3 {
-    margin-left: 1rem;
-}
-.profile-card .mb-0 {
-    margin-bottom: 0;
-}
-.profile-card .mt-0 {
-    margin-top: 0;
+    gap: 0.5rem; /* Space between buttons */
 }
 
 /* Button Utilities */
 .profile-card .btn {
     border: 1px solid transparent;
-    padding: .375rem .75rem;
-    font-size: 1rem;
-    border-radius: .25rem;
+    padding: .5rem .75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 .profile-card .btn-sm {
-    padding: .25rem .5rem;
-    font-size: .875rem;
-    border-radius: .2rem;
+    padding: .375rem .6rem;
+    font-size: .8rem;
 }
 .profile-card .btn-primary {
     color: #fff;
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
+.profile-card .btn-primary:hover {
+    background-color: var(--primary-hover-color);
+    border-color: var(--primary-hover-color);
+}
+
 .profile-card .btn-outline-primary {
-    color: #007bff;
+    color: var(--primary-accent-color);
     background-color: transparent;
-    border-color: #007bff;
+    border-color: var(--primary-accent-color);
 }
+.profile-card .btn-outline-primary:hover {
+    background-color: var(--primary-accent-color);
+    color: #fff;
+}
+
+.profile-card .btn-secondary {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+.profile-card .btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+#logoutButton.btn-danger {
+    background-color: var(--error-color) !important;
+    border-color: var(--error-color) !important;
+    color: #fff !important;
+}
+#logoutButton.btn-danger:hover {
+    background-color: var(--error-hover-color) !important;
+    border-color: var(--error-hover-color) !important;
+}
+
 .profile-card .rounded {
     border-radius: .25rem!important;
 }
