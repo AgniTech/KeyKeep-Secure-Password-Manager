@@ -1,52 +1,53 @@
 document.addEventListener('DOMContentLoaded', () => {
     const saveProfileBtn = document.getElementById('saveProfileBtn');
-    const token = localStorage.getItem('token');
+    const userNameInput = document.getElementById('userName');
+    const userDobInput = document.getElementById('userDob');
+    const userAddressInput = document.getElementById('userAddress');
+    const userPinInput = document.getElementById('userPin');
+    const petNameInput = document.getElementById('petName');
 
+    const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = 'index.html'; // Redirect if not authenticated
+        window.location.href = 'index.html';
         return;
     }
 
-    // Fetch user data to populate the form
-    // This part will be implemented later
-
     saveProfileBtn.addEventListener('click', async () => {
-        const userName = document.getElementById('userName').value;
-        const userDob = document.getElementById('userDob').value;
-        const userPin = document.getElementById('userPin').value;
-        const petName = document.getElementById('petName').value;
+        const profileData = {
+            name: userNameInput.value,
+            dob: userDobInput.value,
+            address: userAddressInput.value,
+            pin: userPinInput.value,
+            petName: petNameInput.value,
+        };
 
         try {
             const response = await fetch('/api/user/profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    name: userName,
-                    dob: userDob,
-                    pin: userPin,
-                    petName: petName
-                })
+                body: JSON.stringify(profileData),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                showToast('Profile saved successfully!', 'success');
+                // Assuming a toast function is available in script.js
+                showToast('Profile updated successfully!', 'success');
                 setTimeout(() => {
                     window.location.href = 'vault.html';
-                }, 1500);
+                }, 2000);
             } else {
-                showToast(data.msg || 'Failed to save profile.', 'error');
+                showToast(data.msg || 'Failed to update profile.', 'error');
             }
         } catch (error) {
             showToast('An error occurred. Please try again.', 'error');
         }
     });
 
-    // --- Toast Notification ---
+    // A simple toast function, in case script.js is not loaded or doesn't have one.
     function showToast(message, type = 'info') {
         const toastContainer = document.getElementById('toastContainer');
         if (!toastContainer) {

@@ -2,7 +2,7 @@
   width: 400px;
   border: 1px solid var(--glass-border-base);
   border-radius: 10px;
-  background: var(--glass-bg-base);
+  background: rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--glass-shadow);
@@ -125,6 +125,7 @@
     border-radius: 8px;
     z-index: 105;
     display: none; /* Hidden by default */
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .profile-image-menu a {
@@ -141,4 +142,19 @@
 
 .profile-image-menu a.danger-text {
     color: var(--error-color);
+}
+
+#logoutButton {
+    background-color: var(--error-color) !important;
+    border-color: var(--error-color) !important;
+}
+
+.profile-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    margin-top: 5px;
 }
