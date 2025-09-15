@@ -56,6 +56,10 @@ const UserSchema = new mongoose.Schema({
     petName: {
         type: String,
         trim: true
+    },
+    address: {
+        type: String,
+        trim: true
     }
 });
 

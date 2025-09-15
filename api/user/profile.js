@@ -25,22 +25,28 @@ export default async function handler(req, res) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.id;
 
-        const { name, dob, pin, petName } = req.body;
+        const { name, dob, pin, petName, address } = req.body;
 
         // Basic validation
-        if (!name || !dob || !pin || !petName) {
-            return res.status(400).json({ msg: 'All fields are required' });
+        if (!name || !dob || !pin) {
+            return res.status(400).json({ msg: 'Name, DOB, and PIN are required' });
+        }
+
+        const updateData = {
+            name,
+            dob,
+            pin,
+            address,
+            profileInitialized: true
+        };
+
+        if (petName) {
+            updateData.petName = petName;
         }
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
-            {
-                name,
-                dob,
-                pin,
-                petName,
-                profileInitialized: true
-            },
+            updateData,
             { new: true }
         );
 
