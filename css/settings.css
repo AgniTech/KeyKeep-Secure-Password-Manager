@@ -67,7 +67,7 @@
 .setting-item input[type="checkbox"]:checked {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    box-shadow: 0 0 10px rgba(108, 99, 255, 0.4);
+    box-shadow: 0 0 10px rgba(110, 172, 218, 0.4); /* Updated shadow color */
 }
 
 .setting-item input[type="checkbox"]:checked::after {

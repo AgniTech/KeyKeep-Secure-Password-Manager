@@ -100,7 +100,7 @@
 }
 
 .dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--hover-color);
     color: var(--accent-color);
 }
 
@@ -117,7 +117,7 @@
 }
 
 .sidebar h3 {
-    color: var(--primary-color);
+    color: var(--secondary-accent-color); /* Changed from primary-color to beige */
     margin-top: 0;
     margin-bottom: 20px;
     font-size: 1.3em;
@@ -143,7 +143,7 @@
 }
 
 .sidebar ul li a:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--hover-color); /* Updated hover color */
     color: var(--accent-color);
     transform: translateX(5px);
 }
@@ -151,7 +151,7 @@
 .sidebar ul li a.active {
     background-color: var(--primary-color);
     color: var(--text-color);
-    box-shadow: 0 0 15px rgba(108, 99, 255, 0.3);
+    box-shadow: 0 0 15px rgba(110, 172, 218, 0.4); /* Updated shadow color */
 }
 
 .dashboard {
@@ -198,7 +198,7 @@
 .search-bar input[type="search"]:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 15px rgba(0, 191, 255, 0.5), var(--glass-shadow);
+    box-shadow: 0 0 15px rgba(110, 172, 218, 0.5), var(--glass-shadow); /* Updated shadow color */
 }
 
 /* Change icon color when the input is focused */

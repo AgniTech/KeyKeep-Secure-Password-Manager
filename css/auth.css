@@ -7,6 +7,16 @@
     min-height: calc(100vh - 80px); /* Adjust for container margin */
 }
 
+/* Update logo and tagline color for auth pages */
+.auth-container header h1 {
+    color: var(--secondary-accent-color);
+    text-shadow: 0 0 15px rgba(226, 226, 182, 0.3); /* Beige shadow */
+}
+
+.auth-container header .tagline {
+    color: var(--secondary-accent-color);
+}
+
 .login-form,
 .register-form {
     width: 100%;
@@ -59,7 +69,7 @@
 .signup-link a:hover,
 .login-link a:hover {
     text-decoration: underline;
-    color: var(--primary-color);
+    color: var(--hover-color);
 }
 
 @media (max-width: 480px) {

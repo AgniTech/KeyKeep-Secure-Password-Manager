@@ -2,10 +2,21 @@
   width: 400px;
   border: 1px solid var(--glass-border-base);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--glass-bg-base);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--glass-shadow);
+}
+
+/* Avatar Outline */
+.profile-card .image {
+    padding: 4px;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+    background-color: transparent;
+}
+.profile-card .image .rounded {
+    border-radius: 50% !important;
 }
 
 .profile-card .stats{
@@ -15,26 +26,28 @@
 .profile-card .stats span {
     color: var(--text-color) !important;
 }
-.profile-card .articles{
+
+.profile-card .articles,
+.profile-card .followers,
+.profile-card .rating {
   font-size:10px;
-  color: #a1aab9;
+  color: rgba(255, 255, 255, 0.8);
 }
-.profile-card .number1{
+
+.profile-card .number1{ /* "New" status */
   font-weight:500;
+  color: var(--primary-color) !important;
 }
-.profile-card .followers{
-    font-size:10px;
-  color: #a1aab9;
-}
-.profile-card .number2{
+
+.profile-card .number2, /* Member Since */
+.profile-card .number3 { /* Profile % */
   font-weight:500;
+  color: var(--secondary-accent-color) !important;
 }
-.profile-card .rating{
-    font-size:10px;
-  color: #a1aab9;
-}
-.profile-card .number3{
-  font-weight:500;
+
+.profile-card .text-muted {
+    color: var(--secondary-text-color);
+    opacity: 0.9;
 }
 
 /* Flexbox Utilities */
@@ -92,13 +105,13 @@
 }
 .profile-card .btn-primary {
     color: #fff;
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 .profile-card .btn-outline-primary {
-    color: #007bff;
+    color: var(--primary-color);
     background-color: transparent;
-    border-color: #007bff;
+    border-color: var(--primary-color);
 }
 .profile-card .rounded {
     border-radius: .25rem!important;
@@ -107,7 +120,7 @@
     color: #fff!important;
 }
 .profile-card .bg-primary {
-    background-color: #007bff!important;
+    background-color: var(--primary-color)!important;
 }
 
 /* Profile Image Menu */
@@ -125,7 +138,7 @@
     border-radius: 8px;
     z-index: 105;
     display: none; /* Hidden by default */
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--glass-bg-base);
 }
 
 .profile-image-menu a {
@@ -137,7 +150,7 @@
 }
 
 .profile-image-menu a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--hover-color);
 }
 
 .profile-image-menu a.danger-text {
@@ -157,4 +170,26 @@
     background-color: var(--input-bg);
     color: var(--text-color);
     margin-top: 5px;
+}
+
+/* Styles for elements in Profile.html */
+.setting-group {
+    margin-bottom: 1rem;
+}
+.setting-item {
+    margin-bottom: 0.75rem;
+}
+.setting-item label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--secondary-text-color);
+    font-weight: 500;
+    font-size: 0.9em;
+}
+.setting-item label i {
+    margin-right: 8px;
+    color: var(--primary-color);
+}
+.main-actions {
+    margin-top: 1.5rem;
 }
