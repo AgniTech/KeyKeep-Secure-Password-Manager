@@ -5,14 +5,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const userAddressInput = document.getElementById('userAddress');
     const userPinInput = document.getElementById('userPin');
     const petNameInput = document.getElementById('petName');
+    const loaderContainer = document.getElementById('loader-container');
+
+    // Profile Image Elements
+    const profileImageContainer = document.querySelector('.profile-image-container');
+    const profileImage = document.getElementById('profileImage');
+    const profileImageMenu = document.getElementById('profileImageMenu');
+    const uploadPhotoBtn = document.getElementById('uploadPhoto');
+    const changePhotoBtn = document.getElementById('changePhoto');
+    const removePhotoBtn = document.getElementById('removePhoto');
+    const photoUploadInput = document.getElementById('photoUploadInput');
+
+    // --- Loader Functions ---
+    const showLoader = () => loaderContainer.classList.add('show');
+    const hideLoader = () => loaderContainer.classList.remove('show');
 
     const token = localStorage.getItem('token');
     if (!token) {
+        showLoader(); // Show loader before redirecting
         window.location.href = 'index.html';
         return;
     }
 
+    // --- Profile Image Functionality ---
+    const savedImage = localStorage.getItem('profileImage');
+    if (savedImage) {
+        profileImage.src = savedImage;
+    }
+
+    if (profileImageContainer) {
+        profileImageContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileImageMenu.style.display = profileImageMenu.style.display === 'block' ? 'none' : 'block';
+        });
+    }
+
+    document.addEventListener('click', () => {
+        if (profileImageMenu) profileImageMenu.style.display = 'none';
+    });
+
+    if (uploadPhotoBtn) uploadPhotoBtn.addEventListener('click', () => photoUploadInput.click());
+    if (changePhotoBtn) changePhotoBtn.addEventListener('click', () => photoUploadInput.click());
+
+    if (photoUploadInput) {
+        photoUploadInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageUrl = e.target.result;
+                    profileImage.src = imageUrl;
+                    localStorage.setItem('profileImage', imageUrl);
+                    showToast('Profile photo updated!', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (removePhotoBtn) {
+        removePhotoBtn.addEventListener('click', () => {
+            profileImage.src = 'images/profile.png';
+            localStorage.removeItem('profileImage');
+            showToast('Profile photo removed.', 'info');
+        });
+    }
+
+    // --- Profile Data Functionality ---
     saveProfileBtn.addEventListener('click', async () => {
+        showLoader(); // Show loader on save
         const profileData = {
             name: userNameInput.value,
             dob: userDobInput.value,
@@ -34,15 +95,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (response.ok) {
-                // Assuming a toast function is available in script.js
                 showToast('Profile updated successfully!', 'success');
                 setTimeout(() => {
                     window.location.href = 'vault.html';
-                }, 2000);
+                }, 1500);
             } else {
+                hideLoader(); // Hide loader on failure
                 showToast(data.msg || 'Failed to update profile.', 'error');
             }
         } catch (error) {
+            hideLoader(); // Hide loader on error
             showToast('An error occurred. Please try again.', 'error');
         }
     });
@@ -67,4 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 5000);
         }, 100);
     }
+
+    // Hide loader when the page is fully loaded
+    window.addEventListener('load', hideLoader);
 });

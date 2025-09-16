@@ -7,9 +7,15 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/vault.css">
     <link rel="stylesheet" href="css/profile-card.css">
+    <link rel="stylesheet" href="css/loader.css"> <!-- Added loader stylesheet -->
     <script src="js/protect.js"></script>
 </head>
 <body>
+    <!-- Loader Container -->
+    <div id="loader-container">
+        <div class="loader"></div>
+    </div>
+
     <div class="container vault-container">
         <nav class="top-nav glassmorphism">
             <div class="left-actions">
@@ -26,7 +32,7 @@
                             <div class="d-flex align-items-center">
                                 <div class="image profile-image-container">
                                     <img src="images/profile.png" class="rounded" width="155" id="profileImage">
-                                    <div id="profileImageMenu" class="profile-image-menu glassmorphism">
+                                    <div id="profileImageMenu" class="profile-image-menu">
                                         <a href="#" id="uploadPhoto">Upload Photo</a>
                                         <a href="#" id="changePhoto">Change Photo</a>
                                         <a href="#" id="removePhoto" class="danger-text">Remove Photo</a>

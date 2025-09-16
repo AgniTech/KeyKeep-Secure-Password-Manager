@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const deleteCredentialNameSpan = document.getElementById('deleteCredentialName');
     const cancelDeleteButton = document.getElementById('cancelDelete');
     const confirmDeleteButton = document.getElementById('confirmDelete');
+    const loaderContainer = document.getElementById('loader-container');
 
     // Profile Dropdown Elements
     const profileButton = document.getElementById('profileButton');
@@ -22,6 +23,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let sessionPassword = null; // Caches the password in memory for the session
     let currentFilter = 'all'; // For category filtering
     let currentCredentialToDeleteId = null; // Stores the ID of the credential to be deleted
+
+    // --- Loader Functions ---
+    const showLoader = () => loaderContainer.classList.add('show');
+    const hideLoader = () => loaderContainer.classList.remove('show');
 
     // --- MODALS & UI FUNCTIONS (DEFINITIONS FIRST) ---
     function openPasswordModal(message, callback) {
@@ -152,6 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- UI RENDERING FUNCTIONS (DEFINITIONS FIRST) ---
     const renderCredentials = (filteredCredentials = credentials) => {
+        hideLoader(); // Hide loader whenever we render
         console.log('renderCredentials called. filteredCredentials length:', filteredCredentials.length, 'sessionPassword:', sessionPassword);
         credentialsList.innerHTML = '';
         if (!filteredCredentials || filteredCredentials.length === 0) {
@@ -294,6 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- FETCH & SAVE LOGIC ---
     async function fetchVault() {
+        showLoader(); // Show loader when fetching
         const token = localStorage.getItem('token');
         if (!token) {
             window.location.href = 'index.html';
@@ -311,6 +318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             sessionPassword = null; // Explicitly set to null on cancellation
             console.log('fetchVault: Password prompt cancelled. sessionPassword set to:', sessionPassword);
             applyFilters(currentFilter); // Pass currentFilter explicitly
+            hideLoader(); // Hide loader on error
             return;
         }
 
@@ -320,6 +328,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             sessionPassword = null; // Explicitly set to null if password is empty
             console.log('fetchVault: Password empty. sessionPassword set to:', sessionPassword);
             applyFilters(currentFilter); // Pass currentFilter explicitly
+            hideLoader(); // Hide loader on error
             return;
         }
 
@@ -337,6 +346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 credentials = []; // Ensure credentials array is empty
                 console.log('fetchVault: 401 Unauthorized. sessionPassword set to:', sessionPassword);
                 applyFilters(currentFilter); // Pass currentFilter explicitly
+                hideLoader(); // Hide loader on error
                 return;
             }
             if (!res.ok) {
@@ -371,10 +381,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             sessionPassword = null; // Explicitly set to null on general fetch error
             console.log('fetchVault: General fetch error. sessionPassword set to:', sessionPassword);
             applyFilters(currentFilter); // Pass currentFilter explicitly
+            hideLoader(); // Hide loader on error
         }
     }
 
     async function executeDelete(credentialId) {
+        showLoader(); // Show loader
         const token = localStorage.getItem('token');
         if (!token) {
             window.location.href = 'index.html';
@@ -399,12 +411,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             await fetchVault(); // Re-fetch to display the updated list
 
         } catch (err) {
+            hideLoader(); // Hide loader on error
             showToast(`Error: ${err.message}`, 'error');
         }
     }
 
     async function handleCredentialSubmit(e) {
         e.preventDefault();
+        showLoader(); // Show loader
         const credentialId = document.getElementById('credentialId').value;
         const isEdit = !!credentialId;
         const token = localStorage.getItem('token');
@@ -445,6 +459,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await fetchVault(); // Re-fetch to display the updated list
 
         } catch (err) {
+            hideLoader(); // Hide loader on error
             showToast(`Error: ${err.message}`, 'error');
         }
     }
@@ -529,6 +544,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Logout functionality
     logoutButton.addEventListener('click', (event) => {
         event.preventDefault();
+        showLoader(); // Show loader on logout
         localStorage.removeItem('token'); // Clear authentication token
         localStorage.removeItem('userEmail'); // Clear stored email
         sessionPassword = null; // Clear session password
@@ -563,6 +579,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    // Show loader for any navigation away from the vault
+    document.querySelectorAll('a, button').forEach(el => {
+        el.addEventListener('click', (e) => {
+            // Check if it's a link that navigates away
+            if (el.tagName === 'A' && el.href && el.target !== '_blank') {
+                // Don't show for in-page links
+                if (el.href.startsWith('#') || el.href.includes('javascript:')) return;
+                showLoader();
+            }
+        });
+    });
+
+    // Hide loader when the page is fully loaded (e.g., when navigating back)
+    window.addEventListener('load', hideLoader);
 
     // --- INITIALIZATION ---
     fetchVault(); // Start by fetching the vault on load.

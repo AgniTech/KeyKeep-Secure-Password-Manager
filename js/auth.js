@@ -3,7 +3,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
+    const loaderContainer = document.getElementById('loader-container');
     const API_BASE_URL = '/api/auth';
+
+    // --- Loader Functions ---
+    const showLoader = () => loaderContainer.classList.add('show');
+    const hideLoader = () => loaderContainer.classList.remove('show');
 
     // --- Toast Notification ---
     function showToast(message, type = 'info') {
@@ -43,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            showLoader(); // Show loader on submission
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorContainer = document.getElementById('loginError');
@@ -66,9 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.location.href = 'Profile.html';
                     }
                 } else {
+                    hideLoader(); // Hide loader on error
                     errorContainer.textContent = data.msg || 'Login failed. Please try again.';
                 }
             } catch (error) {
+                hideLoader(); // Hide loader on error
                 errorContainer.textContent = 'Network error. Please check your connection.';
             }
         });
@@ -78,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            showLoader(); // Show loader on submission
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
@@ -86,10 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (password !== confirmPassword) {
                 errorContainer.textContent = 'Passwords do not match.';
+                hideLoader(); // Hide loader on validation error
                 return;
             }
             if (password.length < 8) {
                 errorContainer.textContent = 'Password must be at least 8 characters long.';
+                hideLoader(); // Hide loader on validation error
                 return;
             }
 
@@ -106,11 +117,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     // On success, redirect to the login page with params
                     window.location.href = `index.html?registered=true&email=${encodeURIComponent(email)}`;
                 } else {
+                    hideLoader(); // Hide loader on error
                     errorContainer.textContent = data.msg || 'Registration failed. Please try again.';
                 }
             } catch (error) {
+                hideLoader(); // Hide loader on error
                 errorContainer.textContent = 'Network error. Please check your connection.';
             }
         });
     }
+
+    // Show loader when navigating away (for successful redirects)
+    window.addEventListener('beforeunload', () => {
+        // Only show loader if a form was submitted
+        if (document.querySelector('#loginForm, #registerForm')) {
+            showLoader();
+        }
+    });
 });
