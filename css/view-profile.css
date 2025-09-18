@@ -1,0 +1,50 @@
+/* css/view-profile.css */
+
+.profile-info-group {
+    background-color: rgba(2, 21, 38, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.profile-info-group h5 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.profile-info-group h5 i {
+    margin-right: 10px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.95em;
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--secondary-text-color);
+    margin-right: 15px;
+}
+
+#profileNameDisplay {
+    color: var(--text-color);
+}
+
+#profileEmailDisplay {
+    color: var(--secondary-text-color);
+    font-size: 0.9em;
+}
+
+.main-actions a.button {
+    display: block; /* Ensure buttons take full width */
+    text-align: center;
+}

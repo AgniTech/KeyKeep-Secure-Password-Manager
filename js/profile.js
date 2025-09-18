@@ -49,30 +49,63 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- Profile Photo Functionality ---
+    // --- Profile Data Loading ---
+    const loadProfileData = async () => {
+        showLoader();
+        try {
+            const response = await fetch('/api/user/profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
 
-    // 1. Load saved profile picture from local storage on page load
+            if (response.ok) {
+                const user = await response.json();
+                // Populate the form with existing data
+                userNameInput.value = user.name || '';
+                // The date input requires YYYY-MM-DD format
+                if (user.dob) {
+                    userDobInput.value = new Date(user.dob).toISOString().split('T')[0];
+                }
+                userAddressInput.value = user.address || '';
+                userPinInput.value = user.pin || '';
+                // Handle nested security question if it exists
+                if (user.securityQuestion) {
+                    petNameInput.value = user.securityQuestion.petName || '';
+                }
+            } else {
+                // This can happen if the profile is new and has no data yet.
+                console.log('Could not fetch profile data, or profile is not yet created.');
+            }
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
+            showToast('Could not load your profile data.', 'error');
+        } finally {
+            hideLoader(); // Always hide the loader after attempting to fetch
+        }
+    };
+
+    // --- Profile Photo Functionality ---
     const savedImage = localStorage.getItem('profileImage');
     if (savedImage) {
         profileImage.src = savedImage;
     }
 
-    // 2. Toggle profile image menu
     profileImageContainer.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent click from closing the menu immediately
+        e.stopPropagation();
         profileImageMenu.style.display = profileImageMenu.style.display === 'block' ? 'none' : 'block';
     });
 
-    // 3. Close menu if clicked outside
     document.addEventListener('click', () => {
-        profileImageMenu.style.display = 'none';
+        if (profileImageMenu) {
+            profileImageMenu.style.display = 'none';
+        }
     });
 
-    // 4. Trigger file input for upload/change
     uploadPhotoBtn.addEventListener('click', () => photoUploadInput.click());
     changePhotoBtn.addEventListener('click', () => photoUploadInput.click());
 
-    // 5. Handle file selection and save to local storage
     photoUploadInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -80,31 +113,28 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = (e) => {
                 const imageUrl = e.target.result;
                 profileImage.src = imageUrl;
-                localStorage.setItem('profileImage', imageUrl); // Save image DataURL
+                localStorage.setItem('profileImage', imageUrl);
                 showToast('Profile photo updated!', 'success');
             };
             reader.readAsDataURL(file);
         }
     });
 
-    // 6. Handle photo removal
     removePhotoBtn.addEventListener('click', () => {
-        profileImage.src = 'images/profile.png'; // Reset to default image
-        localStorage.removeItem('profileImage'); // Remove from local storage
+        profileImage.src = 'images/profile.png';
+        localStorage.removeItem('profileImage');
         showToast('Profile photo removed.', 'info');
     });
 
     // --- Save Profile Data Functionality ---
-
     saveProfileBtn.addEventListener('click', async () => {
-        showLoader(); // Show loader on save
-
+        showLoader();
         const profileData = {
             name: userNameInput.value,
             dob: userDobInput.value,
             address: userAddressInput.value,
             pin: userPinInput.value,
-            petName: petNameInput.value, // Security question answer
+            petName: petNameInput.value,
         };
 
         try {
@@ -123,17 +153,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Profile updated successfully! Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = 'vault.html';
-                }, 1500); // Wait for toast before redirecting
+                }, 1500);
             } else {
-                hideLoader(); // Hide loader on failure
+                hideLoader();
                 showToast(data.msg || 'Failed to update profile.', 'error');
             }
         } catch (error) {
-            hideLoader(); // Hide loader on network or other errors
+            hideLoader();
             showToast('An error occurred. Please try again.', 'error');
         }
     });
 
     // --- Initial Page Load ---
-    window.addEventListener('load', hideLoader);
+    loadProfileData(); // Fetch and populate data as soon as the page loads
 });
