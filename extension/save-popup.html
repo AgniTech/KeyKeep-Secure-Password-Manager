@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Save to KeyKeep</title>
+    <link rel="stylesheet" href="save-popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="images/icon48.png" alt="KeyKeep Logo">
+            <h4>Save to KeyKeep?</h4>
+        </div>
+        <div class="credential-details">
+            <div class="input-group">
+                <label for="username">Username/Email</label>
+                <input type="text" id="username" readonly>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" readonly>
+            </div>
+        </div>
+        <div class="actions">
+            <button id="save-btn" class="button primary">Save</button>
+            <button id="close-btn" class="button secondary">Not Now</button>
+        </div>
+        <!-- Locked State -->
+        <div id="locked-state" style="display: none;">
+            <p>Your vault is locked. Enter your master password to save.</p>
+            <div class="input-group">
+                <label for="master-password">Master Password</label>
+                <input type="password" id="master-password" placeholder="Enter to unlock and save">
+            </div>
+            <button id="unlock-and-save-btn" class="button primary">Unlock & Save</button>
+            <p id="save-error" class="error"></p>
+        </div>
+    </div>
+    <script src="save-popup.js"></script>
+</body>
+</html>

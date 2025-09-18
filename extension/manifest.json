@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "KeyKeep Password Manager",
+  "version": "1.0",
+  "description": "Save and manage your passwords securely with KeyKeep.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [ "save-popup.html", "save-popup.css", "images/icon48.png" ],
+      "matches": [ "<all_urls>" ]
+    }
+  ]
+}

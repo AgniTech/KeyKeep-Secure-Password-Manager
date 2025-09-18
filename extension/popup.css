@@ -1,0 +1,128 @@
+/* extension/popup.css */
+
+:root {
+    --primary-color: #6EACDA;      /* Main Accent - Light Blue */
+    --hover-color: #03346E;          /* Hover/Active State - Navy Blue */
+    --bg-color: #0D1117;             /* Dark Background */
+    --text-color: #FFFFFF;
+    --secondary-text-color: #E2E2B6; /* Beige */
+    --input-bg: rgba(2, 21, 38, 0.5);
+    --border-color: rgba(110, 172, 218, 0.25);
+    --error-color: #FF6B6B;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    width: 350px;
+}
+
+.container {
+    padding: 20px;
+    text-align: center;
+}
+
+.logo {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 10px;
+}
+
+h3 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+p {
+    color: var(--secondary-text-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+    box-sizing: border-box;
+}
+
+.button.primary {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.button.primary:hover {
+    background-color: var(--hover-color);
+}
+
+.button.secondary {
+    background-color: transparent;
+    color: var(--secondary-text-color);
+    border: 1px solid var(--border-color);
+}
+
+.button.secondary:hover {
+    background-color: var(--input-bg);
+    border-color: var(--primary-color);
+}
+
+.button.danger {
+    background-color: var(--error-color);
+    color: var(--text-color);
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--secondary-text-color);
+    font-size: 0.9em;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    box-sizing: border-box;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(110, 172, 218, 0.5);
+}
+
+.error {
+    color: var(--error-color);
+    margin-top: 10px;
+    min-height: 1.2em;
+    font-size: 0.9em;
+}
+
+#vault-content {
+    max-height: 300px;
+    overflow-y: auto;
+    text-align: left;
+    background-color: var(--input-bg);
+    border-radius: 8px;
+    padding: 10px;
+}

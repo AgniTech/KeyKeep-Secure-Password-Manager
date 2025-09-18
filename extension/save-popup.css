@@ -1,0 +1,117 @@
+/* extension/save-popup.css */
+
+:root {
+    --primary-color: #6EACDA;
+    --hover-color: #03346E;
+    --bg-color: #0D1117;
+    --text-color: #FFFFFF;
+    --secondary-text-color: #E2E2B6;
+    --input-bg: rgba(2, 21, 38, 0.7);
+    --border-color: rgba(110, 172, 218, 0.25);
+    --error-color: #FF6B6B;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    overflow: hidden;
+}
+
+.container {
+    padding: 15px;
+    width: 320px;
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.header img {
+    width: 32px;
+    height: 32px;
+}
+
+.header h4 {
+    margin: 0;
+    font-size: 1.1em;
+    color: var(--primary-color);
+}
+
+.input-group {
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--secondary-text-color);
+    font-size: 0.85em;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    box-sizing: border-box;
+    opacity: 0.8;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.button {
+    flex-grow: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.button.primary {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.button.primary:hover {
+    background-color: var(--hover-color);
+}
+
+.button.secondary {
+    background-color: transparent;
+    color: var(--secondary-text-color);
+    border: 1px solid var(--border-color);
+}
+
+.button.secondary:hover {
+    background-color: var(--input-bg);
+}
+
+#locked-state p {
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+    margin-bottom: 10px;
+}
+
+.error {
+    color: var(--error-color);
+    margin-top: 8px;
+    min-height: 1em;
+    font-size: 0.85em;
+    text-align: center;
+}

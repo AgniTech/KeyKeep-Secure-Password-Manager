@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KeyKeep</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Initial View: Shown when the user is logged out -->
+        <div id="initial-view">
+            <img src="images/icon128.png" alt="KeyKeep Logo" class="logo">
+            <h3>Welcome to KeyKeep</h3>
+            <p>Your secure password manager.</p>
+            <button id="show-login-view-btn" class="button primary">Login</button>
+            <button id="register-btn" class="button secondary">Register</button>
+        </div>
+
+        <!-- Login View -->
+        <div id="login-view" style="display:none;">
+            <h3>Login to Your Vault</h3>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your email">
+            </div>
+            <div class="input-group">
+                <label for="password">Master Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+            <button id="login-btn" class="button primary">Login</button>
+            <button id="back-to-initial-view" class="button secondary">Back</button>
+            <p id="login-error" class="error"></p>
+        </div>
+
+        <!-- Locked View -->
+        <div id="locked-view" style="display:none;">
+            <h3>Vault is Locked</h3>
+            <div class="input-group">
+                <label for="unlock-password">Master Password</label>
+                <input type="password" id="unlock-password" placeholder="Enter to unlock">
+            </div>
+            <button id="unlock-btn" class="button primary">Unlock</button>
+            <p id="unlock-error" class="error"></p>
+        </div>
+
+        <!-- Unlocked (Vault) View -->
+        <div id="unlocked-view" style="display:none;">
+            <h3>Your Vault</h3>
+            <div id="vault-content">
+                <!-- Credentials will be rendered here -->
+            </div>
+            <button id="logout-btn" class="button danger">Logout</button>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
