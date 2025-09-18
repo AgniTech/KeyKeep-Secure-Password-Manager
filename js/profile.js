@@ -62,27 +62,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const user = await response.json();
-                // Populate the form with existing data
                 userNameInput.value = user.name || '';
-                // The date input requires YYYY-MM-DD format
                 if (user.dob) {
                     userDobInput.value = new Date(user.dob).toISOString().split('T')[0];
                 }
                 userAddressInput.value = user.address || '';
                 userPinInput.value = user.pin || '';
-                // Handle nested security question if it exists
-                if (user.securityQuestion) {
-                    petNameInput.value = user.securityQuestion.petName || '';
-                }
+                petNameInput.value = user.petName || ''; // Updated to fetch top-level petName
             } else {
-                // This can happen if the profile is new and has no data yet.
                 console.log('Could not fetch profile data, or profile is not yet created.');
             }
         } catch (error) {
             console.error('Error fetching profile data:', error);
             showToast('Could not load your profile data.', 'error');
         } finally {
-            hideLoader(); // Always hide the loader after attempting to fetch
+            hideLoader();
         }
     };
 
@@ -134,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dob: userDobInput.value,
             address: userAddressInput.value,
             pin: userPinInput.value,
-            petName: petNameInput.value,
+            petName: petNameInput.value, // Ensure petName is sent as a top-level field
         };
 
         try {
@@ -152,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 showToast('Profile updated successfully! Redirecting...', 'success');
                 setTimeout(() => {
-                    window.location.href = 'vault.html';
+                    window.location.href = 'view-profile.html'; // Redirect to the view page
                 }, 1500);
             } else {
                 hideLoader();
@@ -165,5 +159,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Initial Page Load ---
-    loadProfileData(); // Fetch and populate data as soon as the page loads
+    loadProfileData();
 });

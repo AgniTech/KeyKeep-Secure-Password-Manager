@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KeyKeep - Complete Your Profile</title>
+    <title>KeyKeep - Edit Your Profile</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/profile-card.css">
-    <link rel="stylesheet" href="css/loader.css"> <!-- Added loader stylesheet -->
+    <link rel="stylesheet" href="css/loader.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -28,12 +28,12 @@
                     </div>
                 </div>
                 <div class="ml-3 w-100">
-                    <h4 class="mb-0 mt-0">Complete Your Profile</h4>
-                    <span>Tell us a bit about yourself</span>
+                    <h4 class="mb-0 mt-0">Edit Your Profile</h4>
+                    <span>Keep your details up to date.</span>
                     <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats">
                         <div class="d-flex flex-column">
                             <span class="articles">Status</span>
-                            <span class="number1">New</span>
+                            <span class="number1">Editing</span>
                         </div>
                         <div class="d-flex flex-column">
                             <span class="followers">Member Since</span>
@@ -41,7 +41,7 @@
                         </div>
                         <div class="d-flex flex-column">
                             <span class="rating">Profile</span>
-                            <span class="number3">0%</span>
+                            <span class="number3">100%</span>
                         </div>
                     </div>
                 </div>
@@ -65,16 +65,14 @@
                         <label for="userPin"><i class="fas fa-map-marker-alt"></i> Pin Code:</label>
                         <input type="text" id="userPin" placeholder="e.g., 123456" class="profile-input">
                     </div>
-                </div>
-                <div class="setting-group">
-                    <h5 class="text-muted">Security Question</h5>
                     <div class="setting-item">
                         <label for="petName"><i class="fas fa-paw"></i> What is your pet's name? (Optional)</label>
                         <input type="text" id="petName" placeholder="Pet's Name" class="profile-input">
                     </div>
                 </div>
                 <div class="main-actions mt-3">
-                    <button id="saveProfileBtn" class="button primary w-100">Save and Continue</button>
+                    <button id="saveProfileBtn" class="button primary w-100">Save Changes</button>
+                    <a href="view-profile.html" class="button secondary w-100 mt-2">Cancel</a>
                 </div>
             </main>
             <footer class="text-center mt-3">
@@ -82,7 +80,6 @@
             </footer>
         </div>
     </div>
-    <script src="js/script.js"></script>
     <script src="js/profile.js"></script>
 </body>
 </html>

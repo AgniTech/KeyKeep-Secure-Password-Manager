@@ -41,12 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 dobDisplay.textContent = user.dob ? new Date(user.dob).toLocaleDateString() : '-';
                 addressDisplay.textContent = user.address || '-';
                 pinDisplay.textContent = user.pin || '-';
-                
-                if (user.securityQuestion && user.securityQuestion.petName) {
-                    petNameDisplay.textContent = '********'; // Always mask the answer
-                } else {
-                    petNameDisplay.textContent = 'Not Set';
-                }
+                petNameDisplay.textContent = user.petName || '-'; // Updated to fetch top-level petName
 
             } else {
                 console.error('Failed to fetch profile data.');
