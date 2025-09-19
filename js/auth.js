@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.profileInitialized) {
                         window.location.href = 'vault.html';
                     } else {
+                        localStorage.setItem('isNewUser', 'true');
                         window.location.href = 'Profile.html';
                     }
                 } else {
