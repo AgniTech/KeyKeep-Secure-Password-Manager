@@ -156,7 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 showToast('Profile updated successfully! Redirecting...', 'success');
                 setTimeout(() => {
-                    window.location.href = 'view-profile.html'; // Redirect to the view page
+                    if (localStorage.getItem('isNewUser')) {
+                        localStorage.removeItem('isNewUser');
+                        window.location.href = 'vault.html';
+                    } else {
+                        window.location.href = 'view-profile.html'; // Redirect to the view page
+                    }
                 }, 1500);
             } else {
                 hideLoader();
