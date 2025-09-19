@@ -18,7 +18,7 @@ function getEncryptionKey() {
   return crypto.scryptSync(fallbackSecret, 'salt', KEY_LENGTH);
 }
 
-// Encrypt sensitive data
+// Encrypt sensitive data (using a global key)
 export function encryptData(plaintext) {
   try {
     if (!plaintext) return { data: '', encrypted: true };
@@ -50,7 +50,7 @@ export function encryptData(plaintext) {
   }
 }
 
-// Decrypt sensitive data
+// Decrypt sensitive data (using a global key)
 export function decryptData(encryptedData) {
   try {
     if (!encryptedData || encryptedData.length < (IV_LENGTH + TAG_LENGTH) * 2) {
@@ -74,6 +74,61 @@ export function decryptData(encryptedData) {
     return decrypted;
   } catch (error) {
     console.error('Decryption error:', error);
+    // Return original data if decryption fails
+    return encryptedData;
+  }
+}
+
+// Derive a key from a password and salt
+function deriveKey(password, salt) {
+  return crypto.pbkdf2Sync(password, salt, 100000, KEY_LENGTH, 'sha512');
+}
+
+// Encrypt data using a user-provided password and salt
+export function encryptWithPassword(plaintext, password, salt) {
+  try {
+    if (!plaintext) return null; // Return null if no plaintext to encrypt
+    
+    const key = deriveKey(password, salt);
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const cipher = crypto.createCipherGCM(ALGORITHM, key, iv);
+    
+    let encrypted = cipher.update(plaintext, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    const tag = cipher.getAuthTag();
+    
+    // Combine IV + tag + encrypted data
+    return iv.toString('hex') + tag.toString('hex') + encrypted;
+  } catch (error) {
+    console.error('Encryption with password error:', error);
+    return null;
+  }
+}
+
+// Decrypt data using a user-provided password and salt
+export function decryptWithPassword(encryptedData, password, salt) {
+  try {
+    if (!encryptedData || encryptedData.length < (IV_LENGTH + TAG_LENGTH) * 2) {
+      return encryptedData; // Return as-is if not properly encrypted or too short
+    }
+    
+    const key = deriveKey(password, salt);
+    
+    // Extract components
+    const iv = Buffer.from(encryptedData.substr(0, IV_LENGTH * 2), 'hex');
+    const tag = Buffer.from(encryptedData.substr(IV_LENGTH * 2, TAG_LENGTH * 2), 'hex');
+    const encrypted = encryptedData.substr((IV_LENGTH + TAG_LENGTH) * 2);
+    
+    const decipher = crypto.createDecipherGCM(ALGORITHM, key, iv);
+    decipher.setAuthTag(tag);
+    
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    
+    return decrypted;
+  } catch (error) {
+    console.error('Decryption with password error:', error);
     // Return original data if decryption fails
     return encryptedData;
   }
