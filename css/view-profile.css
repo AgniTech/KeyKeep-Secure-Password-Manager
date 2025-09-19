@@ -1,50 +1,25 @@
-/* css/view-profile.css */
+/* css/view-profile.css (REVISED FOR UI/UX FIXES) */
 
-.profile-info-group {
-    background-color: rgba(2, 21, 38, 0.3);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.profile-info-group h5 {
-    color: var(--primary-color);
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.1em;
-    font-weight: 600;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
-}
-
-.profile-info-group h5 i {
-    margin-right: 10px;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    font-size: 0.95em;
-}
-
-.info-label {
-    font-weight: 500;
-    color: var(--secondary-text-color);
-    margin-right: 15px;
-}
+/* 
+   Most of the styling for the profile card and info groups
+   has been moved to css/profile-card.css to create a single,
+   unified source of truth and fix layout inconsistencies.
+   This file now only contains styles that are UNIQUE to the view-profile page.
+*/
 
 #profileNameDisplay {
     color: var(--text-color);
+    font-size: 1.5em; /* Make the name more prominent */
 }
 
 #profileEmailDisplay {
     color: var(--secondary-text-color);
     font-size: 0.9em;
+    opacity: 0.9;
 }
 
 .main-actions a.button {
     display: block; /* Ensure buttons take full width */
     text-align: center;
+    margin-top: 10px; /* Add spacing between buttons */
 }

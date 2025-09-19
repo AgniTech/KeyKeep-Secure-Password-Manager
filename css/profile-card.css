@@ -1,28 +1,43 @@
+/* css/profile-card.css (REVISED FOR UI/UX FIXES) */
+
 .profile-card {
-  width: 400px;
+  width: 500px; /* Increased width for better layout */
   border: 1px solid var(--glass-border-base);
-  border-radius: 10px;
+  border-radius: 15px;
   background: var(--glass-bg-base);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--glass-shadow);
 }
 
-/* Avatar Outline */
+/* --- Avatar Fix (DEFINITIVE) --- */
 .profile-card .image {
-    padding: 4px;
-    border-radius: 50%;
-    border: 3px solid var(--primary-color);
-    background-color: transparent;
-}
-.profile-card .image .rounded {
-    border-radius: 50% !important;
+    width: 155px;   /* Explicit width */
+    height: 155px;  /* Explicit height to create a perfect square */
+    border-radius: 50%; /* Makes the container a perfect circle */
+    border: 4px solid var(--primary-color);
+    padding: 3px; /* Inner spacing between border and photo */
+    box-sizing: border-box;
+    background-color: var(--input-bg);
+    display: flex; /* Added for centering */
+    align-items: center; /* Added for centering */
+    justify-content: center; /* Added for centering */
 }
 
-.profile-card .stats{
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: var(--text-color) !important;
+.profile-card .image .rounded {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Scales the image to fill the container without distortion */
+    border-radius: 50%; /* Ensures the image itself is circular */
 }
+/* --- End Avatar Fix --- */
+
+.profile-card .stats{
+  background-color: rgba(2, 21, 38, 0.5) !important;
+  color: var(--text-color) !important;
+  border-radius: 8px;
+}
+
 .profile-card .stats span {
     color: var(--text-color) !important;
 }
@@ -31,16 +46,16 @@
 .profile-card .followers,
 .profile-card .rating {
   font-size:10px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--secondary-text-color);
 }
 
-.profile-card .number1{ /* "New" status */
+.profile-card .number1{ 
   font-weight:500;
   color: var(--primary-color) !important;
 }
 
-.profile-card .number2, /* Member Since */
-.profile-card .number3 { /* Profile % */
+.profile-card .number2, 
+.profile-card .number3 { 
   font-weight:500;
   color: var(--secondary-accent-color) !important;
 }
@@ -51,77 +66,21 @@
 }
 
 /* Flexbox Utilities */
-.profile-card .d-flex {
-    display: flex;
-}
-.profile-card .align-items-center {
-    align-items: center;
-}
-.profile-card .justify-content-between {
-    justify-content: space-between;
-}
-.profile-card .flex-column {
-    flex-direction: column;
-}
-.profile-card .w-100 {
-    width: 100%;
-}
+.profile-card .d-flex { display: flex; }
+.profile-card .align-items-center { align-items: center; }
+.profile-card .justify-content-between { justify-content: space-between; }
+.profile-card .flex-column { flex-direction: column; }
+.profile-card .w-100 { width: 100%; }
 
 /* Margin & Padding Utilities */
-.profile-card .p-3 {
-    padding: 1rem;
-}
-.profile-card .p-2 {
-    padding: 0.5rem;
-}
-.profile-card .mt-2 {
-    margin-top: 0.5rem;
-}
-.profile-card .ml-2 {
-    margin-left: 0.5rem;
-}
-.profile-card .ml-3 {
-    margin-left: 1rem;
-}
-.profile-card .mb-0 {
-    margin-bottom: 0;
-}
-.profile-card .mt-0 {
-    margin-top: 0;
-}
-
-/* Button Utilities */
-.profile-card .btn {
-    border: 1px solid transparent;
-    padding: .375rem .75rem;
-    font-size: 1rem;
-    border-radius: .25rem;
-    cursor: pointer;
-}
-.profile-card .btn-sm {
-    padding: .25rem .5rem;
-    font-size: .875rem;
-    border-radius: .2rem;
-}
-.profile-card .btn-primary {
-    color: #fff;
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-.profile-card .btn-outline-primary {
-    color: var(--primary-color);
-    background-color: transparent;
-    border-color: var(--primary-color);
-}
-.profile-card .rounded {
-    border-radius: .25rem!important;
-}
-.profile-card .text-white {
-    color: #fff!important;
-}
-.profile-card .bg-primary {
-    background-color: var(--primary-color)!important;
-}
+.profile-card .p-3 { padding: 1.5rem; } /* Increased padding */
+.profile-card .p-2 { padding: 0.75rem; }
+.profile-card .mt-2 { margin-top: 0.5rem; }
+.profile-card .mt-3 { margin-top: 1.5rem; }
+.profile-card .ml-2 { margin-left: 0.5rem; }
+.profile-card .ml-3 { margin-left: 1.5rem; } /* Increased margin */
+.profile-card .mb-0 { margin-bottom: 0; }
+.profile-card .mt-0 { margin-top: 0; }
 
 /* Profile Image Menu */
 .profile-image-container {
@@ -139,6 +98,7 @@
     z-index: 105;
     display: none; /* Hidden by default */
     background: var(--glass-bg-base);
+    border: 1px solid var(--glass-border-base);
 }
 
 .profile-image-menu a {
@@ -157,39 +117,62 @@
     color: var(--error-color);
 }
 
-#logoutButton {
-    background-color: var(--error-color) !important;
-    border-color: var(--error-color) !important;
-}
-
+/* Input fields on Edit page */
 .profile-input {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid var(--border-color);
-    border-radius: 5px;
+    border-radius: 8px;
     background-color: var(--input-bg);
     color: var(--text-color);
     margin-top: 5px;
+    box-sizing: border-box;
 }
 
-/* Styles for elements in Profile.html */
-.setting-group {
-    margin-bottom: 1rem;
+/* UNIFIED STYLING for info/setting groups */
+.setting-group, .profile-info-group {
+    background-color: rgba(2, 21, 38, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
 }
-.setting-item {
-    margin-bottom: 0.75rem;
-}
-.setting-item label {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--secondary-text-color);
-    font-weight: 500;
-    font-size: 0.9em;
-}
-.setting-item label i {
-    margin-right: 8px;
+
+.setting-group h5, .profile-info-group h5 {
     color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
 }
-.main-actions {
-    margin-top: 1.5rem;
+
+.setting-group h5 i, .profile-info-group h5 i {
+    margin-right: 10px;
+}
+
+.setting-item, .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 0.95em;
+    border-bottom: 1px solid rgba(110, 172, 218, 0.1);
+}
+
+.setting-group .setting-item:last-child,
+.profile-info-group .info-item:last-child {
+    border-bottom: none;
+}
+
+.setting-item label, .info-label {
+    font-weight: 500;
+    color: var(--secondary-text-color);
+    margin-right: 15px;
+}
+
+.setting-item label i {
+    margin-right: 10px;
+    color: var(--primary-color);
 }
