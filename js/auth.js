@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const loaderContainer = document.getElementById('loader-container');
-    const API_BASE_URL = '/api/auth';
-
+    // const API_BASE_URL = '/api/auth';
+    const API_BASE_URL = 'http://localhost:5000/api/auth';
     // --- Loader Functions ---
     const showLoader = () => loaderContainer.classList.add('show');
     const hideLoader = () => loaderContainer.classList.remove('show');
