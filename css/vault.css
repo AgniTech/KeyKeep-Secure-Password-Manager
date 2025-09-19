@@ -110,6 +110,15 @@
     margin: 5px 0;
 }
 
+/* Profile Avatar Styling */
+.profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover; /* Ensures the image covers the area without distortion */
+    vertical-align: middle; /* Aligns the image nicely with text/other icons */
+}
+
 
 .sidebar {
     grid-area: sidebar;

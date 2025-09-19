@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profileDropdown = document.getElementById('profileDropdown');
     const logoutButton = document.getElementById('logoutButton');
 
+    // Profile Picture Elements
+    const userProfileAvatar = document.getElementById('userProfileAvatar');
+    const profileCardImage = document.getElementById('profileCardImage');
+
     let credentials = [];
     let sessionPassword = null; // Caches the password in memory for the session
     let currentFilter = 'all'; // For category filtering
@@ -464,6 +468,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // --- Profile Picture Functions ---
+    const DEFAULT_AVATAR_PATH = 'images/default-avatar.png';
+
+    const updateProfileImages = (src) => {
+        userProfileAvatar.src = src;
+        profileCardImage.src = src;
+    };
+
     // --- EVENT LISTENERS (ATTACHMENTS AFTER ALL DEFINITIONS) ---
     credentialsList.addEventListener('click', async (e) => {
         const target = e.target;
@@ -536,7 +548,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Populate user name
+    // Populate user name and profile picture
     const loadProfileCardData = async () => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -550,13 +562,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (response.ok) {
                 const user = await response.json();
                 document.getElementById('profileNameLink').textContent = user.name || 'User';
+                
+                // Load profile image from local storage or default
                 const savedImage = localStorage.getItem('profileImage');
                 if (savedImage) {
-                    document.getElementById('profileImage').src = savedImage;
+                    updateProfileImages(savedImage);
+                } else {
+                    updateProfileImages(DEFAULT_AVATAR_PATH);
                 }
             }
         } catch (error) {
             console.error('Error fetching profile data for card:', error);
+            updateProfileImages(DEFAULT_AVATAR_PATH); // Fallback to default on error
         }
     };
 
@@ -566,6 +583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showLoader(); // Show loader on logout
         localStorage.removeItem('token'); // Clear authentication token
         localStorage.removeItem('userEmail'); // Clear stored email
+        localStorage.removeItem('profileImage'); // Clear profile image from local storage
         sessionPassword = null; // Clear session password
         window.location.href = 'index.html'; // Redirect to login page
     });
@@ -581,23 +599,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     searchInput.addEventListener('input', () => applyFilters(currentFilter)); // Pass currentFilter explicitly
-
-    // --- Profile Image Menu Logic ---
-    const profileImage = document.getElementById('profileImage');
-    const profileImageMenu = document.getElementById('profileImageMenu');
-
-    if (profileImage && profileImageMenu) {
-        profileImage.addEventListener('click', (event) => {
-            event.stopPropagation();
-            profileImageMenu.style.display = profileImageMenu.style.display === 'block' ? 'none' : 'block';
-        });
-
-        document.addEventListener('click', (event) => {
-            if (!profileImageMenu.contains(event.target) && !profileImage.contains(event.target)) {
-                profileImageMenu.style.display = 'none';
-            }
-        });
-    }
 
     // Show loader for any navigation away from the vault
     document.querySelectorAll('a, button').forEach(el => {
