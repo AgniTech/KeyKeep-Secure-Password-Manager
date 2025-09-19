@@ -490,8 +490,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Helper to get current profile data from inputs for saving
     const getProfileDataForSave = (includeImage = true) => {
+        console.log('getProfileDataForSave called. includeImage:', includeImage);
         const [day, month, year] = userDobInput.value.split('/');
         const dobISO = userDobInput.value ? new Date(`${year}-${month}-${day}`).toISOString() : null;
+        console.log('DOB input value:', userDobInput.value, 'dobISO:', dobISO);
 
         const data = {
             fullName: fullNameInput.value,
@@ -533,6 +535,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 console.log('Master password obtained for saving profile.');
 
+                console.log('Calling getProfileDataForSave from saveProfileBtn click handler...');
                 const profileData = {
                     ...getProfileDataForSave(true), // Include current profile image state
                     masterPassword: masterPassword
