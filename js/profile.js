@@ -1,8 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Element Selectors ---
     const saveProfileBtn = document.getElementById('saveProfileBtn');
+    const fullNameInput = document.getElementById('fullName'); // NEW
     const userNameInput = document.getElementById('userName');
+    const userEmailInput = document.getElementById('userEmail'); // NEW
     const userMobileInput = document.getElementById('userMobile');
+    const educationalBackgroundInput = document.getElementById('educationalBackground'); // NEW
+    const favoriteSportsTeamInput = document.getElementById('favoriteSportsTeam'); // NEW
+    const favoriteMovieBookInput = document.getElementById('favoriteMovieBook'); // NEW
+    const importantDatesInput = document.getElementById('importantDates'); // NEW
     const userDobInput = document.getElementById('userDob');
     const userAddressInput = document.getElementById('userAddress');
     const userPinInput = document.getElementById('userPin');
@@ -63,8 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const user = await response.json();
-                userNameInput.value = user.name || '';
+                fullNameInput.value = user.fullName || ''; // NEW
+                userNameInput.value = user.userName || ''; // NEW
+                userEmailInput.value = user.email || ''; // NEW
                 userMobileInput.value = user.mobile || '';
+                educationalBackgroundInput.value = user.educationalBackground || ''; // NEW
+                favoriteSportsTeamInput.value = user.favoriteSportsTeam || ''; // NEW
+                favoriteMovieBookInput.value = user.favoriteMovieBook || ''; // NEW
+                importantDatesInput.value = user.importantDates || ''; // NEW
                 if (user.dob) {
                     const date = new Date(user.dob);
                     const day = String(date.getDate()).padStart(2, '0');
@@ -167,8 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const dobISO = userDobInput.value ? new Date(`${year}-${month}-${day}`).toISOString() : null;
 
         const profileData = {
-            name: userNameInput.value,
+            fullName: fullNameInput.value, // NEW
+            userName: userNameInput.value, // NEW
+            email: userEmailInput.value, // NEW
             mobile: userMobileInput.value,
+            educationalBackground: educationalBackgroundInput.value, // NEW
+            favoriteSportsTeam: favoriteSportsTeamInput.value, // NEW
+            favoriteMovieBook: favoriteMovieBookInput.value, // NEW
+            importantDates: importantDatesInput.value, // NEW
             dob: dobISO,
             address: userAddressInput.value,
             pin: userPinInput.value,

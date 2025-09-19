@@ -42,6 +42,34 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    fullName: {
+        type: String,
+        trim: true
+    },
+    userName: {
+        type: String,
+        trim: true
+    },
+    mobile: {
+        type: String,
+        trim: true
+    },
+    educationalBackground: {
+        type: String,
+        trim: true
+    },
+    favoriteSportsTeam: {
+        type: String,
+        trim: true
+    },
+    favoriteMovieBook: {
+        type: String,
+        trim: true
+    },
+    importantDates: {
+        type: String,
+        trim: true
+    },
     name: {
         type: String,
         trim: true

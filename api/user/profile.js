@@ -27,24 +27,47 @@ export default async function handler(req, res) {
             if (!user) {
                 return res.status(404).json({ msg: 'User not found' });
             }
+            // Return all fields including the new ones
             return res.status(200).json(user);
         }
 
         // --- Handle PUT Request: Update Profile Data ---
         if (req.method === 'PUT') {
-            const { name, dob, pin, petName, address } = req.body;
+            const { 
+                fullName,
+                userName,
+                email,
+                mobile,
+                educationalBackground,
+                favoriteSportsTeam,
+                favoriteMovieBook,
+                importantDates,
+                name, 
+                dob, 
+                pin, 
+                petName, 
+                address 
+            } = req.body;
 
-            // Basic validation
-            if (!name || !dob || !pin) {
-                return res.status(400).json({ msg: 'Name, DOB, and PIN are required' });
+            // Basic validation - adjust as needed for new required fields
+            if (!fullName || !userName || !email || !pin) {
+                return res.status(400).json({ msg: 'Full Name, Username, Email, and PIN are required' });
             }
 
             const updateData = {
-                name,
+                fullName,
+                userName,
+                email,
+                mobile,
+                educationalBackground,
+                favoriteSportsTeam,
+                favoriteMovieBook,
+                importantDates,
+                name, // Keep for backward compatibility if needed, though fullName might replace it
                 dob,
                 pin,
                 address,
-                petName, // Save petName as a top-level field
+                petName,
                 profileInitialized: true
             };
 

@@ -8,6 +8,8 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--glass-shadow);
+  padding: 16px; /* UPDATED: Consistent padding */
+  overflow: hidden; /* Prevent content overflow */
 }
 
 /* --- Avatar Fix (DEFINITIVE) --- */
@@ -36,7 +38,12 @@
 .profile-card .stats {
     background-color: rgba(2, 21, 38, 0.5) !important;
     color: var(--text-color) !important;
-    border-radius: 8px;
+    border-radius: 20px; /* UPDATED: Pill-style design */
+    padding: 8px 16px; /* UPDATED: Padding for pill-style */
+    display: flex; /* Ensure flex for alignment */
+    align-items: center; /* Center vertically */
+    justify-content: space-around; /* Distribute items */
+    margin-top: 16px; /* Consistent margin */
 }
 
 .profile-card .stats span {
@@ -46,19 +53,17 @@
 .profile-card .articles,
 .profile-card .followers,
 .profile-card .rating {
-    font-size: 10px;
+    font-size: 14px; /* UPDATED: Label font size */
+    font-weight: 600; /* UPDATED: Semibold */
     color: var(--secondary-text-color);
 }
 
-.profile-card .number1 {
-    font-weight: 500;
-    color: var(--primary-color) !important;
-}
-
+.profile-card .number1,
 .profile-card .number2,
 .profile-card .number3 {
-    font-weight: 500;
-    color: var(--secondary-accent-color) !important;
+    font-weight: 400; /* UPDATED: Normal font weight for values */
+    font-size: 14px; /* UPDATED: Value font size */
+    color: var(--primary-color) !important;
 }
 
 .profile-card .text-muted {
@@ -74,12 +79,12 @@
 .profile-card .w-100 { width: 100%; }
 
 /* Margin & Padding Utilities */
-.profile-card .p-3 { padding: 1.5rem; }
-.profile-card .p-2 { padding: 0.75rem; }
-.profile-card .mt-2 { margin-top: 0.5rem; }
-.profile-card .mt-3 { margin-top: 1.5rem; }
-.profile-card .ml-2 { margin-left: 0.5rem; }
-.profile-card .ml-3 { margin-left: 1.5rem; }
+.profile-card .p-3 { padding: 16px; } /* UPDATED: Consistent padding */
+.profile-card .p-2 { padding: 16px; } /* UPDATED: Consistent padding */
+.profile-card .mt-2 { margin-top: 16px; } /* UPDATED: Consistent margin */
+.profile-card .mt-3 { margin-top: 16px; } /* UPDATED: Consistent margin */
+.profile-card .ml-2 { margin-left: 16px; } /* UPDATED: Consistent margin */
+.profile-card .ml-3 { margin-left: 16px; } /* UPDATED: Consistent margin */
 .profile-card .mb-0 { margin-bottom: 0; }
 .profile-card .mt-0 { margin-top: 0; }
 
@@ -121,7 +126,7 @@
 /* Input fields on Edit page */
 .profile-input {
     flex-grow: 1; /* Allow input to take remaining space */
-    padding: 12px;
+    padding: 16px; /* UPDATED: Consistent padding */
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background-color: var(--input-bg);
@@ -134,16 +139,16 @@
     background-color: rgba(2, 21, 38, 0.3);
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
+    padding: 16px; /* UPDATED: Consistent padding */
+    margin-bottom: 16px; /* UPDATED: Consistent margin */
 }
 
 .setting-group h5, .profile-info-group h5 {
     color: var(--primary-color);
     margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.1em;
-    font-weight: 600;
+    margin-bottom: 16px; /* UPDATED: Consistent margin */
+    font-size: 18px; /* UPDATED: Heading font size */
+    font-weight: 700; /* UPDATED: Bold */
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
 }
@@ -156,7 +161,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 16px 0; /* UPDATED: Consistent padding */
     font-size: 0.95em;
     border-bottom: 1px solid rgba(110, 172, 218, 0.1);
 }
@@ -167,9 +172,10 @@
 }
 
 .setting-item label, .info-label {
-    font-weight: 500;
+    font-weight: 600; /* UPDATED: Semibold */
+    font-size: 14px; /* UPDATED: Label font size */
     color: var(--secondary-text-color);
-    margin-right: 15px;
+    margin-right: 16px; /* UPDATED: Consistent margin */
     flex-basis: 40%; /* Give label a consistent size */
     flex-shrink: 0; /* Prevent label from shrinking */
 }
@@ -181,4 +187,21 @@
 
 .profile-input {
     flex-grow: 1; /* Allow input to take remaining space */
+    font-size: 14px; /* UPDATED: Value font size */
+    font-weight: 400; /* UPDATED: Normal font weight */
+}
+
+/* Align profile picture and text vertically in the center */
+.profile-card > .d-flex.align-items-center {
+    align-items: center; /* Ensure vertical alignment */
+}
+
+.profile-card .ml-3.w-100 h4 {
+    font-size: 18px; /* UPDATED: Name/Heading font size */
+    font-weight: 700; /* UPDATED: Bold */
+}
+
+.profile-card .ml-3.w-100 span {
+    font-size: 14px; /* UPDATED: Value font size */
+    font-weight: 400; /* UPDATED: Normal font weight */
 }
