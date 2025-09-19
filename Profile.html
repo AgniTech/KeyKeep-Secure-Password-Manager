@@ -20,7 +20,7 @@
         <div class="profile-card p-3">
             <div class="d-flex align-items-center">
                 <div class="image profile-image-container">
-                    <img src="images/profile.png" class="rounded" width="155" id="profileImage">
+                    <img src="images/profile.png" class="rounded" id="profileImage">
                     <div id="profileImageMenu" class="profile-image-menu">
                         <a href="#" id="uploadPhoto">Upload Photo</a>
                         <a href="#" id="changePhoto">Change Photo</a>
@@ -54,8 +54,12 @@
                         <input type="text" id="userName" placeholder="Your Full Name" class="profile-input">
                     </div>
                     <div class="setting-item">
+                        <label for="userMobile"><i class="fas fa-mobile-alt"></i> Mobile Number:</label>
+                        <input type="text" id="userMobile" placeholder="Your Mobile Number" class="profile-input">
+                    </div>
+                    <div class="setting-item">
                         <label for="userDob"><i class="fas fa-calendar-alt"></i> Date of Birth:</label>
-                        <input type="date" id="userDob" class="profile-input">
+                        <input type="text" id="userDob" class="profile-input" placeholder="DD/MM/YYYY">
                     </div>
                     <div class="setting-item">
                         <label for="userAddress"><i class="fas fa-map-marked-alt"></i> Address:</label>

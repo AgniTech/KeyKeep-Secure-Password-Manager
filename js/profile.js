@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Element Selectors ---
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     const userNameInput = document.getElementById('userName');
+    const userMobileInput = document.getElementById('userMobile');
     const userDobInput = document.getElementById('userDob');
     const userAddressInput = document.getElementById('userAddress');
     const userPinInput = document.getElementById('userPin');
@@ -63,8 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const user = await response.json();
                 userNameInput.value = user.name || '';
+                userMobileInput.value = user.mobile || '';
                 if (user.dob) {
-                    userDobInput.value = new Date(user.dob).toISOString().split('T')[0];
+                    const date = new Date(user.dob);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    userDobInput.value = `${day}/${month}/${year}`;
                 }
                 userAddressInput.value = user.address || '';
                 userPinInput.value = user.pin || '';
@@ -123,9 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Save Profile Data Functionality ---
     saveProfileBtn.addEventListener('click', async () => {
         showLoader();
+        const [day, month, year] = userDobInput.value.split('/');
+        const dobISO = userDobInput.value ? new Date(`${year}-${month}-${day}`).toISOString() : null;
+
         const profileData = {
             name: userNameInput.value,
-            dob: userDobInput.value,
+            mobile: userMobileInput.value,
+            dob: dobISO,
             address: userAddressInput.value,
             pin: userPinInput.value,
             petName: petNameInput.value, // Ensure petName is sent as a top-level field
@@ -156,6 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
             hideLoader();
             showToast('An error occurred. Please try again.', 'error');
         }
+    });
+
+    // --- Date Formatting ---
+    userDobInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 2) {
+            value = value.slice(0, 2) + '/' + value.slice(2);
+        }
+        if (value.length > 5) {
+            value = value.slice(0, 5) + '/' + value.slice(5, 9);
+        }
+        e.target.value = value;
     });
 
     // --- Initial Page Load ---
