@@ -537,9 +537,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Populate user name
-    const userEmail = localStorage.getItem('userEmail') || 'user@example.com';
-    const userName = userEmail.split('@')[0];
-    document.getElementById('profileNameLink').textContent = userName;
+    const loadProfileCardData = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        try {
+            const response = await fetch('/api/user/profile', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                document.getElementById('profileNameLink').textContent = user.name || 'User';
+                const savedImage = localStorage.getItem('profileImage');
+                if (savedImage) {
+                    document.getElementById('profileImage').src = savedImage;
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching profile data for card:', error);
+        }
+    };
 
     // Logout functionality
     logoutButton.addEventListener('click', (event) => {
@@ -597,4 +616,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- INITIALIZATION ---
     fetchVault(); // Start by fetching the vault on load.
+    loadProfileCardData();
 });

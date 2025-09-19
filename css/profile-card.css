@@ -170,9 +170,15 @@
     font-weight: 500;
     color: var(--secondary-text-color);
     margin-right: 15px;
+    flex-basis: 40%; /* Give label a consistent size */
+    flex-shrink: 0; /* Prevent label from shrinking */
 }
 
 .setting-item label i {
     margin-right: 10px;
     color: var(--primary-color);
+}
+
+.profile-input {
+    flex-grow: 1; /* Allow input to take remaining space */
 }
