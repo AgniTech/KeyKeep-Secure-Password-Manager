@@ -106,15 +106,29 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadPhotoBtn.addEventListener('click', () => photoUploadInput.click());
     changePhotoBtn.addEventListener('click', () => photoUploadInput.click());
 
+    const cropperModal = document.getElementById('cropperModal');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const imageToCrop = document.getElementById('imageToCrop');
+    const saveCropBtn = document.getElementById('saveCrop');
+    const cancelCropBtn = document.getElementById('cancelCrop');
+    let cropper;
+
     photoUploadInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const imageUrl = e.target.result;
-                profileImage.src = imageUrl;
-                localStorage.setItem('profileImage', imageUrl);
-                showToast('Profile photo updated!', 'success');
+                imageToCrop.src = e.target.result;
+                cropperModal.style.display = 'block';
+                modalOverlay.style.display = 'block';
+                cropper = new Cropper(imageToCrop, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    movable: true,
+                    zoomable: true,
+                    rotatable: true,
+                    scalable: true,
+                });
             };
             reader.readAsDataURL(file);
         }
@@ -124,6 +138,26 @@ document.addEventListener('DOMContentLoaded', () => {
         profileImage.src = 'images/profile.png';
         localStorage.removeItem('profileImage');
         showToast('Profile photo removed.', 'info');
+    });
+
+    saveCropBtn.addEventListener('click', () => {
+        const canvas = cropper.getCroppedCanvas({
+            width: 155,
+            height: 155,
+        });
+        const croppedImageUrl = canvas.toDataURL('image/png');
+        profileImage.src = croppedImageUrl;
+        localStorage.setItem('profileImage', croppedImageUrl);
+        cropper.destroy();
+        cropperModal.style.display = 'none';
+        modalOverlay.style.display = 'none';
+        showToast('Profile photo updated!', 'success');
+    });
+
+    cancelCropBtn.addEventListener('click', () => {
+        cropper.destroy();
+        cropperModal.style.display = 'none';
+        modalOverlay.style.display = 'none';
     });
 
     // --- Save Profile Data Functionality ---
