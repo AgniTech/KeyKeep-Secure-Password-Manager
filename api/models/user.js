@@ -88,6 +88,10 @@ const UserSchema = new mongoose.Schema({
     address: {
         type: String,
         trim: true
+    },
+    profileImage: {
+        type: String,
+        trim: true
     }
 });
 
