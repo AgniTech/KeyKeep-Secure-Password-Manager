@@ -9,7 +9,8 @@
   -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--glass-shadow);
   padding: 16px; /* UPDATED: Consistent padding */
-  overflow: hidden; /* Prevent content overflow */
+  /* Removed overflow: hidden; to allow dropdown to be visible */
+  position: relative; /* Ensure proper stacking context for absolute children */
 }
 
 /* --- Avatar Fix (DEFINITIVE) --- */
