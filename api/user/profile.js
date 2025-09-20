@@ -47,7 +47,6 @@ export default async function handler(req, res) {
                 pin, 
                 petName, 
                 address,
-                profileImage, // New field for profile image data
                 masterPassword // Master password for encryption/decryption
             } = req.body;
 
@@ -86,20 +85,6 @@ export default async function handler(req, res) {
                 petName,
                 profileInitialized: true
             };
-
-            // Handle profile image encryption/decryption
-            if (profileImage !== undefined) { // Check if profileImage was sent in the request body
-                if (profileImage === null) {
-                    updateData.profileImage = null; // Remove profile image
-                } else {
-                    // Encrypt the new profile image using the user's master password and argon2Salt
-                    const encryptedProfileImage = encryptWithPassword(profileImage, masterPassword, user.argon2Salt);
-                    if (!encryptedProfileImage) {
-                        return res.status(500).json({ msg: 'Failed to encrypt profile image.' });
-                    }
-                    updateData.profileImage = encryptedProfileImage;
-                }
-            }
 
             const updatedUser = await User.findByIdAndUpdate(
                 userId,

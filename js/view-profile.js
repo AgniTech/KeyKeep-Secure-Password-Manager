@@ -193,4 +193,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Initial Page Load ---
     loadProfileData();
+
+    // --- Event Listeners for Page Navigation ---
+    window.addEventListener('pageshow', (event) => {
+        // Hide loader on page show, especially for back/forward navigations,
+        // which might not re-trigger DOMContentLoaded.
+        const loaderContainer = document.getElementById('loader-container');
+        if (loaderContainer) {
+            loaderContainer.classList.remove('show');
+        }
+    });
+
+    window.addEventListener('popstate', () => {
+        // If the user navigates back/forward while the password modal is open, close it.
+        const passwordModal = document.getElementById('masterPasswordModal');
+        if (passwordModal) {
+            passwordModal.remove();
+        }
+        const modalOverlay = document.getElementById('modalOverlay');
+        if (modalOverlay && modalOverlay.style.display !== 'none') {
+            modalOverlay.style.display = 'none';
+        }
+    });
 });
