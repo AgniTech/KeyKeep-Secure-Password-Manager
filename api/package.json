@@ -2,6 +2,7 @@
   "name": "keykeep-api",
   "version": "1.0.0",
   "description": "API for KeyKeep Secure Password Manager",
+  "main": "index.js",
   "type": "module",
   "dependencies": {
     "@azure/functions": "^4.8.0",
