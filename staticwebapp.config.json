@@ -1,0 +1,8 @@
+{
+  "routes": [
+    {
+      "route": "/api/*",
+      "rewrite": "https://keykeep-secure-password-manager.azurewebsites.net/api/*"
+    }
+  ]
+}
