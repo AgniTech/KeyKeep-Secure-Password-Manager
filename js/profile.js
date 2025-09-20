@@ -80,10 +80,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (changePhotoBtn) changePhotoBtn.addEventListener('click', () => photoUploadInput.click());
 
     if (removePhotoBtn) {
-        removePhotoBtn.addEventListener('click', () => {
-            newProfileImageData = 'remove';
-            if (profileImage) profileImage.src = 'images/default-avatar.png';
-            alert('Profile photo will be removed when you save changes.');
+        removePhotoBtn.addEventListener('click', async () => {
+            const masterPassword = await promptForMasterPassword("Enter your master password to remove the photo:");
+            if (!masterPassword) {
+                alert("Master password is required to remove the photo.");
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/user/profile-picture', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        profileImage: null, // Send null to indicate removal
+                        masterPassword: masterPassword
+                    })
+                });
+
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.msg || 'Failed to remove profile picture.');
+
+                if (profileImage) profileImage.src = 'images/default-avatar.png';
+                alert('Profile picture removed successfully!');
+                newProfileImageData = null; // Clear any staged data
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
         });
     }
 
@@ -113,14 +140,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (saveCropBtn) {
-        saveCropBtn.addEventListener('click', () => {
+        saveCropBtn.addEventListener('click', async () => {
             if (!cropper) return;
+
             const canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
-            newProfileImageData = canvas.toDataURL('image/png');
-            if (profileImage) profileImage.src = newProfileImageData;
+            const newImageData = canvas.toDataURL('image/png');
+
+            // Close the cropper modal first
             if (cropperModal) cropperModal.style.display = 'none';
             if (modalOverlay) modalOverlay.style.display = 'none';
             cropper.destroy();
+
+            const masterPassword = await promptForMasterPassword("Enter your master password to save the new photo:");
+            if (!masterPassword) {
+                alert("Master password is required to save the new photo.");
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/user/profile-picture', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        profileImage: newImageData,
+                        masterPassword: masterPassword
+                    })
+                });
+
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.msg || 'Failed to save profile picture.');
+
+                if (profileImage) profileImage.src = newImageData;
+                alert('Profile picture updated successfully!');
+                newProfileImageData = null;
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
         });
     }
 
@@ -159,10 +219,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 petName: document.getElementById('petName').value,
                 masterPassword: masterPassword
             };
-
-            if (newProfileImageData) {
-                profileData.profileImage = newProfileImageData === 'remove' ? null : newProfileImageData;
-            }
 
             try {
                 const res = await fetch('/api/user/profile', {
