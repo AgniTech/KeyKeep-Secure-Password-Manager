@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const petNameDisplay = document.getElementById('petNameDisplay');
     const profileImage = document.getElementById('profileImage');
     const loaderContainer = document.getElementById('loader-container');
-    const modalOverlay = document.getElementById('modalOverlay'); // Assuming modalOverlay exists
+    const modalOverlay = document.getElementById('modalOverlay');
 
     // --- Constants ---
     const DEFAULT_AVATAR_PATH = 'images/default-avatar.png';
@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showToast(message, type = 'info') {
         const toastContainer = document.getElementById('toastContainer');
         if (!toastContainer) {
-            console.warn('Toast container not found! Using alert as fallback.');
             alert(message);
             return;
         }
@@ -64,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </form>
             `;
             document.body.appendChild(passwordModal);
-            modalOverlay.style.display = 'block';
+            if (modalOverlay) modalOverlay.style.display = 'block';
             passwordModal.style.display = 'block';
 
             const form = passwordModal.querySelector('#masterPasswordForm');
@@ -75,20 +74,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const close = () => {
                 passwordModal.remove();
-                modalOverlay.style.display = 'none';
-                resolve(null); // Resolve with null on cancel
+                if (modalOverlay) modalOverlay.style.display = 'none';
+                resolve(null);
             };
 
             form.onsubmit = (e) => {
                 e.preventDefault();
                 const enteredPassword = passwordInput.value;
                 passwordModal.remove();
-                modalOverlay.style.display = 'none';
+                if (modalOverlay) modalOverlay.style.display = 'none';
                 resolve(enteredPassword);
             };
 
             cancelBtn.onclick = close;
-            modalOverlay.onclick = close;
         });
     }
 
@@ -102,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function deriveKeyFromPassword(password, salt) {
         const passwordBytes = libsodium.from_string(password);
         const saltBytes = libsodium.from_base64(salt);
-        const key = libsodium.crypto_pwhash(
+        return libsodium.crypto_pwhash(
             libsodium.crypto_aead_aes256gcm_KEYBYTES,
             passwordBytes,
             saltBytes,
@@ -110,7 +108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             MEMLIMIT,
             ALG
         );
-        return key;
     }
 
     async function decryptWithPassword(encryptedData, password, salt) {
@@ -120,12 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const nonce = libsodium.from_base64(nonceB64);
             const encrypted = libsodium.from_base64(encryptedB64);
             const key = await deriveKeyFromPassword(password, salt);
-            const decrypted = libsodium.crypto_aead_aes256gcm_decrypt(
-                nonce,
-                encrypted,
-                null, // AAD
-                key
-            );
+            const decrypted = libsodium.crypto_aead_aes256gcm_decrypt(nonce, encrypted, null, key);
             return libsodium.to_string(decrypted);
         } catch (error) {
             console.error('Decryption failed:', error);
@@ -147,15 +139,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch('/api/user/profile', {
                 method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
             });
 
             if (response.ok) {
                 const user = await response.json();
                 
-                // Populate the display fields
                 profileNameDisplay.textContent = user.fullName || user.userName || 'Not Set';
                 profileEmailDisplay.textContent = user.email || 'your.email@example.com';
                 fullNameDisplay.textContent = user.fullName || '-';
@@ -170,14 +159,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 pinDisplay.textContent = user.pin || '-';
                 petNameDisplay.textContent = user.petName || '-';
 
-                // Handle profile image decryption and display
                 if (user.profileImage && user.argon2Salt) {
                     const masterPassword = await promptForMasterPassword('Enter your master password to view your profile picture:');
                     if (masterPassword) {
                         const decryptedImage = await decryptWithPassword(user.profileImage, masterPassword, user.argon2Salt);
                         if (decryptedImage) {
                             profileImage.src = decryptedImage;
-                            localStorage.setItem('profileImage', decryptedImage); // Cache decrypted image
+                            localStorage.setItem('profileImage', decryptedImage);
                         } else {
                             showToast('Failed to decrypt profile picture.', 'error');
                             profileImage.src = DEFAULT_AVATAR_PATH;

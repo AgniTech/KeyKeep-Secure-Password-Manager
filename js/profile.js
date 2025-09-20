@@ -16,6 +16,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     let cropper;
     let newProfileImageData = null;
 
+    // --- Master Password Prompt Modal ---
+    function promptForMasterPassword(message) {
+        return new Promise((resolve) => {
+            const passwordModal = document.createElement('div');
+            passwordModal.id = 'masterPasswordModal';
+            passwordModal.className = 'modal glassmorphism';
+            passwordModal.innerHTML = `
+                <h2>${message}</h2>
+                <form id="masterPasswordForm">
+                    <div class="input-group">
+                        <label for="modalMasterPassword">Master Password:</label>
+                        <input type="password" id="modalMasterPassword" required autocomplete="current-password">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="button secondary" id="cancelMasterPassword">Cancel</button>
+                        <button type="submit" class="button primary">Submit</button>
+                    </div>
+                </form>
+            `;
+            document.body.appendChild(passwordModal);
+            if (modalOverlay) modalOverlay.style.display = 'block';
+            passwordModal.style.display = 'block';
+
+            const form = passwordModal.querySelector('#masterPasswordForm');
+            const passwordInput = passwordModal.querySelector('#modalMasterPassword');
+            const cancelBtn = passwordModal.querySelector('#cancelMasterPassword');
+
+            passwordInput.focus();
+
+            const close = () => {
+                passwordModal.remove();
+                if (modalOverlay) modalOverlay.style.display = 'none';
+                resolve(null); // Resolve with null on cancel
+            };
+
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                const enteredPassword = passwordInput.value;
+                passwordModal.remove();
+                if (modalOverlay) modalOverlay.style.display = 'none';
+                resolve(enteredPassword);
+            };
+
+            cancelBtn.onclick = close;
+        });
+    }
+
     // --- Profile Menu Logic ---
     profileImage.parentElement.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -70,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
 
     saveProfileBtn.addEventListener('click', async () => {
-        const masterPassword = prompt("Please enter your master password to save changes:");
+        const masterPassword = await promptForMasterPassword("Please enter your master password to save changes:");
         if (!masterPassword) {
             alert('Master password is required to save changes.');
             return;
@@ -81,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (dobInput) {
             const parts = dobInput.split('/');
             if (parts.length === 3) {
-                // Create date as UTC to avoid timezone issues on the server
                 dobISO = new Date(Date.UTC(parts[2], parts[1] - 1, parts[0])).toISOString();
             }
         }
@@ -103,7 +149,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         if (newProfileImageData) {
-            // If 'remove', send null. Otherwise, send the new image data.
             profileData.profileImage = newProfileImageData === 'remove' ? null : newProfileImageData;
         }
 
@@ -152,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const res = await fetch('/api/user/profile', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (!res.ok) return; // Don't block editing if fetch fails
+            if (!res.ok) return;
 
             const user = await res.json();
             document.getElementById('fullName').value = user.fullName || '';
@@ -173,7 +218,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('userAddress').value = user.address || '';
             document.getElementById('userPin').value = user.pin || '';
             document.getElementById('petName').value = user.petName || '';
-            // Don't load image here, just show default or let user change it
 
         } catch (error) {
             console.error('Could not pre-load profile data:', error);
