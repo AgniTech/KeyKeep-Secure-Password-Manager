@@ -224,6 +224,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>`;
             credentialsList.appendChild(card);
         });
+
+        // Call setupPasswordToggles after credentials have been rendered
+        window.setupPasswordToggles(credentialsList);
     };
 
     const applyFilters = (filterParam) => { 
@@ -568,7 +571,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (savedImage) {
                     updateProfileImages(savedImage);
                 } else {
-                    updateProfileImages(DEFAULT_AVAR_PATH);
+                    updateProfileImages(DEFAULT_AVATAR_PATH);
                 }
             }
         } catch (error) {
