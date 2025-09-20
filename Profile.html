@@ -3,51 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KeyKeep - Edit Your Profile</title>
+    <title>KeyKeep - Complete Your Profile</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/profile-card.css">
-    <link rel="stylesheet" href="css/loader.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 </head>
 <body>
-    <!-- Loader Container -->
-    <div id="loader-container">
-        <div class="loader"></div>
-    </div>
-
-    <!-- Cropper Modal -->
-    <div id="cropperModal" class="modal glassmorphism" style="display: none;">
-        <h2>Crop Your Image</h2>
-        <div class="img-container">
-            <img id="imageToCrop" src="" alt="Image to crop">
-        </div>
-        <div class="modal-actions">
-            <button type="button" class="button secondary" id="cancelCrop">Cancel</button>
-            <button type="button" class="button primary" id="saveCrop">Crop & Save</button>
-        </div>
-    </div>
-    <div id="modalOverlay" class="modal-overlay" style="display: none;"></div>
-
     <div id="toastContainer"></div>
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="profile-card p-3">
             <div class="d-flex align-items-center">
                 <div class="image profile-image-container">
-                    <img src="images/default-avatar.png" class="rounded" id="profileImage">
-                    <div id="profileImageMenu" class="profile-image-menu">
+                    <img src="images/profile.png" class="rounded" width="155" height="155" id="profileImage">
+                    <div id="profileImageMenu" class="profile-image-menu glassmorphism">
                         <a href="#" id="uploadPhoto">Upload Photo</a>
                         <a href="#" id="changePhoto">Change Photo</a>
                         <a href="#" id="removePhoto" class="danger-text">Remove Photo</a>
                     </div>
                 </div>
                 <div class="ml-3 w-100">
-                    <h4 class="mb-0 mt-0">Edit Your Profile</h4>
-                    <span>Keep your details up to date.</span>
+                    <h4 class="mb-0 mt-0">Complete Your Profile</h4>
+                    <span>Tell us a bit about yourself</span>
                     <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats">
                         <div class="d-flex flex-column">
                             <span class="articles">Status</span>
-                            <span class="number1">Editing</span>
+                            <span class="number1">New</span>
                         </div>
                         <div class="d-flex flex-column">
                             <span class="followers">Member Since</span>
@@ -55,7 +35,7 @@
                         </div>
                         <div class="d-flex flex-column">
                             <span class="rating">Profile</span>
-                            <span class="number3">100%</span>
+                            <span class="number3">0%</span>
                         </div>
                     </div>
                 </div>
@@ -64,40 +44,12 @@
                 <input type="file" id="photoUploadInput" accept="image/*" style="display: none;">
                 <div class="setting-group">
                     <div class="setting-item">
-                        <label for="fullName"><i class="fas fa-user"></i> Full Name:</label>
-                        <input type="text" id="fullName" placeholder="First, Middle, Last" class="profile-input">
-                    </div>
-                    <div class="setting-item">
-                        <label for="userName"><i class="fas fa-user-tag"></i> Username / Display Name:</label>
-                        <input type="text" id="userName" placeholder="Your Username" class="profile-input">
-                    </div>
-                    <div class="setting-item">
-                        <label for="userEmail"><i class="fas fa-envelope"></i> Email Address:</label>
-                        <input type="email" id="userEmail" placeholder="Your Email Address" class="profile-input" readonly>
-                    </div>
-                    <div class="setting-item">
-                        <label for="userMobile"><i class="fas fa-mobile-alt"></i> Phone Number:</label>
-                        <input type="text" id="userMobile" placeholder="Your Phone Number" class="profile-input">
-                    </div>
-                    <div class="setting-item">
-                        <label for="educationalBackground"><i class="fas fa-graduation-cap"></i> Educational Background:</label>
-                        <input type="text" id="educationalBackground" placeholder="School / College, Graduation Year" class="profile-input">
-                    </div>
-                    <div class="setting-item">
-                        <label for="favoriteSportsTeam"><i class="fas fa-futbol"></i> Favorite Sports Team:</label>
-                        <input type="text" id="favoriteSportsTeam" placeholder="e.g., Lakers" class="profile-input">
-                    </div>
-                    <div class="setting-item">
-                        <label for="favoriteMovieBook"><i class="fas fa-book-open"></i> Favorite Movie / Book:</label>
-                        <input type="text" id="favoriteMovieBook" placeholder="e.g., The Matrix" class="profile-input">
-                    </div>
-                    <div class="setting-item">
-                        <label for="importantDates"><i class="fas fa-calendar-alt"></i> Important Dates (Optional):</label>
-                        <input type="text" id="importantDates" placeholder="Anniversaries, Children's Birthdays" class="profile-input">
+                        <label for="userName"><i class="fas fa-user"></i> Name:</label>
+                        <input type="text" id="userName" placeholder="Your Full Name" class="profile-input">
                     </div>
                     <div class="setting-item">
                         <label for="userDob"><i class="fas fa-calendar-alt"></i> Date of Birth:</label>
-                        <input type="text" id="userDob" class="profile-input" placeholder="DD/MM/YYYY">
+                        <input type="date" id="userDob" class="profile-input">
                     </div>
                     <div class="setting-item">
                         <label for="userAddress"><i class="fas fa-map-marked-alt"></i> Address:</label>
@@ -107,14 +59,16 @@
                         <label for="userPin"><i class="fas fa-map-marker-alt"></i> Pin Code:</label>
                         <input type="text" id="userPin" placeholder="e.g., 123456" class="profile-input">
                     </div>
+                </div>
+                <div class="setting-group">
+                    <h5 class="text-muted">Security Question</h5>
                     <div class="setting-item">
                         <label for="petName"><i class="fas fa-paw"></i> What is your pet's name? (Optional)</label>
                         <input type="text" id="petName" placeholder="Pet's Name" class="profile-input">
                     </div>
                 </div>
                 <div class="main-actions mt-3">
-                    <button id="saveProfileBtn" class="button primary w-100">Save Changes</button>
-                    <a href="view-profile.html" class="button secondary w-100 mt-2">Cancel</a>
+                    <button id="saveProfileBtn" class="button primary w-100">Save and Continue</button>
                 </div>
             </main>
             <footer class="text-center mt-3">
@@ -122,8 +76,7 @@
             </footer>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.13/dist/libsodium.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script src="js/script.js"></script>
     <script src="js/profile.js"></script>
 </body>
 </html>
