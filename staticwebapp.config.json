@@ -2,7 +2,7 @@
   "routes": [
     {
       "route": "/api/*",
-      "rewrite": "https://keykeep-secure-password-manager.azurewebsites.net/api/*"
+      "rewrite": "https://happy-smoke-057753500.2.azurestaticapps.net/api/*"
     }
   ]
 }
