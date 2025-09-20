@@ -4,5 +4,8 @@
       "rewrite": "/404.html",
       "statusCode": 404
     }
+  },
+  "mimeTypes": {
+    ".css": "text/css"
   }
 }
