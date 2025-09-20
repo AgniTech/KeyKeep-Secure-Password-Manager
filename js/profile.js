@@ -265,320 +265,120 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // --- Profile Photo Functionality ---
-    console.log('Profile Image Container:', profileImageContainer);
-    console.log('Profile Image Menu:', profileImageMenu);
-    console.log('Upload Photo Button:', uploadPhotoBtn);
-    console.log('Change Photo Button:', changePhotoBtn);
-    console.log('Remove Photo Button:', removePhotoBtn);
-    console.log('Photo Upload Input:', photoUploadInput);
+    // --- Profile Menu Logic ---
+    profileImage.parentElement.addEventListener('click', (e) => {
+        // Stop the click from bubbling up to the document
+        e.stopPropagation();
+        // Toggle the menu's visibility
+        profileImageMenu.style.display = profileImageMenu.style.display === 'block' ? 'none' : 'block';
+    });
 
-    if (profileImageContainer) {
-        profileImageContainer.addEventListener('click', (e) => {
-            console.log('Profile image container clicked.');
-            e.stopPropagation();
-            if (profileImageMenu) {
-                const currentDisplay = profileImageMenu.style.display;
-                profileImageMenu.style.display = currentDisplay === 'block' ? 'none' : 'block';
-                console.log('Profile image menu display toggled to:', profileImageMenu.style.display);
-            } else {
-                console.warn('profileImageMenu element not found when trying to toggle display.');
-            }
-        });
-    } else {
-        console.warn('profileImageContainer element not found.');
-    }
+    // Add a listener to the whole page to close the menu when you click elsewhere
+    document.addEventListener('click', () => {
+        profileImageMenu.style.display = 'none';
+    });
 
-    document.addEventListener('click', (event) => {
-        if (profileImageMenu && !profileImageMenu.contains(event.target) && !profileImageContainer.contains(event.target)) {
-            console.log('Click outside profile image menu/container. Hiding menu.');
-            profileImageMenu.style.display = 'none';
+    // --- Image Handling & Cropper Logic ---
+    let newProfileImageData = null; 
+
+    // Wire up the menu buttons to the hidden file input
+    uploadPhotoBtn.addEventListener('click', () => photoUploadInput.click());
+    changePhotoBtn.addEventListener('click', () => photoUploadInput.click());
+
+    // Handle the "Remove Photo" button
+    removePhotoBtn.addEventListener('click', () => {
+        newProfileImageData = null; // Use null as a signal to the server to remove the image
+        profileImage.src = 'images/default-avatar.png';
+        alert('Profile photo will be removed when you save changes.');
+    });
+
+    // When a new file is selected, open the cropping modal
+    photoUploadInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imageToCrop.src = e.target.result;
+                modalOverlay.style.display = 'block';
+                cropperModal.style.display = 'block';
+                if (cropper) cropper.destroy(); // Destroy old cropper instance
+                // Initialize Cropper.js
+                cropper = new Cropper(imageToCrop, { aspectRatio: 1, viewMode: 1 });
+            };
+            reader.readAsDataURL(file);
         }
     });
 
-    if (uploadPhotoBtn) {
-        uploadPhotoBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Upload Photo button clicked. Triggering file input.');
-            photoUploadInput.click();
-        });
-    } else {
-        console.warn('uploadPhotoBtn element not found.');
-    }
+    // Handle the crop modal buttons
+    cancelCropBtn.addEventListener('click', () => {
+        cropperModal.style.display = 'none';
+        modalOverlay.style.display = 'none';
+        if (cropper) cropper.destroy();
+    });
 
-    if (changePhotoBtn) {
-        changePhotoBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Change Photo button clicked. Triggering file input.');
-            photoUploadInput.click();
-        });
-    } else {
-        console.warn('changePhotoBtn element not found.');
-    }
+    saveCropBtn.addEventListener('click', () => {
+        const canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
+        newProfileImageData = canvas.toDataURL('image/png'); // Store the cropped image data
+        profileImage.src = newProfileImageData; // Update the preview
+        
+        // Hide the modal
+        cropperModal.style.display = 'none';
+        modalOverlay.style.display = 'none';
+        if (cropper) cropper.destroy();
+    });
 
-    if (photoUploadInput) {
-        photoUploadInput.addEventListener('change', (event) => {
-            console.log('Photo upload input change event detected.');
-            const file = event.target.files[0];
-            if (file) {
-                console.log('File selected:', file.name);
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    console.log('FileReader loaded. Setting image to crop source.');
-                    imageToCrop.src = e.target.result;
-                    cropperModal.style.display = 'block';
-                    modalOverlay.style.display = 'block';
-                    if (cropper) {
-                        cropper.destroy();
-                        console.log('Existing cropper instance destroyed.');
-                    }
-                    cropper = new Cropper(imageToCrop, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        movable: true,
-                        zoomable: true,
-                        rotatable: true,
-                        scalable: true,
-                    });
-                    console.log('Cropper initialized.');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                console.log('No file selected.');
-            }
-        });
-    } else {
-        console.warn('photoUploadInput element not found.');
-    }
-
-    const saveProfilePicture = async (imageData) => {
-        showLoader();
-        console.log('Attempting to save profile picture. Image data length:', imageData ? imageData.length : 0);
-        try {
-            let masterPassword = currentMasterPassword;
-            if (!masterPassword) {
-                console.log('Master password not cached. Prompting user...');
-                masterPassword = await promptForMasterPassword('Enter your master password to save your profile picture:');
-            }
-            
-            if (!masterPassword) {
-                showToast('Profile picture update cancelled.', 'info');
-                hideLoader();
-                return;
-            }
-            console.log('Master password obtained for saving profile picture.');
-
-            const profileDataForSave = getProfileDataForSave(false); // Get other profile data without image
-            const requestBody = { 
-                profileImage: imageData, 
-                masterPassword: masterPassword, 
-                ...profileDataForSave 
-            };
-            console.log('Sending profile picture save request with body:', requestBody);
-
-            const response = await fetch('/api/user/profile', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(requestBody)
-            });
-
-            const data = await response.json();
-            console.log('Profile picture save API response:', response.status, data);
-
-            if (response.ok) {
-                showToast('Profile picture updated successfully!', 'success');
-                localStorage.setItem('profileImage', imageData); // Cache the new image
-                updateProfileImages(imageData);
-                if (profileImageMenu) profileImageMenu.style.display = 'none';
-                currentMasterPassword = masterPassword; // Cache the master password
-            } else {
-                showToast(data.msg || 'Failed to save profile picture.', 'error');
-            }
-        } catch (error) {
-            console.error('Error saving profile picture:', error);
-            showToast(`Error saving profile picture: ${error.message}`, 'error');
-        } finally {
-            hideLoader();
+    // --- Save Profile Logic ---
+    saveProfileBtn.addEventListener('click', async () => {
+        // 1. Prompt for the master password - THIS IS THE KEY FIX
+        const masterPassword = prompt("Please enter your master password to save changes:");
+        if (!masterPassword) {
+            alert('Master password is required to save changes.');
+            return;
         }
-    };
 
-    const removeProfilePicture = async () => {
-        showLoader();
-        console.log('Attempting to remove profile picture.');
-        try {
-            let masterPassword = currentMasterPassword;
-            if (!masterPassword) {
-                console.log('Master password not cached. Prompting user for removal...');
-                masterPassword = await promptForMasterPassword('Enter your master password to remove your profile picture:');
-            }
-
-            if (!masterPassword) {
-                showToast('Profile picture removal cancelled.', 'info');
-                hideLoader();
-                return;
-            }
-            console.log('Master password obtained for removing profile picture.');
-
-            const profileDataForSave = getProfileDataForSave(false); // Get other profile data without image
-            const requestBody = { 
-                profileImage: null, 
-                masterPassword: masterPassword, 
-                ...profileDataForSave 
-            };
-            console.log('Sending profile picture remove request with body:', requestBody);
-
-            const response = await fetch('/api/user/profile', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(requestBody)
-            });
-
-            const data = await response.json();
-            console.log('Profile picture remove API response:', response.status, data);
-
-            if (response.ok) {
-                showToast('Profile picture removed successfully!', 'success');
-                localStorage.removeItem('profileImage');
-                updateProfileImages(DEFAULT_AVATAR_PATH);
-                if (profileImageMenu) profileImageMenu.style.display = 'none';
-                currentMasterPassword = masterPassword; // Cache the master password
-            } else {
-                showToast(data.msg || 'Failed to remove profile picture.', 'error');
-            }
-        } catch (error) {
-            console.error('Error removing profile picture:', error);
-            showToast(`Error removing profile picture: ${error.message}`, 'error');
-        } finally {
-            hideLoader();
-        }
-    };
-
-    if (removePhotoBtn) {
-        removePhotoBtn.addEventListener('click', removeProfilePicture);
-    } else {
-        console.warn('removePhotoBtn element not found.');
-    }
-
-    if (saveCropBtn) {
-        saveCropBtn.addEventListener('click', () => {
-            console.log('Save Crop button clicked.');
-            const canvas = cropper.getCroppedCanvas({
-                width: 155,
-                height: 155,
-            });
-            const croppedImageUrl = canvas.toDataURL('image/png');
-            console.log('Cropped image URL generated. Calling saveProfilePicture.');
-            saveProfilePicture(croppedImageUrl); // Call save function
-            cropper.destroy();
-            cropperModal.style.display = 'none';
-            modalOverlay.style.display = 'none';
-        });
-    } else {
-        console.warn('saveCropBtn element not found.');
-    }
-
-    if (cancelCropBtn) {
-        cancelCropBtn.addEventListener('click', () => {
-            console.log('Cancel Crop button clicked.');
-            cropper.destroy();
-            cropperModal.style.display = 'none';
-            modalOverlay.style.display = 'none';
-        });
-    } else {
-        console.warn('cancelCropBtn element not found.');
-    }
-
-    // Helper to get current profile data from inputs for saving
-    const getProfileDataForSave = (includeImage = true) => {
-        console.log('getProfileDataForSave called. includeImage:', includeImage);
-        const [day, month, year] = userDobInput.value.split('/');
-        const dobISO = userDobInput.value ? new Date(`${year}-${month}-${day}`).toISOString() : null;
-        console.log('DOB input value:', userDobInput.value, 'dobISO:', dobISO);
-
-        const data = {
-            fullName: fullNameInput.value,
-            userName: userNameInput.value,
-            email: userEmailInput.value,
-            mobile: userMobileInput.value,
-            educationalBackground: educationalBackgroundInput.value,
-            favoriteSportsTeam: favoriteSportsTeamInput.value,
-            favoriteMovieBook: favoriteMovieBookInput.value,
-            importantDates: importantDatesInput.value,
-            dob: dobISO,
-            address: userAddressInput.value,
-            pin: userPinInput.value,
-            petName: petNameInput.value,
+        // 2. Gather all data from the input fields
+        const profileData = {
+            fullName: document.getElementById('fullName').value,
+            userName: document.getElementById('userName').value,
+            email: document.getElementById('userEmail').value,
+            mobile: document.getElementById('userMobile').value,
+            educationalBackground: document.getElementById('educationalBackground').value,
+            favoriteSportsTeam: document.getElementById('favoriteSportsTeam').value,
+            favoriteMovieBook: document.getElementById('favoriteMovieBook').value,
+            importantDates: document.getElementById('importantDates').value,
+            dob: document.getElementById('userDob').value,
+            address: document.getElementById('userAddress').value,
+            pin: document.getElementById('userPin').value,
+            petName: document.getElementById('petName').value,
+            masterPassword: masterPassword // Include the password in the request
         };
-        if (includeImage) {
-            data.profileImage = profileImage.src === DEFAULT_AVATAR_PATH ? null : profileImage.src;
+
+        // 3. Add the new image data if it exists
+        if (newProfileImageData !== null) {
+            profileData.profileImage = newProfileImageData;
         }
-        console.log('Collected profile data for save:', data);
-        return data;
-    };
 
-    // --- Save Profile Data Functionality ---
-    if (saveProfileBtn) {
-        saveProfileBtn.addEventListener('click', async () => {
-            console.log('Save Profile button clicked.');
-            showLoader();
-            try {
-                let masterPassword = currentMasterPassword;
-                if (!masterPassword) {
-                    console.log('Master password not cached. Prompting user for profile save...');
-                    masterPassword = await promptForMasterPassword('Enter your master password to save your profile changes:');
-                }
+        // 4. Send the data to the server
+        try {
+            const res = await fetch('/api/user/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(profileData)
+            });
 
-                if (!masterPassword) {
-                    showToast('Profile update cancelled.', 'info');
-                    hideLoader();
-                    return;
-                }
-                console.log('Master password obtained for saving profile.');
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.msg || 'Failed to save profile.');
 
-                console.log('Calling getProfileDataForSave from saveProfileBtn click handler...');
-                const profileData = {
-                    ...getProfileDataForSave(true), // Include current profile image state
-                    masterPassword: masterPassword
-                };
-                console.log('Sending profile save request with body:', profileData);
+            alert('Profile updated successfully!');
+            window.location.href = 'view-profile.html'; // Redirect to view page on success
 
-                const response = await fetch('/api/user/profile', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(profileData),
-                });
-
-                const data = await response.json();
-                console.log('Profile save API response:', response.status, data);
-
-                if (response.ok) {
-                    showToast('Profile updated successfully! Redirecting...', 'success');
-                    currentMasterPassword = masterPassword; // Cache the master password
-                    setTimeout(() => {
-                        if (localStorage.getItem('isNewUser')) {
-                            localStorage.removeItem('isNewUser');
-                            window.location.href = 'vault.html';
-                        } else {
-                            window.location.href = 'view-profile.html'; // Redirect to the view page
-                        }
-                    }, 1500);
-                } else {
-                    hideLoader();
-                    showToast(data.msg || 'Failed to update profile.', 'error');
-                }
-            } catch (error) {
-                console.error('Error saving profile:', error);
-                showToast('An error occurred. Please try again.', 'error');
-            } finally {
-                hideLoader();
-            }
-        });
-    } else {
-        console.warn('saveProfileBtn element not found.');
-    }
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+    });
 
     // --- Date Formatting ---
     if (userDobInput) {
