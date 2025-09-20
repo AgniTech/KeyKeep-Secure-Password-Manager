@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 emptyStateContent = `
                     <div class="empty-state">
                         <div class="empty-state-icon">🛡️</div>
-                        <p>Your vault is empty. Let's secure your first account!</p>
+                        <p>Your vault is empty. Let\'s secure your first account!</p>
                         <button class="button primary" id="addFirstCredential">Add New Credential</button>
                     </div>`;
             }
@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- PASSWORD MODAL & SESSION CACHE ---
     /**
-     * Gets the user's password. It will only prompt the user once per session,
+     * Gets the user\'s password. It will only prompt the user once per session,
      * caching the password in a local variable for subsequent calls.
      * @param {string} message The message to display in the password prompt.
      * @returns {Promise<string>} A promise that resolves with the password.
@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const res = await fetch('/api/vault/fetch', {
+            const res = await fetch('/api/fetchVault', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ password })
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch('/api/vault/delete', {
+            const response = await fetch('/api/deleteVault', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ id: credentialId, password: sessionPassword })
@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isEdit) requestBody.id = credentialId;
 
         try {
-            const response = await fetch('/api/vault/save', {
+            const response = await fetch('/api/saveVault', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(requestBody)
@@ -554,7 +554,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!token) return;
 
         try {
-            const response = await fetch('/api/user/profile', {
+            const response = await fetch('/api/profile', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (savedImage) {
                     updateProfileImages(savedImage);
                 } else {
-                    updateProfileImages(DEFAULT_AVATAR_PATH);
+                    updateProfileImages(DEFAULT_AVAR_PATH);
                 }
             }
         } catch (error) {
@@ -603,9 +603,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show loader for any navigation away from the vault
     document.querySelectorAll('a, button').forEach(el => {
         el.addEventListener('click', (e) => {
-            // Check if it's a link that navigates away
+            // Check if it\'s a link that navigates away
             if (el.tagName === 'A' && el.href && el.target !== '_blank') {
-                // Don't show for in-page links
+                // Don\'t show for in-page links
                 if (el.href.startsWith('#') || el.href.includes('javascript:')) return;
                 showLoader();
             }

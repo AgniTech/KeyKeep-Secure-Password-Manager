@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch('/api/auth/unlock', {
+                const response = await fetch('/api/unlock', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

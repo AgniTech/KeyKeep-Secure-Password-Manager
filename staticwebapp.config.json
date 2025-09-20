@@ -1,8 +1,8 @@
 {
-  "routes": [
-    {
-      "route": "/api/*",
-      "rewrite": "https://happy-smoke-057753500.2.azurestaticapps.net/api/*"
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/404.html",
+      "statusCode": 404
     }
-  ]
+  }
 }

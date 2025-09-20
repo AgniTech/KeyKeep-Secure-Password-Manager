@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('/api/user/profile-picture', {
+                const res = await fetch('/api/profilePicture', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('/api/user/profile-picture', {
+                const res = await fetch('/api/profilePicture', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             try {
-                const res = await fetch('/api/user/profile', {
+                const res = await fetch('/api/profile', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         try {
-            const res = await fetch('/api/user/profile', {
+            const res = await fetch('/api/profile', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) return;

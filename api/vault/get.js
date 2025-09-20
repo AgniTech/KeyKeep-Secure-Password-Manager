@@ -1,27 +1,35 @@
-// File: /api/vault/get.js
+import { app } from '@azure/functions';
 import { connectDB } from '../util/db.js';
 import Vault from '../models/Vault.js';
 import jwt from 'jsonwebtoken';
 
-export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+app.http('getVault', {
+    methods: ['GET'],
+    authLevel: 'anonymous', // Auth handled by token
+    handler: async (request, context) => {
+        context.log('HTTP trigger function processed a getVault request.');
 
-  try {
-    await connectDB();
+        try {
+            await connectDB();
 
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'Unauthorized: No token' });
+            const authHeader = request.headers.get('authorization');
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return { status: 401, jsonBody: { error: 'Unauthorized: No token provided' } };
+            }
+            const token = authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const userId = decoded.id;
 
-    const vaultEntries = await Vault.find({ userId }).sort({ createdAt: -1 });
+            const vaultEntries = await Vault.find({ userId }).sort({ createdAt: -1 });
 
-    res.status(200).json({ vault: vaultEntries });
-  } catch (e) {
-    console.error('Get vault error:', e);
-    res.status(500).json({ error: 'Server error' });
-  }
-}
+            return { status: 200, jsonBody: { vault: vaultEntries } };
+        } catch (e) {
+            context.error('Get vault error:', e);
+            if (e.name === 'JsonWebTokenError' || e.name === 'TokenExpiredError') {
+                return { status: 401, jsonBody: { error: 'Invalid or expired session.' } };
+            }
+            return { status: 500, jsonBody: { error: 'Server error' } };
+        }
+    }
+});

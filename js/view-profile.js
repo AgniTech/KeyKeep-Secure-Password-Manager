@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loadProfileData = async () => {
         showLoader();
         try {
-            const response = await fetch('/api/user/profile', {
+            const response = await fetch('/api/profile', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
             });

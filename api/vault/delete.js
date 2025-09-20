@@ -1,58 +1,54 @@
-// File: /api/vault/delete.js
+import { app } from '@azure/functions';
 import { connectDB } from '../util/db.js';
 import Vault from '../models/Vault.js';
 import jwt from 'jsonwebtoken';
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+app.http('deleteVault', {
+    methods: ['POST'],
+    authLevel: 'anonymous', // Auth handled by token
+    handler: async (request, context) => {
+        context.log('HTTP trigger function processed a deleteVault request.');
 
-  try {
-    // Connect to database
-    await connectDB();
-    console.log('Database connected successfully for vault delete');
+        try {
+            await connectDB();
 
-    // Verify JWT token
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Unauthorized: No valid token provided' });
+            const authHeader = request.headers.get('authorization');
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return { status: 401, jsonBody: { error: 'Unauthorized: No valid token provided' } };
+            }
+
+            const token = authHeader.split(' ')[1];
+            if (!process.env.JWT_SECRET) {
+                context.error('JWT_SECRET not configured');
+                return { status: 500, jsonBody: { error: 'Server configuration error' } };
+            }
+
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const userId = decoded.id;
+
+            const { id } = await request.json();
+            if (!id) {
+                return { status: 400, jsonBody: { error: 'Credential ID is required' } };
+            }
+
+            const deletedEntry = await Vault.findOneAndDelete({ _id: id, userId });
+
+            if (!deletedEntry) {
+                return { status: 404, jsonBody: { error: 'Credential not found or you do not have permission to delete it.' } };
+            }
+
+            context.log('Vault entry deleted successfully:', id);
+            return { status: 200, jsonBody: { message: 'Credential deleted successfully' } };
+
+        } catch (e) {
+            context.error('Delete vault error:', e);
+            if (e.name === 'JsonWebTokenError' || e.name === 'TokenExpiredError') {
+                return { status: 401, jsonBody: { error: 'Invalid or expired token' } };
+            }
+            if (e.name === 'CastError') {
+                return { status: 400, jsonBody: { error: 'Invalid credential ID format' } };
+            }
+            return { status: 500, jsonBody: { error: 'Server error: ' + e.message } };
+        }
     }
-
-    const token = authHeader.split(' ')[1];
-    if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET not configured');
-      return res.status(500).json({ error: 'Server configuration error' });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
-    console.log('User authenticated for delete:', userId);
-
-    // Validate request data
-    const { id } = req.body;
-    if (!id) {
-      return res.status(400).json({ error: 'Credential ID is required' });
-    }
-
-    // Find and delete the vault entry, ensuring it belongs to the user
-    const deletedEntry = await Vault.findOneAndDelete({ _id: id, userId });
-
-    if (!deletedEntry) {
-      return res.status(404).json({ error: 'Credential not found or you do not have permission to delete it.' });
-    }
-
-    console.log('Vault entry deleted successfully:', id);
-    res.status(200).json({ message: 'Credential deleted successfully' });
-
-  } catch (e) {
-    console.error('Delete vault error:', e);
-    if (e.name === 'JsonWebTokenError' || e.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Invalid or expired token' });
-    }
-    if (e.name === 'CastError') { // Mongoose throws this for invalid ObjectId format
-      return res.status(400).json({ error: 'Invalid credential ID format' });
-    }
-    res.status(500).json({ error: 'Server error: ' + e.message });
-  }
-}
+});

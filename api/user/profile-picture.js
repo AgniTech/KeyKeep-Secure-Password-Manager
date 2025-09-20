@@ -1,10 +1,8 @@
+import { app } from '@azure/functions';
 import { connectDB } from '../util/db.js';
 import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
 import libsodium from 'libsodium-wrappers';
-
-dotenv.config();
 
 // --- Libsodium Encryption Helpers ---
 async function getLibsodium() {
@@ -56,69 +54,68 @@ async function encryptWithPassword(plaintext, password, salt) {
 }
 
 // --- API Handler ---
-export default async function handler(req, res) {
-    if (req.method !== 'PUT') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
+app.http('profilePicture', {
+    methods: ['PUT'],
+    authLevel: 'anonymous', // Auth handled by token
+    handler: async (request, context) => {
+        context.log('HTTP trigger function processed a profile picture request.');
+
+        try {
+            await connectDB();
+
+            const authHeader = request.headers.get('authorization');
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return { status: 401, jsonBody: { msg: 'Authorization token is required' } };
+            }
+
+            const token = authHeader.split(' ')[1];
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const userId = decoded.id;
+
+            const { profileImage, masterPassword } = await request.json();
+
+            if (!profileImage || !masterPassword) {
+                return { status: 400, jsonBody: { msg: 'Profile image data and master password are required.' } };
+            }
+
+            const user = await User.findById(userId);
+            if (!user) {
+                return { status: 404, jsonBody: { msg: 'User not found' } };
+            }
+
+            const isPasswordValid = await user.comparePassword(masterPassword);
+            if (!isPasswordValid) {
+                return { status: 401, jsonBody: { msg: 'Invalid master password.' } };
+            }
+
+            if (!user.argon2Salt) {
+                return { status: 400, jsonBody: { msg: 'User salt not found. Cannot encrypt profile image.' } };
+            }
+
+            const encryptedProfileImage = await encryptWithPassword(profileImage, masterPassword, user.argon2Salt);
+
+            if (!encryptedProfileImage) {
+                return { status: 500, jsonBody: { msg: 'Failed to encrypt profile image.' } };
+            }
+
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { profileImage: encryptedProfileImage },
+                { new: true }
+            );
+
+            if (!updatedUser) {
+                return { status: 404, jsonBody: { msg: 'User not found after update' } };
+            }
+
+            return { status: 200, jsonBody: { msg: 'Profile picture updated successfully' } };
+
+        } catch (error) {
+            if (error.name === 'JsonWebTokenError') {
+                return { status: 401, jsonBody: { msg: 'Invalid token' } };
+            }
+            context.error('Profile picture API error:', error);
+            return { status: 500, jsonBody: { msg: 'Server error' } };
+        }
     }
-
-    await connectDB().catch(err => {
-        console.error('MongoDB connection error:', err);
-        return res.status(500).json({ msg: 'Database connection failed' });
-    });
-
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ msg: 'Authorization token is required' });
-    }
-
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.id;
-
-        const { profileImage, masterPassword } = req.body;
-
-        if (!profileImage || !masterPassword) {
-            return res.status(400).json({ msg: 'Profile image data and master password are required.' });
-        }
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ msg: 'User not found' });
-        }
-
-        const isPasswordValid = await user.comparePassword(masterPassword);
-        if (!isPasswordValid) {
-            return res.status(401).json({ msg: 'Invalid master password.' });
-        }
-
-        if (!user.argon2Salt) {
-            return res.status(400).json({ msg: 'User salt not found. Cannot encrypt profile image.' });
-        }
-
-        const encryptedProfileImage = await encryptWithPassword(profileImage, masterPassword, user.argon2Salt);
-
-        if (!encryptedProfileImage) {
-            return res.status(500).json({ msg: 'Failed to encrypt profile image.' });
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            { profileImage: encryptedProfileImage },
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            return res.status(404).json({ msg: 'User not found after update' });
-        }
-
-        return res.status(200).json({ msg: 'Profile picture updated successfully' });
-
-    } catch (error) {
-        if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({ msg: 'Invalid token' });
-        }
-        console.error('Profile picture API error:', error);
-        res.status(500).json({ msg: 'Server error' });
-    }
-}
+});
