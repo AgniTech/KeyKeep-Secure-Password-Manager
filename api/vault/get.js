@@ -1,4 +1,4 @@
-import { app } from '@azure/functions';
+import { app } from '../app.js';
 import { connectDB } from '../util/db.js';
 import Vault from '../models/Vault.js';
 import jwt from 'jsonwebtoken';

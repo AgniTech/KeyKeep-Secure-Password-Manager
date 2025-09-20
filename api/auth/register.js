@@ -1,4 +1,4 @@
-import { app } from '@azure/functions';
+import { app } from '../app.js';
 import crypto from 'crypto';
 import argon2 from 'argon2';
 import bcrypt from 'bcrypt';
