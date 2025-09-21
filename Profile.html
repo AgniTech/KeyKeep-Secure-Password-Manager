@@ -122,7 +122,18 @@
             </footer>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.13/dist/libsodium.min.js"></script>
+    <script>
+        window.sodium = {
+            onload: function (sodium) {
+                // libsodium is now ready to use
+                window.libsodium = sodium;
+                
+                // Dispatch a custom event to notify profile.js
+                window.dispatchEvent(new CustomEvent('libsodium-ready'));
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.15/dist/browsers/sodium.js" integrity="sha512-tZKaP2qOJOTqk7YeRh8cKZ6Gvr5hYOJNi3+7UplOGzXjAPQzKbqK6BmIJdUJqjQkWBXy9OUCmFZL/wUKCwIBTQ==" crossorigin="anonymous" referrerpolicy="no-referrer" async></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="js/profile.js"></script>
 </body>

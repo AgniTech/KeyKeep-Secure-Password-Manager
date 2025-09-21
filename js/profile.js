@@ -1,4 +1,15 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // Wait for libsodium to be ready
+    if (!window.libsodium) {
+        await new Promise((resolve) => {
+            window.addEventListener('libsodium-ready', resolve);
+        });
+    }
+    
+    // Now libsodium is available
+    await window.libsodium.ready;
+    const sodium = window.libsodium;
+
     // --- Element Selectors ---
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     const fullNameInput = document.getElementById('fullName');
@@ -118,9 +129,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- sodium Encryption/Decryption Helpers ---
-    await libsodium.ready;
-    const sodium = libsodium;
-
     const OPSLIMIT = sodium.crypto_pwhash_OPSLIMIT_MODERATE;
     const MEMLIMIT = sodium.crypto_pwhash_MEMLIMIT_MODERATE;
     const ALG = sodium.crypto_pwhash_ALG_ARGON2ID13;
