@@ -71,10 +71,7 @@
             </footer>
         </div>
     </div>
-    <script> src="/vendor/libsodium-wrappers/dist/browsers/sodium.js"</script>
-    <script>
-        console.log('libsodium defined immediately after script tag:', typeof libsodium !== 'undefined');
-    </script>
-    <script src="js/view-profile.js"></script>
+    <script src="js/sodium.js"></script>
+    <script type="module" src="js/view-profile.js?v=2"></script>
 </body>
 </html>

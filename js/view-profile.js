@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    await sodium.ready;
     // --- Element Selectors ---
     const profileNameDisplay = document.getElementById('profileNameDisplay');
     const profileEmailDisplay = document.getElementById('profileEmailDisplay');
