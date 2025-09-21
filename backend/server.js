@@ -45,7 +45,8 @@ connectDB()
         process.exit(1); // [cite: 539]
     });
 
-
+// This is necessary to make the libsodium-wrappers library available to the frontend.
+app.use('/vendor', express.static(path.join(__dirname, '../node_modules')));
 // --- API Routes ---
 // This is the crucial part that maps your API file logic to a URL path.
 app.use('/api/auth/login', loginRouter);
