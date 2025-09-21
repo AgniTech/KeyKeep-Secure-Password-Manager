@@ -1,14 +1,9 @@
-document.addEventListener('DOMContentLoaded', async () => {
+(async () => {
     // Wait for libsodium to be ready
-    if (!window.libsodium) {
-        await new Promise((resolve) => {
-            window.addEventListener('libsodium-ready', resolve);
-        });
-    }
+    await sodium.ready;
     
     // Now libsodium is available
-    await window.libsodium.ready;
-    const sodium = window.libsodium;
+
 
     // --- Element Selectors ---
     const saveProfileBtn = document.getElementById('saveProfileBtn');
@@ -417,4 +412,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Initial Page Load ---
     console.log('DOMContentLoaded: Calling loadProfileData()...');
     loadProfileData();
-});
+})();
