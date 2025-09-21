@@ -30,14 +30,6 @@
     const removePhotoBtn = document.getElementById('removePhoto');
     const photoUploadInput = document.getElementById('photoUploadInput');
 
-    // Cropper Modal Elements
-    const cropperModal = document.getElementById('cropperModal');
-    const modalOverlay = document.getElementById('modalOverlay');
-    const imageToCrop = document.getElementById('imageToCrop');
-    const saveCropBtn = document.getElementById('saveCrop');
-    const cancelCropBtn = document.getElementById('cancelCrop');
-    let cropper;
-
     // --- Constants ---
     const DEFAULT_AVATAR_PATH = 'images/default-avatar.png';
     let userArgon2Salt = null; // To store the salt fetched from the backend
@@ -78,6 +70,11 @@
     function promptForMasterPassword(message) {
         console.log('Prompting for master password...');
         return new Promise((resolve) => {
+            const modalOverlay = document.getElementById('modalOverlay') || document.createElement('div'); // Ensure overlay exists
+            if (!document.getElementById('modalOverlay')) {
+                modalOverlay.id = 'modalOverlay';
+                document.body.appendChild(modalOverlay);
+            }
             const passwordModal = document.createElement('div');
             passwordModal.id = 'masterPasswordModal';
             passwordModal.className = 'modal glassmorphism';
@@ -282,7 +279,7 @@
         profileImageMenu.style.display = 'none';
     });
 
-    // --- Image Handling & Cropper Logic ---
+    // --- Image Handling Logic (Cropper Removed) ---
     let newProfileImageData = null; 
 
     // Wire up the menu buttons to the hidden file input
@@ -291,58 +288,53 @@
 
     // Handle the "Remove Photo" button
     removePhotoBtn.addEventListener('click', () => {
-        newProfileImageData = null; // Use null as a signal to the server to remove the image
-        profileImage.src = 'images/default-avatar.png';
-        alert('Profile photo will be removed when you save changes.');
+        newProfileImageData = "remove"; // Use "remove" as a signal to the server to remove the image
+        updateProfileImages(DEFAULT_AVATAR_PATH);
+        showToast('Profile photo will be removed when you save changes.', 'info');
     });
 
-    // When a new file is selected, open the cropping modal
+    // When a new file is selected, directly process it without cropping
     photoUploadInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imageToCrop.src = e.target.result;
-                modalOverlay.style.display = 'block';
-                cropperModal.style.display = 'block';
-                if (cropper) cropper.destroy(); // Destroy old cropper instance
-                // Initialize Cropper.js
-                cropper = new Cropper(imageToCrop, { aspectRatio: 1, viewMode: 1 });
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        // Basic validation (optional, but good practice)
+        if (!file.type.startsWith('image/')) {
+            showToast('Please select a valid image file.', 'warning');
+            return;
         }
-    });
+        if (file.size > 2 * 1024 * 1024) { // 2MB limit
+            showToast('Image is too large. Please select an image under 2MB.', 'warning');
+            return;
+        }
 
-    // Handle the crop modal buttons
-    cancelCropBtn.addEventListener('click', () => {
-        cropperModal.style.display = 'none';
-        modalOverlay.style.display = 'none';
-        if (cropper) cropper.destroy();
-    });
-
-    saveCropBtn.addEventListener('click', () => {
-        const canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
-        newProfileImageData = canvas.toDataURL('image/png'); // Store the cropped image data
-        profileImage.src = newProfileImageData; // Update the preview
-        
-        // Hide the modal
-        cropperModal.style.display = 'none';
-        modalOverlay.style.display = 'none';
-        if (cropper) cropper.destroy();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            // The result is a base64 Data URL
+            newProfileImageData = e.target.result;
+            // Update the preview
+            updateProfileImages(newProfileImageData);
+            showToast('Profile photo selected. Click "Save Changes" to apply.', 'info');
+        };
+        reader.onerror = () => {
+            showToast('Error reading file.', 'error');
+        };
+        reader.readAsDataURL(file);
     });
 
     // --- Save Profile Logic ---
     saveProfileBtn.addEventListener('click', async () => {
-        // Add loading state
         showLoader();
         saveProfileBtn.disabled = true;
         saveProfileBtn.textContent = 'Saving...';
 
         try {
-            // 1. Prompt for the master password - THIS IS THE KEY FIX
             const masterPassword = await promptForMasterPassword("Please enter your master password to save changes:");
             if (!masterPassword) {
                 showToast('Master password is required to save changes.', 'warning');
+                hideLoader();
+                saveProfileBtn.disabled = false;
+                saveProfileBtn.textContent = 'Save Changes';
                 return;
             }
 
@@ -364,7 +356,9 @@
             };
 
             // 3. Add the new image data if it exists
-            if (newProfileImageData !== null) {
+            if (newProfileImageData === "remove") {
+                profileData.profileImage = null; // Tell server to remove it
+            } else if (newProfileImageData) {
                 profileData.profileImage = newProfileImageData;
             }
 
@@ -386,7 +380,6 @@
 
         } catch (error) {
             showToast(`Error: ${error.message}`, 'error');
-        } finally {
             hideLoader();
             saveProfileBtn.disabled = false;
             saveProfileBtn.textContent = 'Save Changes';
