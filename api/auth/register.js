@@ -6,10 +6,6 @@ import bcrypt from 'bcrypt';
 import { connectDB } from '../util/db.js';
 import User from '../models/user.js';
 
-connectDB().catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
-});
 
 const router = Router(); // 👈 Create a new router instance
 

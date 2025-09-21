@@ -12,7 +12,6 @@ router.post('/', async (req, res) => { // 👇 Change the handler to a router me
     }
 
     try {
-        await connectDB();
 
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {

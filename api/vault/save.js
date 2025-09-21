@@ -17,7 +17,6 @@ router.post('/', async (req, res) => { // 👇 Change the handler to a router me
   let PKEK, rsaPrivateKey, vaultKey;
 
   try {
-    await connectDB();
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

@@ -5,12 +5,6 @@ import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
-dotenv.config();
-
-connectDB().catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
-});
 
 const router = Router(); // 👈 Create a new router instance
 

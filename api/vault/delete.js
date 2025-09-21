@@ -13,7 +13,7 @@ router.post('/', async (req, res) => { // 👇 Change the handler to a router me
 
   try {
     // Connect to database
-    await connectDB();
+
     console.log('Database connected successfully for vault delete');
 
     // Verify JWT token
