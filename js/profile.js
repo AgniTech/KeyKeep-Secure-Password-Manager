@@ -117,18 +117,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- Libsodium Encryption/Decryption Helpers ---
-    await libsodium.ready;
+    // --- sodium Encryption/Decryption Helpers ---
+    await sodium.ready;
 
-    const OPSLIMIT = libsodium.crypto_pwhash_OPSLIMIT_MODERATE;
-    const MEMLIMIT = libsodium.crypto_pwhash_MEMLIMIT_MODERATE;
-    const ALG = libsodium.crypto_pwhash_ALG_ARGON2ID13;
+    const OPSLIMIT = sodium.crypto_pwhash_OPSLIMIT_MODERATE;
+    const MEMLIMIT = sodium.crypto_pwhash_MEMLIMIT_MODERATE;
+    const ALG = sodium.crypto_pwhash_ALG_ARGON2ID13;
 
     async function deriveKeyFromPassword(password, salt) {
-        const passwordBytes = libsodium.from_string(password);
-        const saltBytes = libsodium.from_base64(salt);
-        const key = libsodium.crypto_pwhash(
-            libsodium.crypto_aead_aes256gcm_KEYBYTES,
+        const passwordBytes = sodium.from_string(password);
+        const saltBytes = sodium.from_base64(salt);
+        const key = sodium.crypto_pwhash(
+            sodium.crypto_aead_aes256gcm_KEYBYTES,
             passwordBytes,
             saltBytes,
             OPSLIMIT,
@@ -141,30 +141,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function encryptWithPassword(plaintext, password, salt) {
         if (!plaintext) return null;
         const key = await deriveKeyFromPassword(password, salt);
-        const nonce = libsodium.randombytes_buf(libsodium.crypto_aead_aes256gcm_NPUBBYTES);
-        const encrypted = libsodium.crypto_aead_aes256gcm_encrypt(
-            libsodium.from_string(plaintext),
+        const nonce = sodium.randombytes_buf(sodium.crypto_aead_aes256gcm_NPUBBYTES);
+        const encrypted = sodium.crypto_aead_aes256gcm_encrypt(
+            sodium.from_string(plaintext),
             null, // AAD
             nonce,
             key
         );
-        return libsodium.to_base64(nonce) + ':' + libsodium.to_base64(encrypted);
+        return sodium.to_base64(nonce) + ':' + sodium.to_base64(encrypted);
     }
 
     async function decryptWithPassword(encryptedData, password, salt) {
         if (!encryptedData) return null;
         try {
             const [nonceB64, encryptedB64] = encryptedData.split(':');
-            const nonce = libsodium.from_base64(nonceB64);
-            const encrypted = libsodium.from_base64(encryptedB64);
+            const nonce = sodium.from_base64(nonceB64);
+            const encrypted = sodium.from_base64(encryptedB64);
             const key = await deriveKeyFromPassword(password, salt);
-            const decrypted = libsodium.crypto_aead_aes256gcm_decrypt(
+            const decrypted = sodium.crypto_aead_aes256gcm_decrypt(
                 nonce,
                 encrypted,
                 null, // AAD
                 key
             );
-            return libsodium.to_string(decrypted);
+            return sodium.to_string(decrypted);
         } catch (error) {
             console.error('Decryption failed:', error);
             return null;
