@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mobileDisplay = document.getElementById('mobileDisplay');
     const educationalBackgroundDisplay = document.getElementById('educationalBackgroundDisplay');
     const favoriteSportsTeamDisplay = document.getElementById('favoriteSportsTeamDisplay');
-    const favoriteMovieBookDisplay = document.getElementById('favoriteMovieBookDisplay');
+    const favoriteMovieBookDisplay =  document.getElementById('favoriteMovieBookDisplay');
     const importantDatesDisplay = document.getElementById('importantDatesDisplay');
     const dobDisplay = document.getElementById('dobDisplay');
     const addressDisplay = document.getElementById('addressDisplay');
@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profileImage = document.getElementById('profileImage');
     const loaderContainer = document.getElementById('loader-container');
     const modalOverlay = document.getElementById('modalOverlay'); // Assuming modalOverlay exists
+    const profileCompletionDisplay = document.getElementById('profileCompletionDisplay');
 
     // --- Constants ---
     const DEFAULT_AVATAR_PATH = 'images/default-avatar.png';
@@ -114,6 +115,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         return key;
     }
 
+    async function encryptWithPassword(plaintext, password, salt) {
+        if (!plaintext) return null;
+        const key = await deriveKeyFromPassword(password, salt);
+        const nonce = libsodium.randombytes_buf(libsodium.crypto_aead_aes256gcm_NPUBBYTES);
+        const encrypted = libsodium.crypto_aead_aes256gcm_encrypt(
+            libsodium.from_string(plaintext),
+            null, // AAD
+            nonce,
+            key
+        );
+        return libsodium.to_base64(nonce) + ':' + libsodium.to_base64(encrypted);
+    }
+
     async function decryptWithPassword(encryptedData, password, salt) {
         if (!encryptedData) return null;
         try {
@@ -140,6 +154,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         showLoader();
         window.location.href = 'index.html';
         return;
+    }
+
+    // --- Profile Completion Calculation ---
+    function calculateProfileCompletion(user) {
+        const totalFields = 12; // Total number of fields considered for completion
+        let completedFields = 0;
+
+        if (user.fullName && user.fullName !== '-') completedFields++;
+        if (user.userName && user.userName !== '-') completedFields++;
+        if (user.email && user.email !== '-') completedFields++;
+        if (user.mobile && user.mobile !== '-') completedFields++;
+        if (user.educationalBackground && user.educationalBackground !== '-') completedFields++;
+        if (user.favoriteSportsTeam && user.favoriteSportsTeam !== '-') completedFields++;
+        if (user.favoriteMovieBook && user.favoriteMovieBook !== '-') completedFields++;
+        if (user.importantDates && user.importantDates !== '-') completedFields++;
+        if (user.dob) completedFields++; // dob is handled differently as it's a date object
+        if (user.address && user.address !== '-') completedFields++;
+        if (user.pin && user.pin !== '-') completedFields++;
+        if (user.profileImage) completedFields++;
+
+        const percentage = (completedFields / totalFields) * 100;
+        return Math.round(percentage);
     }
 
     // --- Data Loading ---
@@ -170,6 +206,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 addressDisplay.textContent = user.address || '-';
                 pinDisplay.textContent = user.pin || '-';
                 petNameDisplay.textContent = user.petName || '-';
+
+                // Calculate and display profile completion
+                const completionPercentage = calculateProfileCompletion(user);
+                profileCompletionDisplay.textContent = `${completionPercentage}%`;
 
                 // Handle profile image decryption and display
                 if (user.profileImage && user.argon2Salt) {

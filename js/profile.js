@@ -20,6 +20,7 @@
     const userPinInput = document.getElementById('userPin');
     const petNameInput = document.getElementById('petName');
     const loaderContainer = document.getElementById('loader-container');
+    const profileCompletionDisplay = document.getElementById('profileCompletionDisplay');
 
     // --- Profile Image Elements ---
     const profileImageContainer = document.querySelector('.profile-image-container');
@@ -154,8 +155,15 @@
     const ALG = sodium.crypto_pwhash_ALG_ARGON2ID13;
 
     async function deriveKeyFromPassword(password, salt) {
+        if (!salt) throw new Error('Invalid salt: empty or missing');
+        let saltBytes;
+        try {
+            saltBytes = sodium.from_base64(salt);
+        } catch (err) {
+            console.error('Salt is invalid Base64:', salt, err);
+            throw new Error('Invalid salt for key derivation');
+        }
         const passwordBytes = sodium.from_string(password);
-        const saltBytes = sodium.from_base64(salt);
         const key = sodium.crypto_pwhash(
             sodium.crypto_aead_aes256gcm_KEYBYTES,
             passwordBytes,
@@ -166,6 +174,7 @@
         );
         return key;
     }
+
 
     async function encryptWithPassword(plaintext, password, salt) {
         if (!plaintext) return null;
@@ -206,6 +215,29 @@
         showLoader();
         window.location.href = 'index.html';
         return;
+    }
+
+    // --- Profile Completion Calculation ---
+    function calculateProfileCompletion(user) {
+        const totalFields = 12; // Total number of fields considered for completion
+        let completedFields = 0;
+
+        // Check each field for a non-empty value
+        if (user.fullName && user.fullName !== '') completedFields++;
+        if (user.userName && user.userName !== '') completedFields++;
+        if (user.email && user.email !== '') completedFields++;
+        if (user.mobile && user.mobile !== '') completedFields++;
+        if (user.educationalBackground && user.educationalBackground !== '') completedFields++;
+        if (user.favoriteSportsTeam && user.favoriteSportsTeam !== '') completedFields++;
+        if (user.favoriteMovieBook && user.favoriteMovieBook !== '') completedFields++;
+        if (user.importantDates && user.importantDates !== '') completedFields++;
+        if (user.dob) completedFields++; // dob is handled differently as it's a date object
+        if (user.address && user.address !== '') completedFields++;
+        if (user.pin && user.pin !== '') completedFields++;
+        if (user.profileImage) completedFields++;
+
+        const percentage = (completedFields / totalFields) * 100;
+        return Math.round(percentage);
     }
 
     // --- Profile Data Loading ---
@@ -255,6 +287,12 @@
 
                 userArgon2Salt = user.argon2Salt; // Store the salt
                 console.log('User Argon2 Salt:', userArgon2Salt);
+
+                // Calculate and display profile completion
+                const completionPercentage = calculateProfileCompletion(user);
+                if (profileCompletionDisplay) {
+                    profileCompletionDisplay.textContent = `${completionPercentage}%`;
+                }
 
                 // Handle profile image decryption and display
                 if (user.profileImage) {
@@ -350,7 +388,6 @@
         reader.readAsDataURL(file);
     });
 
-    // --- Save Profile Logic ---
     saveProfileBtn.addEventListener('click', async () => {
         saveProfileBtn.disabled = true;
         saveProfileBtn.textContent = 'Saving...';
@@ -366,31 +403,52 @@
 
             showLoader();
 
-            // 2. Gather all data from the input fields
+            // Gather all data
             const profileData = {
-                fullName: document.getElementById('fullName').value,
-                userName: document.getElementById('userName').value,
-                email: document.getElementById('userEmail').value,
-                mobile: document.getElementById('userMobile').value,
-                educationalBackground: document.getElementById('educationalBackground').value,
-                favoriteSportsTeam: document.getElementById('favoriteSportsTeam').value,
-                favoriteMovieBook: document.getElementById('favoriteMovieBook').value,
-                importantDates: document.getElementById('importantDates').value,
-                dob: document.getElementById('userDob').value,
-                address: document.getElementById('userAddress').value,
-                pin: document.getElementById('userPin').value,
-                petName: document.getElementById('petName').value,
-                masterPassword: masterPassword // Include the password in the request
+                fullName: fullNameInput.value,
+                userName: userNameInput.value,
+                email: userEmailInput.value,
+                mobile: userMobileInput.value,
+                educationalBackground: educationalBackgroundInput.value,
+                favoriteSportsTeam: favoriteSportsTeamInput.value,
+                favoriteMovieBook: favoriteMovieBookInput.value,
+                importantDates: importantDatesInput.value,
+                dob: userDobInput.value,
+                address: userAddressInput.value,
+                pin: userPinInput.value,
+                petName: petNameInput.value,
             };
 
-            // 3. Add the new image data if it exists
-            if (newProfileImageData === "remove") {
-                profileData.profileImage = null; // Tell server to remove it
-            } else if (newProfileImageData) {
-                profileData.profileImage = newProfileImageData;
+            // Ensure salt exists
+            if (!userArgon2Salt || typeof userArgon2Salt !== 'string' || userArgon2Salt.trim() === '') {
+                showToast('Profile salt not available. Please refresh and try again.', 'error');
+                hideLoader();
+                saveProfileBtn.disabled = false;
+                saveProfileBtn.textContent = 'Save Changes';
+                return;
             }
 
-            // 4. Send the data to the server
+            // Handle image
+            if (newProfileImageData === "remove") {
+                profileData.profileImage = null;
+            } else if (newProfileImageData && typeof newProfileImageData === 'string' && newProfileImageData.startsWith('data:image/')) {
+                try {
+                    console.log('Encrypting image with master password and salt...');
+                    profileData.profileImage = await encryptWithPassword(newProfileImageData, masterPassword, userArgon2Salt);
+                    if (!profileData.profileImage) {
+                        throw new Error('Encryption returned null.');
+                    }
+                } catch (err) {
+                    console.error('Error encrypting image:', err);
+                    showToast('Failed to encrypt profile image. Please try again.', 'error');
+                    hideLoader();
+                    saveProfileBtn.disabled = false;
+                    saveProfileBtn.textContent = 'Save Changes';
+                    return;
+                }
+            }
+
+            // Send to server
             const res = await fetch('/api/user/profile', {
                 method: 'PUT',
                 headers: {
@@ -404,15 +462,17 @@
             if (!res.ok) throw new Error(result.msg || 'Failed to save profile.');
 
             showToast('Profile updated successfully!', 'success');
-            window.location.href = 'view-profile.html'; // Redirect to view page on success
+            window.location.href = 'view-profile.html';
 
         } catch (error) {
+            console.error('Save profile error:', error);
             showToast(`Error: ${error.message}`, 'error');
             hideLoader();
             saveProfileBtn.disabled = false;
             saveProfileBtn.textContent = 'Save Changes';
         }
     });
+
 
     // --- Date Formatting ---
     if (userDobInput) {
