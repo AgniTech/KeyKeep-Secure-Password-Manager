@@ -329,37 +329,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Save Profile Logic ---
     saveProfileBtn.addEventListener('click', async () => {
-        // 1. Prompt for the master password - THIS IS THE KEY FIX
-        const masterPassword = prompt("Please enter your master password to save changes:");
-        if (!masterPassword) {
-            alert('Master password is required to save changes.');
-            return;
-        }
+        // Add loading state
+        showLoader();
+        saveProfileBtn.disabled = true;
+        saveProfileBtn.textContent = 'Saving...';
 
-        // 2. Gather all data from the input fields
-        const profileData = {
-            fullName: document.getElementById('fullName').value,
-            userName: document.getElementById('userName').value,
-            email: document.getElementById('userEmail').value,
-            mobile: document.getElementById('userMobile').value,
-            educationalBackground: document.getElementById('educationalBackground').value,
-            favoriteSportsTeam: document.getElementById('favoriteSportsTeam').value,
-            favoriteMovieBook: document.getElementById('favoriteMovieBook').value,
-            importantDates: document.getElementById('importantDates').value,
-            dob: document.getElementById('userDob').value,
-            address: document.getElementById('userAddress').value,
-            pin: document.getElementById('userPin').value,
-            petName: document.getElementById('petName').value,
-            masterPassword: masterPassword // Include the password in the request
-        };
-
-        // 3. Add the new image data if it exists
-        if (newProfileImageData !== null) {
-            profileData.profileImage = newProfileImageData;
-        }
-
-        // 4. Send the data to the server
         try {
+            // 1. Prompt for the master password - THIS IS THE KEY FIX
+            const masterPassword = await promptForMasterPassword("Please enter your master password to save changes:");
+            if (!masterPassword) {
+                showToast('Master password is required to save changes.', 'warning');
+                return;
+            }
+
+            // 2. Gather all data from the input fields
+            const profileData = {
+                fullName: document.getElementById('fullName').value,
+                userName: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                mobile: document.getElementById('userMobile').value,
+                educationalBackground: document.getElementById('educationalBackground').value,
+                favoriteSportsTeam: document.getElementById('favoriteSportsTeam').value,
+                favoriteMovieBook: document.getElementById('favoriteMovieBook').value,
+                importantDates: document.getElementById('importantDates').value,
+                dob: document.getElementById('userDob').value,
+                address: document.getElementById('userAddress').value,
+                pin: document.getElementById('userPin').value,
+                petName: document.getElementById('petName').value,
+                masterPassword: masterPassword // Include the password in the request
+            };
+
+            // 3. Add the new image data if it exists
+            if (newProfileImageData !== null) {
+                profileData.profileImage = newProfileImageData;
+            }
+
+            // 4. Send the data to the server
             const res = await fetch('/api/user/profile', {
                 method: 'PUT',
                 headers: {
@@ -372,11 +377,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await res.json();
             if (!res.ok) throw new Error(result.msg || 'Failed to save profile.');
 
-            alert('Profile updated successfully!');
+            showToast('Profile updated successfully!', 'success');
             window.location.href = 'view-profile.html'; // Redirect to view page on success
 
         } catch (error) {
-            alert(`Error: ${error.message}`);
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            hideLoader();
+            saveProfileBtn.disabled = false;
+            saveProfileBtn.textContent = 'Save Changes';
         }
     });
 
