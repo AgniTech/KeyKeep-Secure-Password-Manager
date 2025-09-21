@@ -70,11 +70,17 @@
     function promptForMasterPassword(message) {
         console.log('Prompting for master password...');
         return new Promise((resolve) => {
-            const modalOverlay = document.getElementById('modalOverlay') || document.createElement('div'); // Ensure overlay exists
-            if (!document.getElementById('modalOverlay')) {
+            let modalOverlay = document.getElementById('modalOverlay');
+            if (!modalOverlay) {
+                modalOverlay = document.createElement('div');
                 modalOverlay.id = 'modalOverlay';
+                modalOverlay.className = 'modal-overlay'; // Ensure it has the class for styling
                 document.body.appendChild(modalOverlay);
+                console.log('modalOverlay created and appended.');
+            } else {
+                console.log('modalOverlay found.');
             }
+
             const passwordModal = document.createElement('div');
             passwordModal.id = 'masterPasswordModal';
             passwordModal.className = 'modal glassmorphism';
@@ -92,31 +98,53 @@
                 </form>
             `;
             document.body.appendChild(passwordModal);
-            modalOverlay.style.display = 'block';
-            passwordModal.style.display = 'block';
+            console.log('passwordModal created and appended.');
+            
+            // Make them visible
+            modalOverlay.classList.add('show');
+            passwordModal.classList.add('show');
+            console.log('Added show class to modalOverlay and passwordModal.');
 
             const form = passwordModal.querySelector('#masterPasswordForm');
             const passwordInput = passwordModal.querySelector('#modalMasterPassword');
             const cancelBtn = passwordModal.querySelector('#cancelMasterPassword');
 
             passwordInput.focus();
+            console.log('Password input focused.');
 
-            const close = () => {
-                passwordModal.remove();
-                modalOverlay.style.display = 'none';
-                resolve(null); // Resolve with null on cancel
+            const close = (reason) => {
+                console.log(`Closing modal: ${reason}`);
+                passwordModal.classList.remove('show');
+                modalOverlay.classList.remove('show');
+                // Allow transition to finish before removing
+                setTimeout(() => {
+                    passwordModal.remove();
+                    // Only remove overlay if it was dynamically created by this function
+                    if (modalOverlay.id === 'modalOverlay' && !document.querySelector('[data-original-modal-overlay]')) {
+                        modalOverlay.remove();
+                    }
+                    resolve(null); // Resolve with null on cancel
+                }, 500); 
             };
 
             form.onsubmit = (e) => {
                 e.preventDefault();
                 const enteredPassword = passwordInput.value;
-                passwordModal.remove();
-                modalOverlay.style.display = 'none';
-                resolve(enteredPassword);
+                console.log('Form submitted.');
+                passwordModal.classList.remove('show');
+                modalOverlay.classList.remove('show');
+                setTimeout(() => {
+                    passwordModal.remove();
+                    // Only remove overlay if it was dynamically created by this function
+                    if (modalOverlay.id === 'modalOverlay' && !document.querySelector('[data-original-modal-overlay]')) {
+                        modalOverlay.remove();
+                    }
+                    resolve(enteredPassword);
+                }, 500);
             };
 
-            cancelBtn.onclick = close;
-            modalOverlay.onclick = close;
+            cancelBtn.onclick = () => close('cancel button clicked');
+            modalOverlay.onclick = () => close('overlay clicked');
         });
     }
 
@@ -324,7 +352,6 @@
 
     // --- Save Profile Logic ---
     saveProfileBtn.addEventListener('click', async () => {
-        showLoader();
         saveProfileBtn.disabled = true;
         saveProfileBtn.textContent = 'Saving...';
 
@@ -332,11 +359,12 @@
             const masterPassword = await promptForMasterPassword("Please enter your master password to save changes:");
             if (!masterPassword) {
                 showToast('Master password is required to save changes.', 'warning');
-                hideLoader();
                 saveProfileBtn.disabled = false;
                 saveProfileBtn.textContent = 'Save Changes';
                 return;
             }
+
+            showLoader();
 
             // 2. Gather all data from the input fields
             const profileData = {

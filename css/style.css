@@ -330,7 +330,7 @@ select:focus {
     opacity: 0;
     visibility: hidden;
     transition: opacity var(--transition-speed), visibility var(--transition-speed), transform var(--transition-speed);
-    z-index: 1000;
+    z-index: 2002;
     padding: 30px;
     min-width: 350px;
     max-width: 500px;
@@ -351,7 +351,7 @@ select:focus {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(5px);
-    z-index: 999;
+    z-index: 2001;
     opacity: 0;
     visibility: hidden;
     transition: opacity var(--transition-speed), visibility var(--transition-speed);
