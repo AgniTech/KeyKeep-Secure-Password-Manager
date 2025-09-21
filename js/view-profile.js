@@ -1,6 +1,5 @@
-import * as libsodium from '../node_modules/libsodium-wrappers/dist/modules/libsodium-wrappers.js';
-
 document.addEventListener('DOMContentLoaded', async () => {
+    await sodium.ready;
     // --- Element Selectors ---
     const profileNameDisplay = document.getElementById('profileNameDisplay');
     const profileEmailDisplay = document.getElementById('profileEmailDisplay');
