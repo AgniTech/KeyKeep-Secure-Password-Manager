@@ -1,3 +1,5 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 // server.js (place this in your project's root directory)
 import express from 'express';
 import cors from 'cors';
@@ -27,6 +29,13 @@ const PORT = process.env.PORT || 5000; // [cite: 537]
 app.use(cors()); // [cite: 538]
 app.use(express.json()); // [cite: 538]
 
+// --- Serve Frontend Static Files ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// The static middleware needs to point to the root directory, which is one level up from /backend
+app.use(express.static(path.join(__dirname, '../')));
+
 
 // --- Database Connection ---
 connectDB()
@@ -51,6 +60,12 @@ app.use('/api/vault/save', saveVaultRouter);
 // A basic test route to confirm the server is running
 app.get('/', (req, res) => {
     res.send('KeyKeep Backend API is running!'); // [cite: 541]
+});
+
+// --- Handle Frontend Routing ---
+// For any request that doesn't match an API route, send back the main index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 
