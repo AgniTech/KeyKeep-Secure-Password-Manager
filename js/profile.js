@@ -118,7 +118,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- sodium Encryption/Decryption Helpers ---
-    await sodium.ready;
+    await libsodium.ready;
+    const sodium = libsodium;
 
     const OPSLIMIT = sodium.crypto_pwhash_OPSLIMIT_MODERATE;
     const MEMLIMIT = sodium.crypto_pwhash_MEMLIMIT_MODERATE;
