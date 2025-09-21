@@ -2,18 +2,18 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { connectDB } from './api/util/db.js'; [cite_start]// [cite: 536]
+import { connectDB } from '../api/util/db.js'; [cite_start]// [cite: 536]
 
 // --- Import All API Logic as Routers ---
 // Note: You must first convert each of these files to export an Express router.
-import loginRouter from './api/auth/login.js'; [cite_start]// [cite: 225]
-import registerRouter from './api/auth/register.js'; [cite_start]// [cite: 243]
-import unlockRouter from './api/auth/unlock.js'; [cite_start]// [cite: 266]
-import profileRouter from './api/user/profile.js'; [cite_start]// [cite: 303]
-import deleteVaultRouter from './api/vault/delete.js'; [cite_start]// [cite: 404]
-import fetchVaultRouter from './api/vault/fetch.js'; [cite_start]// [cite: 424]
-import getVaultRouter from './api/vault/get.js'; [cite_start]// [cite: 459]
-import saveVaultRouter from './api/vault/save.js'; [cite_start]// [cite: 468]
+import loginRouter from '../api/auth/login.js'; [cite_start]// [cite: 225]
+import registerRouter from '../api/auth/register.js'; [cite_start]// [cite: 243]
+import unlockRouter from '../api/auth/unlock.js'; [cite_start]// [cite: 266]
+import profileRouter from '../api/user/profile.js'; [cite_start]// [cite: 303]
+import deleteVaultRouter from '../api/vault/delete.js'; [cite_start]// [cite: 404]
+import fetchVaultRouter from '../api/vault/fetch.js'; [cite_start]// [cite: 424]
+import getVaultRouter from '../api/vault/get.js'; [cite_start]// [cite: 459]
+import saveVaultRouter from '../api/vault/save.js'; [cite_start]// [cite: 468]
 
 
 // --- Basic Server Setup ---
