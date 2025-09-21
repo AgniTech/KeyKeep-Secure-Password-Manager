@@ -1,9 +1,12 @@
 // File: /api/vault/delete.js
+import { Router } from 'express'; // 👈 Import Router
 import { connectDB } from '../util/db.js';
 import Vault from '../models/Vault.js';
 import jwt from 'jsonwebtoken';
 
-export default async function handler(req, res) {
+const router = Router(); // 👈 Create a new router instance
+
+router.post('/', async (req, res) => { // 👇 Change the handler to a router method (e.g., router.post)
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -55,4 +58,6 @@ export default async function handler(req, res) {
     }
     res.status(500).json({ error: 'Server error: ' + e.message });
   }
-}
+});
+
+export default router; // 👈 Export the router

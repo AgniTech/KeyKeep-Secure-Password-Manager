@@ -1,4 +1,5 @@
 // File: /api/vault/fetch.js
+import { Router } from 'express'; // 👈 Import Router
 import crypto from 'crypto';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
@@ -6,7 +7,9 @@ import { connectDB } from '../util/db.js';
 import User from '../models/user.js';
 import Vault from '../models/Vault.js';
 
-export default async function handler(req, res) {
+const router = Router(); // 👈 Create a new router instance
+
+router.post('/', async (req, res) => { // 👇 Change the handler to a router method (e.g., router.post)
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -125,4 +128,6 @@ export default async function handler(req, res) {
     if (PKEK) PKEK.fill(0);
     if (rsaPrivateKey) rsaPrivateKey = null;
   }
-}
+});
+
+export default router; // 👈 Export the router
