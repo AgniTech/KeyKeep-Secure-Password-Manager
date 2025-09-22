@@ -6,6 +6,7 @@
     <title>KeyKeep - Health Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/health.css">
+    <link rel="stylesheet" href="css/master-password-popup.css"> <!-- Link the new CSS -->
     <script src="js/protect.js"></script>
 </head>
 <body>
@@ -39,6 +40,11 @@
                     <p class="count">0</p>
                     <span class="risk-level low">Low Risk</span>
                 </div>
+                <div class="card glassmorphism" id="strongCard">
+                    <h3>Strong</h3>
+                    <p class="count">0</p>
+                    <span class="risk-level safe">Safe</span>
+                </div>
             </div>
 
             <div class="vulnerable-list glassmorphism" id="vulnerableList">
@@ -53,6 +59,21 @@
             <a href="vault.html" class="button primary">Back to Vault</a>
             <p>&copy; 2025 KeyKeep</p>
         </footer>
+    </div>
+
+    <!-- Master Password Popup HTML -->
+    <div id="masterPasswordOverlay" class="master-password-overlay">
+        <div class="master-password-popup">
+            <h3>Unlock Vault</h3>
+            <p>Please enter your Master Password to view your password health.</p>
+            <div class="input-group">
+                <label for="masterPasswordInput">Master Password</label>
+                <input type="password" id="masterPasswordInput" placeholder="Enter Master Password" required>
+            </div>
+            <p id="masterPasswordError" class="error-message"></p>
+            <button id="unlockVaultButton" class="button primary">Unlock</button>
+            <button id="cancelUnlockButton" class="button secondary" style="margin-top: 10px;">Cancel</button>
+        </div>
     </div>
     
     <script src="js/data.js"></script>

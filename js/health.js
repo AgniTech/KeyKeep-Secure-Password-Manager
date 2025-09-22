@@ -1,26 +1,94 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if the credentials data exists
-    if (typeof credentials === 'undefined') {
-        console.error('Credentials data not found. Make sure data.js is loaded.');
-        return;
-    }
-
     const scoreCircle = document.getElementById('scoreCircle');
     const scoreText = document.getElementById('scoreText');
     const scoreSummary = document.getElementById('scoreSummary');
     const compromisedCard = document.getElementById('compromisedCard');
     const reusedCard = document.getElementById('reusedCard');
     const weakCard = document.getElementById('weakCard');
+    const strongCard = document.getElementById('strongCard'); // Added strongCard
     const vulnerableListContainer = document.querySelector('.vulnerable-list .list-container');
 
     // --- Authentication Check ---
     const token = localStorage.getItem('token');
     if (!token) {
-        // If no token, redirect to login or handle as unauthenticated
         console.warn('No authentication token found. Cannot fetch user profile for strength analysis.');
-        // Optionally redirect or show a message
+        window.location.href = 'index.html'; // Redirect to login page
         return;
     }
+
+    // Master Password Popup Elements
+    const masterPasswordOverlay = document.getElementById('masterPasswordOverlay');
+    const masterPasswordPopup = masterPasswordOverlay.querySelector('.master-password-popup');
+    const masterPasswordInput = document.getElementById('masterPasswordInput');
+    const unlockVaultButton = document.getElementById('unlockVaultButton');
+    const cancelUnlockButton = document.getElementById('cancelUnlockButton');
+    const masterPasswordError = document.getElementById('masterPasswordError');
+
+    let decryptedCredentials = []; // This will hold the decrypted credentials after successful unlock
+
+    const showMasterPasswordPopup = () => {
+        masterPasswordOverlay.classList.add('show');
+        masterPasswordPopup.classList.add('show');
+        masterPasswordInput.value = ''; // Clear previous input
+        masterPasswordError.textContent = ''; // Clear previous errors
+        masterPasswordInput.focus();
+    };
+
+    const hideMasterPasswordPopup = () => {
+        masterPasswordOverlay.classList.remove('show');
+        masterPasswordPopup.classList.remove('show');
+    };
+
+    const unlockAndFetchCredentials = async (masterPassword) => {
+        try {
+            const response = await fetch('/api/vault/unlock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ masterPassword: masterPassword }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.credentials) {
+                    return data.credentials;
+                } else {
+                    masterPasswordError.textContent = 'Failed to retrieve vault data after unlock.';
+                    return null;
+                }
+            } else {
+                const errorData = await response.json();
+                masterPasswordError.textContent = errorData.message || 'Incorrect Master Password.';
+                return null;
+            }
+        } catch (error) {
+            console.error('Error unlocking vault:', error);
+            masterPasswordError.textContent = 'An error occurred during unlock. Please try again.';
+            return null;
+        }
+    };
+
+    unlockVaultButton.addEventListener('click', async () => {
+        const masterPassword = masterPasswordInput.value;
+        if (!masterPassword) {
+            masterPasswordError.textContent = 'Master Password cannot be empty.';
+            return;
+        }
+
+        const credentialsData = await unlockAndFetchCredentials(masterPassword);
+        if (credentialsData) {
+            decryptedCredentials = credentialsData;
+            hideMasterPasswordPopup();
+            initHealthAnalysis();
+        }
+    });
+
+    cancelUnlockButton.addEventListener('click', () => {
+        hideMasterPasswordPopup();
+        window.location.href = 'vault.html'; // Redirect to vault page if user cancels
+    });
 
     const fetchUserProfile = async () => {
         try {
@@ -45,125 +113,266 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const analyzeVault = (userProfile) => {
-        const totalPasswords = credentials.length;
-        if (totalPasswords === 0) return { score: 100, compromised: [], reused: {}, weak: [] };
+        const totalPasswords = decryptedCredentials.length;
+        if (totalPasswords === 0) return { score: 100, compromised: [], reused: {}, weak: [], strong: 0 };
 
-        // 1. Find Compromised Passwords
-        const compromised = credentials.filter(c => c.compromised);
+        const compromised = decryptedCredentials.filter(c => c.compromised);
 
-        // 2. Find Reused Passwords
         const passwordCounts = {};
-        credentials.forEach(c => {
+        decryptedCredentials.forEach(c => {
             passwordCounts[c.password] = (passwordCounts[c.password] || 0) + 1;
         });
         const reusedPasswords = Object.keys(passwordCounts).filter(p => passwordCounts[p] > 1);
-        const reused = credentials.filter(c => reusedPasswords.includes(c.password));
+        const reused = decryptedCredentials.filter(c => reusedPasswords.includes(c.password));
 
-        // 3. Find Weak Passwords (including personal info check)
-        const weak = credentials.filter(c => isWeak(c.password, userProfile));
+        const weak = decryptedCredentials.filter(c => isWeak(c.password, userProfile));
 
-        // 4. Calculate Score
+        // Calculate unique vulnerable credentials for score and strong count
+        const vulnerableIds = new Set();
+        compromised.forEach(c => vulnerableIds.add(c.id));
+        reused.forEach(c => vulnerableIds.add(c.id));
+        weak.forEach(c => vulnerableIds.add(c.id));
+
+        const uniqueVulnerableCount = vulnerableIds.size;
+        const strong = totalPasswords - uniqueVulnerableCount;
+
         let score = 100;
         score -= compromised.length * 15; // High penalty
         score -= reused.length * 5;      // Medium penalty
         score -= weak.length * 5;        // Medium penalty
         score = Math.max(0, Math.floor(score)); // Ensure score is not negative
 
-        return { score, compromised, reused, weak };
+        return { score, compromised, reused, weak, strong };
     };
 
     const isWeak = (password, userProfile) => {
-        // Simple weakness check: less than 8 chars or just letters/numbers
+        const lowerCasePassword = password.toLowerCase();
+
+        // 1. Basic checks
         let weaknessFound = password.length < 8 || /^[a-zA-Z]+$/.test(password) || /^[0-9]+$/.test(password);
+        if (weaknessFound) return true;
 
-        if (userProfile) {
-            const personalInfoFields = [
-                userProfile.fullName, userProfile.userName, userProfile.email,
-                userProfile.mobile, userProfile.educationalBackground,
-                userProfile.favoriteSportsTeam, userProfile.favoriteMovieBook,
-                userProfile.importantDates, userProfile.dob, userProfile.address,
-                userProfile.pin, userProfile.petName, userProfile.name
-            ];
+        // 2. Common weak passwords
+        const commonWeakPasswords = [
+            "password", "123456", "12345678", "qwerty", "123456789", "12345", "1234",
+            "p@ssword", "admin", "guest", "welcome", "secret", "master", "dragon",
+            "football", "iloveyou", "america", "princess", "superman", "batman",
+            "starwars", "pokemon", "computer", "internet", "qazwsx", "asdfgh", "zxcvbn",
+            "qwert", "asdfg", "zxcvb", "12345", "23456", "34567", "45678", "56789",
+            "ytrewq", "lkjhgf", "mnbvcx", "pass", "test", "user", "login", "admin1",
+            "password123", "123password", "abcde", "edcba", "abcdef", "fedcba"
+        ];
+        if (commonWeakPasswords.includes(lowerCasePassword)) {
+            return true;
+        }
 
-            const lowerCasePassword = password.toLowerCase();
-
-            for (const field of personalInfoFields) {
-                if (field && typeof field === 'string') {
-                    // Clean and normalize personal info for comparison
-                    const cleanedField = field.toLowerCase().replace(/[^a-z0-9]/g, '');
-                    if (cleanedField.length > 2 && lowerCasePassword.includes(cleanedField)) {
-                        weaknessFound = true;
+        // 3. Sequential characters (e.g., "abc", "123", "321")
+        const checkSequential = (str, len = 3) => {
+            for (let i = 0; i <= str.length - len; i++) {
+                const sub = str.substring(i, i + len);
+                // Ascending sequence (e.g., abc, 123)
+                let isAscending = true;
+                for (let j = 0; j < sub.length - 1; j++) {
+                    if (sub.charCodeAt(j + 1) - sub.charCodeAt(j) !== 1) {
+                        isAscending = false;
                         break;
                     }
-                    // Also check for parts of full name if applicable
-                    if (field === userProfile.fullName) {
-                        const nameParts = field.toLowerCase().split(' ').filter(part => part.length > 2);
-                        if (nameParts.some(part => lowerCasePassword.includes(part))) {
-                            weaknessFound = true;
-                            break;
-                        }
+                }
+                if (isAscending) return true;
+
+                // Descending sequence (e.g., cba, 321)
+                let isDescending = true;
+                for (let j = 0; j < sub.length - 1; j++) {
+                    if (sub.charCodeAt(j) - sub.charCodeAt(j + 1) !== 1) {
+                        isDescending = false;
+                        break;
                     }
+                }
+                if (isDescending) return true;
+            }
+            return false;
+        };
+        if (checkSequential(lowerCasePassword, 3)) { // Check for sequences of 3 or more
+            return true;
+        }
+
+        // 4. Repeated characters (e.g., "aaa", "111")
+        if (/(.)\1\1/.test(lowerCasePassword)) { // Checks for any character repeated 3 or more times
+            return true;
+        }
+
+        // 5. User profile details
+        if (userProfile) {
+            const cleanAndNormalize = (str) => {
+                if (!str || typeof str !== 'string') return [];
+                // Remove common special characters and split by spaces or non-alphanumeric
+                return str.toLowerCase().replace(/[^a-z0-9]/g, ' ').split(' ').filter(s => s.length > 2);
+            };
+
+            let personalInfoParts = [];
+
+            // Add all relevant user profile fields
+            personalInfoParts.push(...cleanAndNormalize(userProfile.fullName));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.userName));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.email));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.mobile));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.educationalBackground));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.favoriteSportsTeam));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.favoriteMovieBook));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.address));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.pin));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.petName));
+            personalInfoParts.push(...cleanAndNormalize(userProfile.name)); // Assuming 'name' might be a separate field
+
+            // Extract parts from email
+            if (userProfile.email && typeof userProfile.email === 'string') {
+                const emailParts = userProfile.email.split('@');
+                if (emailParts[0]) personalInfoParts.push(...cleanAndNormalize(emailParts[0]));
+                if (emailParts[1]) personalInfoParts.push(...cleanAndNormalize(emailParts[1].split('.')[0])); // Domain part without .com
+            }
+
+            // Extract parts from DOB
+            if (userProfile.dob) {
+                try {
+                    const dobDate = new Date(userProfile.dob);
+                    if (!isNaN(dobDate.getTime())) {
+                        const year = dobDate.getFullYear().toString();
+                        const month = (dobDate.getMonth() + 1).toString();
+                        const day = dobDate.getDate().toString();
+
+                        personalInfoParts.push(year);
+                        personalInfoParts.push(month);
+                        personalInfoParts.push(day);
+                        if (month.length === 1) personalInfoParts.push('0' + month);
+                        if (day.length === 1) personalInfoParts.push('0' + day);
+                        personalInfoParts.push(month + day); // e.g., 0101 for Jan 1
+                        personalInfoParts.push(day + month); // e.g., 0101 for Jan 1
+                        personalInfoParts.push(year.substring(2)); // last two digits of year
+                    }
+                } catch (e) {
+                    console.warn('Could not parse DOB:', userProfile.dob, e);
+                }
+            }
+
+            // Extract parts from importantDates
+            if (userProfile.importantDates && typeof userProfile.importantDates === 'string') {
+                try {
+                    const impDate = new Date(userProfile.importantDates);
+                    if (!isNaN(impDate.getTime())) {
+                        const year = impDate.getFullYear().toString();
+                        const month = (impDate.getMonth() + 1).toString();
+                        const day = impDate.getDate().toString();
+                        personalInfoParts.push(year);
+                        personalInfoParts.push(month);
+                        personalInfoParts.push(day);
+                        if (month.length === 1) personalInfoParts.push('0' + month);
+                        if (day.length === 1) personalInfoParts.push('0' + day);
+                        personalInfoParts.push(month + day);
+                        personalInfoParts.push(day + month);
+                        personalInfoParts.push(year.substring(2));
+                    }
+                } catch (e) {
+                    // Handle parsing error if necessary
+                }
+                personalInfoParts.push(...cleanAndNormalize(userProfile.importantDates));
+            }
+
+            // Remove duplicates and filter out very short parts
+            personalInfoParts = [...new Set(personalInfoParts)].filter(part => part.length > 2);
+
+            for (const part of personalInfoParts) {
+                if (lowerCasePassword.includes(part)) {
+                    return true; // Password contains a significant part of personal info
                 }
             }
         }
 
-        return weaknessFound;
+        return false; // If no weakness found
     };
 
     const renderDashboard = (analysis) => {
-        // Update score circle
         setTimeout(() => {
             scoreCircle.style.setProperty('--score', analysis.score);
         }, 100);
         scoreText.textContent = `${analysis.score}%`;
         
-        // Update summary text
         if(analysis.score > 90) scoreSummary.textContent = "Excellent! Your vault is very secure.";
         else if(analysis.score > 70) scoreSummary.textContent = "Good, but there's room for improvement.";
         else scoreSummary.textContent = "Your vault needs attention. Please review the items below.";
 
-        // Update summary cards
         compromisedCard.querySelector('.count').textContent = analysis.compromised.length;
         reusedCard.querySelector('.count').textContent = analysis.reused.length;
         weakCard.querySelector('.count').textContent = analysis.weak.length;
+        if (strongCard) { // Update strong card if it exists
+            strongCard.querySelector('.count').textContent = analysis.strong;
+        }
 
-        // Render vulnerable items list
         vulnerableListContainer.innerHTML = '';
         let hasVulnerabilities = false;
 
-        const renderItem = (cred, type, reason) => {
+        // Consolidate vulnerable items
+        const consolidatedVulnerabilities = new Map(); // Map<credentialId, {cred, reasons[]}>
+
+        analysis.compromised.forEach(c => {
+            if (!consolidatedVulnerabilities.has(c.id)) {
+                consolidatedVulnerabilities.set(c.id, { cred: c, reasons: [] });
+            }
+            consolidatedVulnerabilities.get(c.id).reasons.push('Compromised - Found in a data breach. Change it immediately.');
+        });
+        analysis.reused.forEach(c => {
+            if (!consolidatedVulnerabilities.has(c.id)) {
+                consolidatedVulnerabilities.set(c.id, { cred: c, reasons: [] });
+            }
+            consolidatedVulnerabilities.get(c.id).reasons.push('Reused - This password is used on multiple sites.');
+        });
+        analysis.weak.forEach(c => {
+            if (!consolidatedVulnerabilities.has(c.id)) {
+                consolidatedVulnerabilities.set(c.id, { cred: c, reasons: [] });
+            }
+            consolidatedVulnerabilities.get(c.id).reasons.push('Weak - Password is too simple or short or contains personal information.');
+        });
+
+        // Render consolidated items
+        if (consolidatedVulnerabilities.size > 0) {
             hasVulnerabilities = true;
-            const item = document.createElement('div');
-            item.className = 'vulnerable-item';
-            const icon = type === 'Compromised' ? '🔥' : type === 'Reused' ? '🔁' : '🩹';
-            item.innerHTML = `
-                <div class="vulnerable-icon">${icon}</div>
-                <div class="vulnerable-details">
-                    <h4>${cred.title}</h4>
-                    <p><strong>Reason:</strong> ${type} - ${reason}</p>
-                </div>
-                <div class="vulnerable-action">
-                    <a href="vault.html" class="button secondary">Go to Vault</a>
-                </div>
-            `;
-            vulnerableListContainer.appendChild(item);
-        };
-        
-        analysis.compromised.forEach(c => renderItem(c, 'Compromised', 'Found in a data breach. Change it immediately.'));
-        analysis.reused.forEach(c => renderItem(c, 'Reused', 'This password is used on multiple sites.'));
-        analysis.weak.forEach(c => renderItem(c, 'Weak', 'Password is too simple or short or contains personal information.'));
+            consolidatedVulnerabilities.forEach(({ cred, reasons }) => {
+                const item = document.createElement('div');
+                item.className = 'vulnerable-item';
+                // Determine icon based on highest risk (Compromised > Reused > Weak)
+                let icon = '🩹'; // Default to weak
+                if (reasons.some(r => r.includes('Compromised'))) icon = '🔥';
+                else if (reasons.some(r => r.includes('Reused'))) icon = '🔁';
+
+                item.innerHTML = `
+                    <div class="vulnerable-icon">${icon}</div>
+                    <div class="vulnerable-details">
+                        <h4>${cred.title}</h4>
+                        <p><strong>Reasons:</strong> ${reasons.join('<br>')}</p>
+                    </div>
+                    <div class="vulnerable-action">
+                        <a href="vault.html" class="button secondary">Go to Vault</a>
+                    </div>
+                `;
+                vulnerableListContainer.appendChild(item);
+            });
+        }
 
         if (!hasVulnerabilities) {
             vulnerableListContainer.innerHTML = '<p class="all-good-message">Your vault is looking secure. Great job!</p>';
         }
     };
 
-    // Run analysis and render the page
-    const init = async () => {
+    const initHealthAnalysis = async () => {
+        if (decryptedCredentials.length === 0) {
+            console.error('No decrypted credentials available for analysis. Re-showing unlock popup.');
+            showMasterPasswordPopup();
+            return;
+        }
+
         const userProfile = await fetchUserProfile();
         const analysisResults = analyzeVault(userProfile);
         renderDashboard(analysisResults);
     };
 
-    init();
+    showMasterPasswordPopup();
 });
