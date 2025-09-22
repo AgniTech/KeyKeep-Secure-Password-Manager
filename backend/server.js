@@ -17,6 +17,7 @@ import fetchVaultRouter from '../api/vault/fetch.js'; // [cite: 424]
 import getVaultRouter from '../api/vault/get.js'; // [cite: 459]
 import saveVaultRouter from '../api/vault/save.js'; // [cite: 468]
 import unlockVaultRouter from '../api/vault/unlock.js'; // NEW: Import the new vault unlock router
+import healthRouter from '../api/vault/health.js';
 
 
 // --- Basic Server Setup ---
@@ -59,6 +60,7 @@ app.use('/api/vault/fetch', fetchVaultRouter);
 app.use('/api/vault/get', getVaultRouter);
 app.use('/api/vault/save', saveVaultRouter);
 app.use('/api/vault/unlock', unlockVaultRouter); // NEW: Mount the new vault unlock router
+app.use('/api/vault/health', healthRouter);
 
 // A basic test route to confirm the server is running
 app.get('/', (req, res) => {

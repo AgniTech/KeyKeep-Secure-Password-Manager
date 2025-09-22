@@ -126,3 +126,55 @@
 @media(max-width: 768px) {
     .summary-cards { grid-template-columns: 1fr; gap: 20px; }
 }
+
+/* Styles for compromised passwords */
+.health-bar.compromised {
+    background-color: #dc2626;
+    color: white;
+}
+
+.password-item.critical {
+    border-left: 4px solid #dc2626;
+    background-color: #fef2f2;
+}
+
+.compromised-section {
+    margin-bottom: 20px;
+}
+
+.compromised-section .warning {
+    color: #dc2626;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.change-btn {
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.change-btn:hover {
+    background-color: #b91c1c;
+}
+
+.vulnerable-item.critical {
+    border-left-color: var(--danger-color);
+}
+
+.vulnerable-item.warning {
+    border-left-color: var(--warning-color);
+}
+
+.vulnerable-item.info {
+    border-left-color: var(--info-color);
+}
+
+.reused-section, .weak-section {
+    margin-top: 20px;
+}
