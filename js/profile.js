@@ -447,6 +447,7 @@
                     return;
                 }
             }
+            profileData.masterPassword = masterPassword;
 
             // Send to server
             const res = await fetch('/api/user/profile', {
